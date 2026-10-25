@@ -130,3 +130,26 @@ Semua data dipisahkan secara rapi di folder `data/` sehingga Anda tidak perlu me
 - **Menambah / Mengubah Skill:** Edit [data/skills.js](file:///d:/VIBE%20CODING/PORTFOLIO/data/skills.js)
 - **Menambah Proyek Portofolio Anda:** Edit [data/projects.js](file:///d:/VIBE%20CODING/PORTFOLIO/data/projects.js)
 - **Menyesuaikan Riwayat Pengalaman:** Edit [data/timeline.js](file:///d:/VIBE%20CODING/PORTFOLIO/data/timeline.js)
+
+---
+
+## 🚀 Cara Menjalankan Secara Lokal
+
+Portofolio ini murni berbasis web statis standar (*Vanilla JavaScript & CSS3*), tanpa dependensi eksternal yang rumit:
+
+```bash
+# Jalankan server lokal bawaan Node.js:
+node scripts/dev-server.js
+
+# Atau menggunakan ekstensi VS Code "Live Server", atau python:
+python -m http.server 3000
+```
+Buka browser di `http://localhost:3000` (atau port yang tertera).
+
+---
+
+## 🌐 Deployment (Vercel / GitHub Pages / Netlify)
+
+Proyek ini telah dikonfigurasi untuk zero-config static hosting di Vercel, Netlify, atau GitHub Pages:
+- Cukup hubungkan repositori ini ke Vercel atau GitHub Pages.
+- Vercel akan otomatis menyajikan seluruh aset statis (`index.html`, `/css`, `/js`, `/img`) melalui CDN global berkecepatan tinggi tanpa memerlukan build step.
