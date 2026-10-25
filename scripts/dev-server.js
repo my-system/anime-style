@@ -21,6 +21,8 @@ const MIME_TYPES = {
   '.gltf': 'model/gltf+json'
 };
 
+const rootDir = path.join(__dirname, '..');
+
 const server = http.createServer((req, res) => {
   let reqPath = decodeURI(req.url.split('?')[0]);
   if (reqPath === '/') reqPath = '/index.html';
@@ -28,9 +30,9 @@ const server = http.createServer((req, res) => {
   let filePath;
   if (reqPath.startsWith('/projects-demo/')) {
     const rel = reqPath.replace('/projects-demo/', '');
-    filePath = path.join(__dirname, '..', rel);
+    filePath = path.join(rootDir, '..', rel);
   } else {
-    filePath = path.join(__dirname, reqPath);
+    filePath = path.join(rootDir, reqPath);
   }
 
   const serveFile = (targetFile, stats) => {

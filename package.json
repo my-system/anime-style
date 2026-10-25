@@ -3,7 +3,7 @@
   "version": "2.0.0",
   "description": "Portofolio Interaktif Visual Novel Hyouka dengan Tatapan Mata Reaktif dan Efek Tinta Kaligrafi",
   "scripts": {
-    "dev": "node server.js"
+    "dev": "node scripts/dev-server.js"
   },
   "keywords": [
     "portfolio",
