@@ -1,0 +1,39 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1200" height="750" viewBox="0 0 1200 750" fill="none">
+  <rect width="1200" height="750" fill="#0B131E"/>
+  <circle cx="950" cy="200" r="300" fill="#0EA5E9" fill-opacity="0.12" filter="blur(80px)"/>
+  <circle cx="250" cy="550" r="250" fill="#22C55E" fill-opacity="0.08" filter="blur(80px)"/>
+  
+  <g opacity="0.15">
+    <path d="M0 150H1200M0 300H1200M0 450H1200M0 600H1200" stroke="#38BDF8" stroke-width="1" stroke-dasharray="6 6"/>
+    <path d="M200 0V750M400 0V750M600 0V750M800 0V750M1000 0V750" stroke="#38BDF8" stroke-width="1" stroke-dasharray="6 6"/>
+  </g>
+
+  <!-- Card preview -->
+  <rect x="180" y="140" width="840" height="470" rx="20" fill="#111C2B" stroke="#1E293B" stroke-width="2"/>
+  
+  <!-- Header Bar -->
+  <rect x="180" y="140" width="840" height="60" rx="20" fill="#162234"/>
+  <circle cx="220" cy="170" r="6" fill="#EF4444"/>
+  <circle cx="240" cy="170" r="6" fill="#F59E0B"/>
+  <circle cx="260" cy="170" r="6" fill="#10B981"/>
+  <text x="300" y="176" fill="#94A3B8" font-family="system-ui, sans-serif" font-size="14" font-weight="500">ProFaskes Auto-Bot RPA // RSB BAZNAS Palu Automation Engine</text>
+
+  <!-- Terminal Content -->
+  <text x="230" y="260" fill="#22C55E" font-family="monospace" font-size="20" font-weight="600">&gt; INITIALIZING CHROMIUM EXTENSION ENGINE v2.4...</text>
+  <text x="230" y="300" fill="#38BDF8" font-family="monospace" font-size="16">&gt; PARSING EXCEL / XLSX DATA STREAM (3,400+ PATIENT RECORDS)</text>
+  <text x="230" y="340" fill="#F8FAFC" font-family="monospace" font-size="16">&gt; AUTO-INJECTING DOM FORM SELECTORS [BYPASS_CONFIRM: ACTIVE]</text>
+  <text x="230" y="380" fill="#94A3B8" font-family="monospace" font-size="15">&gt; SUCCESS: 100% RECORDS TRANSFERRED WITH ZERO HUMAN TYPO ERROR</text>
+
+  <!-- Metric Badges -->
+  <rect x="230" y="440" width="220" height="110" rx="12" fill="#16253A" stroke="#0284C7" stroke-width="1"/>
+  <text x="255" y="480" fill="#94A3B8" font-family="system-ui, sans-serif" font-size="13">EFFICIENCY GAIN</text>
+  <text x="255" y="525" fill="#38BDF8" font-family="system-ui, sans-serif" font-size="34" font-weight="700">95% Faster</text>
+
+  <rect x="490" y="440" width="220" height="110" rx="12" fill="#16253A" stroke="#16A34A" stroke-width="1"/>
+  <text x="515" y="480" fill="#94A3B8" font-family="system-ui, sans-serif" font-size="13">ERROR REDUCTION</text>
+  <text x="515" y="525" fill="#22C55E" font-family="system-ui, sans-serif" font-size="34" font-weight="700">0% Faults</text>
+
+  <rect x="750" y="440" width="220" height="110" rx="12" fill="#16253A" stroke="#6366F1" stroke-width="1"/>
+  <text x="775" y="480" fill="#94A3B8" font-family="system-ui, sans-serif" font-size="13">AUTOMATION ARCH</text>
+  <text x="775" y="525" fill="#818CF8" font-family="system-ui, sans-serif" font-size="30" font-weight="700">Chrome RPA</text>
+</svg>

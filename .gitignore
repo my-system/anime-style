@@ -1,0 +1,14 @@
+node_modules/
+.DS_Store
+Thumbs.db
+*.log
+.env
+
+# Raw screen recordings in root and img root
+Camera_moving_through_open_door_*.mp4
+White_door_and_gentle_nature_*.mp4
+*_old_backup.mp4
+index.backup.html
+
+# Raw duplicate screen recordings directly in img/ (not projects or loader)
+img/*.mp4

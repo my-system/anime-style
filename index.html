@@ -1,0 +1,1160 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Portofolio Yusuf (S.Stat) — Creative Web Developer</title>
+  <meta name="description" content="Portofolio Yusuf: Pengembang Web & Frontend interaktif bergaya visual novel dengan tatapan mata reaktif, kursor kuas kaligrafi, dan lanskap suara.">
+  <link rel="icon" type="image/svg+xml" href="favicon.svg">
+
+  <!-- Google Fonts sesuai Bagian 2 Cetak Biru: Outfit (Light), Homemade Apple, Caveat, Noto Serif, JetBrains Mono -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Caveat:wght@400;600;700&family=Homemade+Apple&family=JetBrains+Mono:wght@400;500;600&family=Noto+Serif:ital,wght@0,400;0,600;1,400&family=Outfit:wght@200;300;400;600;700&display=swap" rel="stylesheet">
+
+  <!-- Stylesheets -->
+  <link rel="stylesheet" href="css/base.css">
+  <link rel="stylesheet" href="css/themes.css">
+  <link rel="stylesheet" href="css/scenes.css">
+</head>
+<body data-theme="light" data-scene="scene-prolog">
+
+  <!-- Canvas Latar: Hujan, Kaca Berembun Interaktif, dan WebGL Fluid Cursor -->
+  <canvas id="rain-canvas"></canvas>
+  <canvas id="window-glass-canvas" class="window-glass-canvas" aria-hidden="true"></canvas>
+  <canvas data-fluid-cursor="" class="fluid-cur"></canvas>
+
+  <!-- Custom Magnetic Cursor (Dot & Expanding Circle dari Profil Cafe Cinematic) -->
+  <div class="cursor-dot" id="cursorDot"></div>
+  <div class="cursor-circle" id="cursorCircle">
+    <span class="cursor-text" id="cursorText"></span>
+  </div>
+
+  <!-- SVG Clip-Path Definisi Area Bukaan Mata (Bagian 5.1 & 16 Cetak Biru) -->
+  <svg width="0" height="0" style="position: absolute; pointer-events: none;">
+    <defs>
+      <clipPath id="eyes-clip" clipPathUnits="objectBoundingBox">
+        <ellipse id="clip-left-eye" cx="0.434" cy="0.312" rx="0.031" ry="0.014"></ellipse>
+        <ellipse id="clip-right-eye" cx="0.584" cy="0.312" rx="0.031" ry="0.014"></ellipse>
+      </clipPath>
+    </defs>
+  </svg>
+
+  <!-- Scene 0: Suzume no Tojimari Cinematic Video Opening (Gerbang Pembuka Dunia Hyouka) -->
+  <div id="gate-overlay" class="eye-loader-overlay suzume-video-overlay" role="dialog" aria-label="Gerbang Pembuka">
+    <!-- Kontainer Pemutar Video Sinematik Fullscreen (2-Stage: Pintu Hening -> Transisi Buka Gerbang) -->
+    <div class="loader-video-container" id="loader-video-container">
+      <!-- Stage 1: Pintu Hening Beriak (Idle Loop Sebelum Diklik) -->
+      <video
+        id="loader-idle-video"
+        class="loader-video-layer loader-idle-video"
+        src="img/loader/idle_door.mp4"
+        playsinline
+        muted
+        loop
+        autoplay
+        preload="auto"
+      ></video>
+
+      <!-- Stage 2: Kamera Mendekat & Membuka Pintu ke Tokoyo (Diputar Saat Pintu Diklik) -->
+      <video
+        id="loader-intro-video"
+        class="loader-video-layer loader-intro-video"
+        src="img/loader/intro.mp4"
+        playsinline
+        muted
+        preload="auto"
+      ></video>
+
+      <!-- Area Interaktif Gagang Pintu Suzume (Hotspot untuk Klik Membuka Gerbang) -->
+      <div class="suzume-door-hotspot" id="suzume-door-hotspot" role="button" tabindex="0" title="Klik pintu untuk memutar kunci dan masuk" aria-label="Buka Pintu Suzume">
+        <div class="door-glow-pulse" aria-hidden="true"></div>
+        <div class="door-keyhole-sparkle" aria-hidden="true"></div>
+        <div class="door-hover-tooltip" aria-hidden="true">
+          <span class="door-tooltip-key">🗝️</span>
+          <span>Buka Pintu</span>
+        </div>
+      </div>
+
+      <!-- Efek Riak Air / Shockwave Saat Pintu Diklik -->
+      <div class="door-click-ripple" id="door-click-ripple" aria-hidden="true"></div>
+
+      <!-- Whiteout Flash Overlay (Menyatu dengan detik akhir video yang putih bersih ke panggung hero) -->
+      <div class="video-whiteout-veil" id="video-whiteout-veil" aria-hidden="true"></div>
+    </div>
+
+    <!-- Ambient Status & Skip Controls -->
+    <div class="loader-sub-text" id="loader-sub-text">
+      <span class="loader-sub-dot"></span>
+      <span id="loader-text-status">Sentuh pintu untuk membuka gerbang...</span>
+    </div>
+
+    <div class="loader-top-controls">
+      <button type="button" class="loader-audio-toggle" id="loader-audio-toggle" title="Klik untuk mengaktifkan audio latar">
+        <span id="loader-audio-icon">🔇</span>
+        <span id="loader-audio-label">Suara: Senyap</span>
+      </button>
+      <button type="button" class="loader-skip-btn" id="loader-skip-btn" title="Lewati animasi langsung ke halaman hero">
+        [ Lewati ]
+      </button>
+    </div>
+  </div>
+
+  <!-- Floating Glassmorphic Top Navigation Bar -->
+  <header class="top-nav" id="top-nav" role="banner">
+    <a href="#scene-prolog" class="nav-brand" title="Yusuf / Hyouka">
+      <span class="brand-nick">Yusuf</span>
+      <span class="brand-sep" style="opacity: 0.4; font-weight: 300;">/</span>
+      <span class="brand-char" style="color: var(--accent-green); font-weight: 500;">Hyouka</span>
+      <span class="dot" aria-hidden="true"></span>
+    </a>
+
+    <nav class="nav-quick-links" aria-label="Menu Cepat Bab">
+      <a href="#scene-prolog" class="active">Prolog</a>
+      <a href="#scene-whoami">Siapa Aku</a>
+      <a href="#scene-skills">Keahlian</a>
+      <a href="#scene-projects">Karya</a>
+      <a href="#scene-timeline">Jejak</a>
+      <a href="#scene-contact">Surat</a>
+    </nav>
+
+    <div class="nav-controls">
+      <!-- Stasiun Radio Lo-Fi Terpadu (Menggantikan tombol mute ganda) -->
+      <div class="lofi-radio-widget" id="lofi-radio-widget" aria-label="Pemutar Radio Lo-Fi Kafe">
+        <div class="lofi-radio-pill" id="lofi-radio-toggle" title="Klik untuk membuka stasiun radio Lo-Fi & saluran musik">
+          <div class="cassette-mini-icon">
+            <span class="cassette-wheel left"></span>
+            <span class="cassette-tape-bar"></span>
+            <span class="cassette-wheel right"></span>
+          </div>
+          <div class="lofi-pill-info">
+            <span class="lofi-live-badge"><span class="live-dot"></span> LO-FI RADIO</span>
+            <span class="lofi-channel-name" id="lofi-current-track">Ch 1: Kopi &amp; Hujan</span>
+          </div>
+          <button type="button" class="lofi-btn-play" id="lofi-play-btn" aria-label="Putar / Jeda Radio">▶</button>
+        </div>
+
+        <div class="lofi-radio-drawer" id="lofi-radio-drawer">
+          <div class="lofi-drawer-head">
+            <span class="lofi-drawer-title">📻 VIBE LO-FI STATION · PROCEDURAL SYNTH</span>
+            <button type="button" class="lofi-drawer-close" id="lofi-drawer-close-btn" aria-label="Tutup">&times;</button>
+          </div>
+          <div class="lofi-channel-list">
+            <button type="button" class="lofi-ch-btn active" data-ch="coffee">
+              <span class="ch-icon">☕</span>
+              <div class="ch-text">
+                <strong>Kopi &amp; Hujan Tenang</strong>
+                <small>Rhodes Piano Chords + Vinyl Dust + Rain</small>
+              </div>
+            </button>
+            <button type="button" class="lofi-ch-btn" data-ch="coding">
+              <span class="ch-icon">💻</span>
+              <div class="ch-text">
+                <strong>Vibe Coding 02:00 AM</strong>
+                <small>Warm Analog Pad + Tape Flutter (60 BPM)</small>
+              </div>
+            </button>
+            <button type="button" class="lofi-ch-btn" data-ch="shrine">
+              <span class="ch-icon">⛩️</span>
+              <div class="ch-text">
+                <strong>Angin Sore &amp; Lonceng Kuil</strong>
+                <small>Wind Ambient + Pentatonic Suzu Chimes</small>
+              </div>
+            </button>
+          </div>
+          <div class="lofi-volume-bar">
+            <span>Volume:</span>
+            <input type="range" id="lofi-vol-slider" min="0" max="1" step="0.05" value="0.5">
+          </div>
+        </div>
+      </div>
+
+      <button id="ink-toggle-btn" class="btn-ctrl btn-ctrl-icon active" title="Efek Tinta Fluida: Aktif (Klik untuk Matikan)" aria-label="Efek Tinta Fluida">
+        <span class="ctrl-icon">🖌️</span>
+      </button>
+      <button id="compact-toggle-btn" class="btn-ctrl btn-ctrl-icon" title="Mode Ringkas: Nonaktif (Klik untuk Baca Cepat)" aria-label="Mode Ringkas">
+        <span class="ctrl-icon">⚡</span>
+      </button>
+
+      <!-- Tombol Hamburger Menu Mobile -->
+      <button id="mobile-menu-btn" class="btn-ctrl btn-ctrl-icon mobile-menu-btn" title="Buka Daftar Bab" aria-label="Menu Bab Petualangan">
+        <span class="ctrl-icon" id="mobile-menu-icon">☰</span>
+      </button>
+    </div>
+  </header>
+
+  <!-- Laci Navigasi Mobile (Bab Selector) -->
+  <aside class="mobile-nav-drawer" id="mobile-nav-drawer" aria-label="Daftar Bab Petualangan">
+    <div class="mobile-nav-header">
+      <div class="mobile-nav-brand">
+        <strong>Yusuf / Hyouka</strong>
+        <small>Daftar Bab Petualangan</small>
+      </div>
+      <button type="button" class="mobile-nav-close" id="mobile-nav-close-btn" aria-label="Tutup Menu">&times;</button>
+    </div>
+    <div class="mobile-nav-items">
+      <a href="#scene-prolog" class="mobile-nav-item active" data-target="scene-prolog">
+        <span class="nav-ch-badge">00</span>
+        <div class="nav-ch-info">
+          <strong>Prolog</strong>
+          <small>Sapaan &amp; Dunia Vibe Coding</small>
+        </div>
+      </a>
+      <a href="#scene-whoami" class="mobile-nav-item" data-target="scene-whoami">
+        <span class="nav-ch-badge">01</span>
+        <div class="nav-ch-info">
+          <strong>Siapa Aku</strong>
+          <small>Filosofi &amp; Cerita Yusuf</small>
+        </div>
+      </a>
+      <a href="#scene-skills" class="mobile-nav-item" data-target="scene-skills">
+        <span class="nav-ch-badge">02</span>
+        <div class="nav-ch-info">
+          <strong>Keahlian</strong>
+          <small>Radar Vibe &amp; Senjata Utama</small>
+        </div>
+      </a>
+      <a href="#scene-projects" class="mobile-nav-item" data-target="scene-projects">
+        <span class="nav-ch-badge">03</span>
+        <div class="nav-ch-info">
+          <strong>Karya</strong>
+          <small>8 Proyek Unggulan (Kartu 3D)</small>
+        </div>
+      </a>
+      <a href="#scene-timeline" class="mobile-nav-item" data-target="scene-timeline">
+        <span class="nav-ch-badge">04</span>
+        <div class="nav-ch-info">
+          <strong>Jejak</strong>
+          <small>Peta Jalur Metro 2021-2026</small>
+        </div>
+      </a>
+      <a href="#scene-contact" class="mobile-nav-item" data-target="scene-contact">
+        <span class="nav-ch-badge">05</span>
+        <div class="nav-ch-info">
+          <strong>Surat</strong>
+          <small>Buku Tamu Kuil (Ofuda) &amp; Surel</small>
+        </div>
+      </a>
+      <a href="#scene-epilog" class="mobile-nav-item" data-target="scene-epilog">
+        <span class="nav-ch-badge">EPL</span>
+        <div class="nav-ch-info">
+          <strong>Epilog</strong>
+          <small>Tiket Paspor &amp; Pencapaian</small>
+        </div>
+      </a>
+    </div>
+  </aside>
+  <div class="mobile-nav-backdrop" id="mobile-nav-backdrop" aria-hidden="true"></div>
+
+  <!-- Indikator Bab (Titik-titik di Sisi Kanan) -->
+  <nav class="scene-dots" aria-label="Indikator Bab">
+    <button class="dot-btn active" data-target="scene-prolog" data-title="Prolog: Hi! I'm Yusuf"></button>
+    <button class="dot-btn" data-target="scene-whoami" data-title="Bab 1: Who I'm"></button>
+    <button class="dot-btn" data-target="scene-skills" data-title="Bab 2: Jurus (Skills)"></button>
+    <button class="dot-btn" data-target="scene-projects" data-title="Bab 3: Misi (Projects)"></button>
+    <button class="dot-btn" data-target="scene-timeline" data-title="Bab 4: Jejak (Timeline)"></button>
+    <button class="dot-btn" data-target="scene-contact" data-title="Bab 5: Surat (Contact)"></button>
+    <button class="dot-btn" data-target="scene-epilog" data-title="Epilog: Sampai Jumpa"></button>
+  </nav>
+
+  <!-- Kiri Bawah: Avatar Bulat (Potongan Mata Karakter) Ganti Suasana -->
+  <div class="bottom-dock">
+    <button id="avatar-mood-btn" class="avatar-mood-btn" title="Klik untuk mengganti suasana: Terang, Malam, Hujan">
+      <img src="img/ui/avatar-eye.png" alt="Potongan Mata Karakter - Tombol Ganti Suasana">
+    </button>
+    <div class="mood-pill-label">
+      Suasana: <strong id="mood-current-label">Terang</strong>
+    </div>
+  </div>
+
+  
+
+  <!-- Persistent Character Stage (Berubah Crop, Zoom, dan Blur Sesuai Bab) -->
+  <div class="character-stage" id="character-stage">
+    <div class="character-wrap">
+      <!-- Canvas WebGL 2D Fluid Reveal (Menghapus ilustrasi anime & menyibak foto asli Yusuf di baliknya) -->
+      <canvas id="fluid-reveal-canvas" class="character-fluid-canvas"></canvas>
+
+      <!-- Overlay Kalibrasi Bukaan Mata Interaktif (Aktif saat tombol K ditekan) -->
+      <div id="eye-calibration-overlay" class="eye-calibration-overlay" aria-hidden="true">
+        <div id="target-box-lefteye" class="eye-target-box" data-label="Mata Kiri">
+          <span class="eye-resize-handle" data-resize="left" title="Tarik untuk ubah ukuran"></span>
+        </div>
+        <div id="target-box-righteye" class="eye-target-box" data-label="Mata Kanan">
+          <span class="eye-resize-handle" data-resize="right" title="Tarik untuk ubah ukuran"></span>
+        </div>
+      </div>
+      <!-- 5 Layer Gambar Ekspresi dengan Cross-Fade 150ms -->
+      <img src="img/hyouka/hyouka-master.png" alt="Yusuf - Tatapan Dasar" class="character-img expr-layer active" data-expr="base">
+      <img src="img/hyouka/hyouka-blink.png" alt="Yusuf - Mata Terpejam" class="character-img expr-layer" data-expr="blink">
+      <img src="img/hyouka/hyouka-sleepy.png" alt="Yusuf - Mengantuk" class="character-img expr-layer" data-expr="sleepy">
+      <img src="img/hyouka/hyouka-smile.png" alt="Yusuf - Senyum Menyipit" class="character-img expr-layer" data-expr="smile">
+      <img src="img/hyouka/hyouka-surprised.png" alt="Yusuf - Terkejut" class="character-img expr-layer" data-expr="surprised">
+
+      <!-- Overlay Gerak Mata Mengikuti Kursor (Clip-path 2 - 4 px) -->
+      <div class="character-eyes-layer">
+        <img src="img/hyouka/hyouka-master.png" alt="Layer Gerak Mata Yusuf">
+      </div>
+
+      <!-- Lingkar Cahaya Hijau Samar di Mata (Mode Malam) -->
+      <div class="eyes-glow-overlay"></div>
+
+      <!-- Indikator Tidur 'z z z' saat Idle 30 Detik -->
+      <div class="character-zzz-floating" id="character-zzz-floating">z z z</div>
+
+      <!-- Kotak Visual Debug Area Mata (Muncul saat Ctrl+Shift+C) -->
+      <div class="eye-debug-boxes" id="eye-debug-boxes">
+        <div class="eye-debug-box" id="debug-box-left"></div>
+        <div class="eye-debug-box" id="debug-box-right"></div>
+      </div>
+
+      <!-- Area Klik Interaktif pada Wajah -->
+      <div class="character-click-area" title="Klik wajah karakter untuk berinteraksi"></div>
+
+      <!-- Efek Partikel Visual Sentuhan Wajah (Hearts, Shock Lines, Sweatdrop) -->
+      <div class="character-touch-effects" id="character-touch-effects" aria-hidden="true"></div>
+
+      <!-- Cangkir Kopi Mengepul Hangat di Meja Yusuf (Interaktif) -->
+      <div class="interactive-desk-cup" id="interactive-desk-cup" role="button" tabindex="0" title="Klik untuk menikmati kopi hangat bersama Yusuf ☕" aria-label="Cangkir Kopi Hangat Yusuf">
+        <!-- Kepulan Uap Panas Dinamis -->
+        <div class="cup-steam-wrap" aria-hidden="true">
+          <span class="steam-wisp w1"></span>
+          <span class="steam-wisp w2"></span>
+          <span class="steam-wisp w3"></span>
+        </div>
+        <!-- Ilustrasi Vektor Cangkir Keramik & Piring Kecil -->
+        <svg class="coffee-cup-svg" viewBox="0 0 76 64" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+          <!-- Piring Tatakan (Saucer) -->
+          <ellipse cx="38" cy="56" rx="34" ry="7" fill="url(#saucer-grad)" stroke="#cbd5e1" stroke-width="1.2" />
+          <ellipse cx="38" cy="55" rx="28" ry="4.5" fill="#f8fafc" opacity="0.6" />
+          <!-- Badan Cangkir -->
+          <path d="M 17 24 C 17 48 24 53 38 53 C 52 53 59 48 59 24 Z" fill="url(#cup-body-grad)" stroke="#94a3b8" stroke-width="1.2" />
+          <!-- Bayangan Dalam Cangkir & Kopi -->
+          <ellipse cx="38" cy="24" rx="21" ry="6" fill="#451a03" />
+          <!-- Permukaan Cairan Kopi & Latte Art Busa -->
+          <ellipse cx="38" cy="24.5" rx="19.5" ry="5" fill="url(#coffee-liquid-grad)" />
+          <path d="M 38 23 C 34 21 32 24 38 27 C 44 24 42 21 38 23 Z" fill="#fef3c7" opacity="0.85" />
+          <!-- Gagang Cangkir -->
+          <path d="M 57 28 C 68 28 69 44 55 45" stroke="url(#cup-handle-grad)" stroke-width="4.5" stroke-linecap="round" fill="none" />
+          <!-- Kilau Keramik Kiri -->
+          <path d="M 21 28 C 22 42 26 48 32 50" stroke="#ffffff" stroke-width="2" stroke-linecap="round" opacity="0.75" />
+          <defs>
+            <linearGradient id="saucer-grad" x1="0" y1="0" x2="0" y2="1">
+              <stop offset="0%" stop-color="#ffffff" />
+              <stop offset="100%" stop-color="#cbd5e1" />
+            </linearGradient>
+            <linearGradient id="cup-body-grad" x1="0" y1="0" x2="1" y2="1">
+              <stop offset="0%" stop-color="#ffffff" />
+              <stop offset="60%" stop-color="#f1f5f9" />
+              <stop offset="100%" stop-color="#cbd5e1" />
+            </linearGradient>
+            <linearGradient id="cup-handle-grad" x1="0" y1="0" x2="1" y2="0">
+              <stop offset="0%" stop-color="#f8fafc" />
+              <stop offset="100%" stop-color="#94a3b8" />
+            </linearGradient>
+            <radialGradient id="coffee-liquid-grad" cx="50%" cy="50%" r="50%">
+              <stop offset="0%" stop-color="#78350f" />
+              <stop offset="75%" stop-color="#451a03" />
+              <stop offset="100%" stop-color="#291205" />
+            </radialGradient>
+          </defs>
+        </svg>
+        <span class="cup-hover-pill" aria-hidden="true">☕ Seruput Kopi</span>
+      </div>
+    </div>
+  </div>
+
+  <!-- Mode Cerita: Scroll-Snap Container (7 Bab) -->
+  <main class="story-scroll-container" id="story-scroll-container">
+
+    <!-- Scene 1: Prolog ("Hi! I'm Yusuf") -->
+    <section class="story-scene prolog-scene" id="scene-prolog">
+      <div class="prolog-content">
+        <div class="chapter-badge">
+          <span class="chapter-dot"></span>
+          <span>BAB 00 · PROLOG</span>
+        </div>
+
+        <h1 class="hero-pencil-heading" id="hero-pencil-text">
+          Hi, I'm <span class="highlight-hand">Yusuf</span> <span class="hero-aka">/ Hyouka</span>
+        </h1>
+        <p class="hero-role-subtitle">Creative Frontend Developer &bull; Statistician (S.Stat)</p>
+
+        <!-- Bubble Dialog Visual Novel Interaktif -->
+        <div class="vn-dialog-bubble" id="prolog-vn-bubble">
+          <div class="vn-bubble-head">
+            <span class="vn-speaker-tag">Yusuf</span>
+            <span class="vn-expr-pill" id="character-expr-badge">Tatapan Tenang</span>
+          </div>
+          <p id="prolog-dialog-text" class="vn-dialog-text">
+            Konnichiwa! Selamat datang di duniaku. Usap kanvas kursor di samping untuk menyibak foto asliku, atau gulir ke bawah untuk menjelajahi kisah &amp; 8 proyek unggulanku.
+          </p>
+          <div class="vn-guide-hint">
+            <span>[ Usap ilustrasi dengan kursor &bull; Gulir ke bawah untuk lanjut ▾ ]</span>
+          </div>
+        </div>
+
+        <!-- Dua Tombol Utama -->
+        <div class="hero-actions" id="prolog-actions">
+          <a href="#scene-whoami" class="btn-hero primary" data-cursor="CERITA">Eksplorasi Kisah ↓</a>
+          <a href="#scene-projects" class="btn-hero secondary" data-cursor="MISI">Koleksi 8 Proyek ⚡</a>
+        </div>
+
+        <!-- Widget Emoji (Reaksi Ringkas Bersih) -->
+        <div class="emoji-widget" id="prolog-emoji-widget">
+          <span class="emoji-widget-label">Tinggalkan Jejak Emosi:</span>
+          <div class="emoji-bar">
+            <button type="button" class="emoji-btn" data-emoji="❤️" title="Suka">❤️ <span class="emoji-count">1.284</span></button>
+            <button type="button" class="emoji-btn" data-emoji="🔥" title="Keren">🔥 <span class="emoji-count">896</span></button>
+            <button type="button" class="emoji-btn" data-emoji="✨" title="Apresiasi">✨ <span class="emoji-count">645</span></button>
+            <button type="button" class="emoji-btn" data-emoji="☕" title="Kopi">☕ <span class="emoji-count">412</span></button>
+            <button type="button" class="emoji-btn" data-emoji="👏" title="Hebat">👏 <span class="emoji-count">238</span></button>
+          </div>
+        </div>
+      </div>
+
+      <a href="#scene-whoami" class="scroll-indicator" aria-label="Gulir ke Bab 1">
+        <span>GULIR KE BAWAH</span>
+        <span class="arrow">↓</span>
+      </a>
+    </section>
+
+    <!-- Scene 2: Bab 1, Who I'm -->
+    <section class="story-scene whoami-scene" id="scene-whoami">
+      <div class="scene-watermark" aria-hidden="true">Who I'm</div>
+      <div class="whoami-content">
+        <div class="vn-card" id="whoami-vn-box" title="Klik atau tekan Spasi untuk lanjut">
+          <div class="vn-card-header">
+            <span class="vn-speaker-tag">Yusuf</span>
+            <span class="vn-step-badge" id="whoami-step-counter">Bagian 1 / 4</span>
+          </div>
+
+          <p class="vn-main-dialogue" id="whoami-dialog-text"></p>
+
+          <div class="vn-next-prompt" id="whoami-next-prompt">
+            <span>▼ Klik kotak ini atau tekan [Spasi] untuk lanjut</span>
+          </div>
+
+          <div class="vn-choices" id="whoami-choices">
+            <button type="button" id="btn-vn-extra" class="btn-choice" data-cursor="KISAH">Ceritakan lebih banyak</button>
+            <button type="button" id="btn-vn-skills" class="btn-choice" data-cursor="JURUS">Lihat jurusmu ➔</button>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- Scene 3: Bab 2, Jurus (Skills) -->
+    <section class="story-scene skills-scene" id="scene-skills">
+      <div class="scene-watermark" aria-hidden="true">Jurus</div>
+      <div class="skills-container">
+        <!-- Kartu Status RPG Yusuf -->
+        <aside class="rpg-status-card">
+          <div class="rpg-avatar-row">
+            <img src="img/ui/avatar-eye.png" alt="Avatar Yusuf">
+            <div>
+              <span class="rpg-badge">STATUS KARAKTER</span>
+              <h2 class="rpg-title">Yusuf</h2>
+            </div>
+          </div>
+
+          <!-- Tab Switcher: Profil vs Radar Vibe (Fitur Unik #1) -->
+          <div class="rpg-tab-row" role="tablist">
+            <button type="button" class="rpg-tab-btn active" id="btn-tab-meta" data-tab="meta" role="tab" aria-selected="true">
+              <span>📋 Info</span>
+            </button>
+            <button type="button" class="rpg-tab-btn" id="btn-tab-radar" data-tab="radar" role="tab" aria-selected="false">
+              <span>⬡ Radar Vibe</span>
+            </button>
+          </div>
+
+          <!-- Tampilan 1: Tabel Profil Meta -->
+          <div class="rpg-meta-table" id="rpg-meta-panel">
+            <div class="rpg-meta-row">
+              <span>Kelas</span>
+              <strong>AI &amp; Creative Builder</strong>
+            </div>
+            <div class="rpg-meta-row">
+              <span>Level</span>
+              <strong>Rapid Prototyper</strong>
+            </div>
+            <div class="rpg-meta-row">
+              <span>Fokus</span>
+              <strong>Visual Web, 3D &amp; AI Workflow</strong>
+            </div>
+          </div>
+
+          <!-- Tampilan 2: Diagram Radar Heksagonal RPG (Fitur Unik #1) -->
+          <div class="rpg-radar-panel" id="rpg-radar-panel" style="display: none;" role="tabpanel">
+            <svg class="radar-svg" viewBox="0 0 250 200" id="radar-chart-svg" aria-label="Diagram Radar Kekuatan Karakter">
+              <g class="radar-grid" id="radar-grid-layer"></g>
+              <polygon class="radar-polygon" id="radar-polygon-shape" points=""></polygon>
+              <g class="radar-points" id="radar-points-layer"></g>
+              <g class="radar-labels" id="radar-labels-layer"></g>
+            </svg>
+            <div class="radar-stat-tip" id="radar-stat-tip">Arahkan kursor ke titik sudut</div>
+          </div>
+
+          <!-- Kotak Komentar Hyouka -->
+          <div class="rpg-comment-box" id="rpg-skill-comment">
+            "Fokusku bukan menghafal sintaks manual, tapi merangkai ide, visual, dan kecerdasan AI menjadi produk digital nyata yang hidup."
+          </div>
+
+          <!-- Jembatan Jurus ke Bukti Proyek Nyata (Fitur Unik #2) -->
+          <div class="rpg-project-bridge" id="rpg-project-bridge" style="display: none;">
+            <span class="bridge-label">⚡ Bukti Karya Nyata:</span>
+            <div class="bridge-chips-list" id="rpg-bridge-chips"></div>
+          </div>
+
+          <!-- Tombol Pemicu Terminal Vibe Console (Fitur Unik #3) -->
+          <button type="button" class="btn-open-vibe-console" id="btn-open-vibe-console" title="Buka terminal simulasi alur kerja AI prompting">
+            <span class="btn-console-icon">🔮</span>
+            <span>Simulasi Vibe Console</span>
+            <span class="btn-pulse-sparkle">⚡</span>
+          </button>
+        </aside>
+
+        <!-- Tiga Kelompok Skill: Senjata Utama, Senjata Cadangan, Jurus Rahasia -->
+        <div class="skills-grid-panel" id="skills-panel-list"></div>
+      </div>
+    </section>
+
+    <!-- Scene 4: Bab 3, Misi (Projects) -->
+    <section class="story-scene projects-scene" id="scene-projects">
+      <div class="scene-watermark" aria-hidden="true">Misi</div>
+      <div class="projects-container">
+        
+        <div class="projects-header-wrapper">
+          <div class="section-head">
+            <div class="chapter-badge" id="projects-chapter-badge">
+              <span class="chapter-dot"></span>
+              <span id="projects-badge-text">BAB 03 · LEMBAR MISI D:\VIBE CODING</span>
+            </div>
+            <h2 id="projects-section-title">Koleksi 8 Proyek Pilihan</h2>
+            <p id="projects-section-subtitle">Konvergensi simulasi WebGL 2D/3D, analitika data inferensial, otomatisasi RPA, dan arsitektur web interaktif modern.</p>
+
+            <!-- Dual Persona Switcher di dalam Section -->
+            <div class="section-persona-switch" id="section-persona-switch">
+              <span class="persona-switch-label">Persona Portofolio:</span>
+              <div class="persona-switch-buttons">
+                <button type="button" class="persona-switch-btn active" data-persona="code">
+                  <span class="persona-icon">💻</span>
+                  <span>Developer &amp; Data (8 Proyek)</span>
+                </button>
+                <button type="button" class="persona-switch-btn" data-persona="creative">
+                  <span class="persona-icon">🎬</span>
+                  <span>Desain Grafis &amp; Video (10 Karya)</span>
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Filter Tab Kategori Proyek (Diperbarui dinamis sesuai persona) -->
+        <div class="projects-filter-bar" id="projects-filter-bar"></div>
+
+        <!-- Komentar Pemandu Hyouka / Yusuf (Sticky Companion Guide Banner yang Tetap Terlihat Saat Scroll Kartu) -->
+        <div class="spectator-card" id="spectator-bubble" aria-live="polite">
+          <div class="spectator-card-top">
+            <img src="img/ui/avatar-eye.png" alt="Avatar Hyouka" class="spectator-avatar">
+            <div class="spectator-meta">
+              <span class="spectator-name" id="spectator-name-label">Hyouka (Penonton Misi)</span>
+              <span class="spectator-status-pill">● Aktif Memandu</span>
+            </div>
+          </div>
+          <p id="spectator-comment-text" class="spectator-comment-text">
+            "💡 Tips: Klik 2x atau tekan tombol ↻ di kartu mana pun untuk membalik kartu 3D dan melihat lembar spek rahasianya!"
+          </p>
+        </div>
+
+        <!-- Grid Kartu Proyek (Developer atau Studio Creative) -->
+        <div class="projects-cards-grid" id="projects-cards-grid"></div>
+      </div>
+    </section>
+
+    <!-- Scene 5: Bab 4, Jejak (Timeline) -->
+    <section class="story-scene timeline-scene" id="scene-timeline">
+      <div class="scene-watermark" aria-hidden="true">Jejak</div>
+      <div class="timeline-container">
+        <div class="section-head timeline-head-split">
+          <div>
+            <span class="vn-speaker-tag">BAB 04 · JEJAK LANGKAH</span>
+            <h2>Jejak Perjalanan</h2>
+            <p>Rute halte stasiun riil sepanjang perjalanan. Klik perhentian atau putar tur otomatis.</p>
+          </div>
+          <div class="timeline-controls">
+            <button type="button" class="btn-autoplay-timeline" id="btn-autoplay-timeline" title="Putar perjalanan stasiun secara otomatis">
+              <span class="btn-icon">⚡</span>
+              <span>Putar Rute Perjalanan</span>
+            </button>
+          </div>
+        </div>
+
+        <!-- Metro / Shinkansen Rail Track Visualizer (Fitur Unik #1) -->
+        <div class="metro-track-bar" id="metro-track-bar">
+          <div class="metro-track-line"></div>
+          <div class="metro-track-progress" id="metro-track-progress" style="width: 25%;"></div>
+          <div class="metro-stations-dots" id="metro-stations-dots">
+            <span class="metro-dot active" data-stop-idx="0" title="2021: Palu · Inisiasi Statistika"><small>2021</small></span>
+            <span class="metro-dot" data-stop-idx="1" title="2023-2024: Otomasi RPA & POS"><small>2023</small></span>
+            <span class="metro-dot" data-stop-idx="2" title="2025: WebGL & Fluida"><small>2025</small></span>
+            <span class="metro-dot" data-stop-idx="3" title="2026: Vibe Technologist"><small>2026</small></span>
+          </div>
+        </div>
+
+        <div class="timeline-path" id="timeline-nodes"></div>
+
+        <div class="timeline-thought-banner" id="timeline-hyouka-thought">
+          <span class="thought-avatar">💬</span>
+          <span class="thought-text" id="timeline-thought-text">Hyouka: "Statistika bukan sekadar angka di atas kertas, tapi cara pandang membaca pola dunia."</span>
+        </div>
+      </div>
+    </section>
+
+    <!-- Scene 6: Bab 5, Surat (Contact) -->
+    <section class="story-scene contact-scene" id="scene-contact">
+      <div class="scene-watermark" aria-hidden="true">Surat</div>
+      <div class="contact-container">
+        <!-- Blok 1: Kirim Pesan (Formulir Bentuk Surat) -->
+        <div class="contact-letter-card">
+          <span class="vn-speaker-tag">Bab 5 · Surat</span>
+          <h2 style="font-family: var(--font-serif); font-size: 1.4rem; margin: 6px 0 8px;">
+            Mau bergabung dalam perjalanan berikutnya?
+          </h2>
+          <p style="font-size: 0.84rem; color: var(--text-muted);">
+            Tulis pesanmu di lembar surat ini. Aku akan membalasnya sesegera mungkin ke alamat surelmu.
+          </p>
+
+          <form class="contact-form" action="mailto:yusufdarwis097@gmail.com" method="POST" enctype="text/plain">
+            <div class="form-group">
+              <label for="name">NAMA PENGIRIM</label>
+              <input type="text" id="name" name="name" class="form-input" placeholder="Nama lengkap atau panggilan" required>
+            </div>
+            <div class="form-group">
+              <label for="email">ALAMAT SUREL</label>
+              <input type="email" id="email" name="email" class="form-input" placeholder="nama@email.com" required>
+            </div>
+            <div class="form-group">
+              <label for="message">ISI SURAT</label>
+              <textarea id="message" name="message" rows="3" class="form-textarea" placeholder="Ceritakan proyek, kolaborasi, atau sapaanmu..." required></textarea>
+            </div>
+            <button type="submit" class="btn-hero primary" style="width: fit-content; margin-top: 4px;">
+              Kirim Pesan ✉️
+            </button>
+          </form>
+        </div>
+
+        <!-- Blok 2 & 3: Sosial Media, Unduh CV (Gulungan), & Buku Tamu (Ofuda) -->
+        <div class="contact-side-info">
+          <div class="social-links-list">
+            <a href="https://github.com/my-system/" target="_blank" rel="noopener" class="social-pill" title="GitHub: my-system">
+              <span>💻</span> GitHub
+            </a>
+            <a href="https://www.linkedin.com/in/yusuf-s-stat-41420931a/" target="_blank" rel="noopener" class="social-pill" title="LinkedIn: Yusuf, S.Stat">
+              <span>💼</span> LinkedIn
+            </a>
+            <a href="https://instagram.com/m._.systm" target="_blank" rel="noopener" class="social-pill" title="Instagram: @m._.systm">
+              <span>📷</span> Instagram (@m._.systm)
+            </a>
+            <a href="mailto:yusufdarwis097@gmail.com" class="social-pill" title="Email: yusufdarwis097@gmail.com">
+              <span>✉️</span> yusufdarwis097@gmail.com
+            </a>
+            <button type="button" id="btn-open-cv-scroll" class="social-pill cv-scroll-btn" data-cursor="GULUNGAN">
+              📜 Buka Gulungan CV &amp; Unduh PDF
+            </button>
+          </div>
+
+          <!-- Buku Tamu (Ofuda) -->
+          <div class="ofuda-wall-panel">
+            <div class="ofuda-wall-header">
+              <div class="ofuda-header-left">
+                <h3>⛩️ Buku Tamu (Ofuda)</h3>
+                <span style="font-size: 0.68rem; color: var(--text-muted); font-family: var(--font-mono);">Dinding Pesan Kuil</span>
+              </div>
+              <!-- Interactive Suzu Shrine Bell Rope (Fitur Unik #2) -->
+              <button type="button" class="suzu-bell-btn" id="btn-suzu-bell" title="Tarik tali lonceng kuil untuk memohon doa berkah">
+                <span class="suzu-bell-icon">🔔</span>
+                <span class="suzu-bell-rope">🏮 Lonceng Suzu</span>
+              </button>
+            </div>
+            <div class="ofuda-wall-grid" id="ofuda-wall-notes"></div>
+
+            <form id="ofuda-submit-form" class="ofuda-form">
+              <!-- Hanko Stamp Selection Chips -->
+              <div class="hanko-selector-bar">
+                <span class="hanko-title">Cap Segel:</span>
+                <div class="hanko-chips-list">
+                  <button type="button" class="hanko-chip active" data-stamp="kagum" title="Kagum (感服)">🌸 Kagum</button>
+                  <button type="button" class="hanko-chip" data-stamp="inspirasi" title="Inspirasi (発想)">💡 Inspirasi</button>
+                  <button type="button" class="hanko-chip" data-stamp="kopi" title="Ngopi (珈琲)">☕ Ngopi</button>
+                  <button type="button" class="hanko-chip" data-stamp="kolaborasi" title="Kolaborasi (協業)">🚀 Kolaborasi</button>
+                  <button type="button" class="hanko-chip" data-stamp="berkah" title="Berkah (祈願)">⛩️ Berkah</button>
+                </div>
+              </div>
+
+              <div class="ofuda-inputs-row">
+                <input type="text" id="ofuda-name-input" class="ofuda-input ofuda-input-name" placeholder="Nama..." required>
+                <input type="text" id="ofuda-msg-input" class="ofuda-input ofuda-input-msg" placeholder="Tulis doa / pesan di ofuda..." required>
+                <button type="submit" class="ofuda-btn-submit">Cap &amp; Tempel</button>
+              </div>
+            </form>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- Scene 7: Epilog (Sampai Jumpa) -->
+    <section class="story-scene epilog-scene" id="scene-epilog">
+      <div class="epilog-box">
+        <span class="vn-speaker-tag">Epilog · Perjalanan Selesai</span>
+        <h2 class="epilog-title">
+          Terima kasih sudah mampir. Sampai jumpa di perjalanan berikutnya.
+        </h2>
+
+        <!-- Ringkasan Achievement Langsung di Epilog -->
+        <div class="epilog-achievements-preview" id="epilog-achievements-preview"></div>
+
+        <!-- Petunjuk Samar Easter Egg yang Belum Ditemukan -->
+        <p class="epilog-easter-hint" id="epilog-easter-egg-hint"></p>
+
+        <!-- Tiket Paspor Pengelana Digital (Fitur Unik #4) -->
+        <div class="vibe-boarding-pass-wrap" id="vibe-boarding-pass-wrap">
+          <div class="vibe-pass-card" id="vibe-pass-card">
+            <div class="pass-stub-main">
+              <div class="pass-top-meta">
+                <span class="pass-airline">D:\VIBE CODING · SHINKANSEN DIGITAL LINE</span>
+                <span class="pass-serial" id="pass-serial-num">TICKET #7482-2026</span>
+              </div>
+              <div class="pass-route-row">
+                <div class="pass-station">
+                  <span class="station-code">PLG</span>
+                  <span class="station-city">Prolog</span>
+                </div>
+                <div class="pass-arrow-path">
+                  <span class="train-glyph">🚅</span>
+                  <span class="dotted-line">· · · · · · · · ·</span>
+                </div>
+                <div class="pass-station">
+                  <span class="station-code">EPL</span>
+                  <span class="station-city">Epilog</span>
+                </div>
+              </div>
+              <div class="pass-grid-info">
+                <div class="pass-info-cell">
+                  <span class="pass-lbl">PENGELANA:</span>
+                  <strong class="pass-val" id="pass-visitor-name">Tamu Penjelajah</strong>
+                </div>
+                <div class="pass-info-cell">
+                  <span class="pass-lbl">KELAS:</span>
+                  <strong class="pass-val text-green">FIRST CLASS · VIBE</strong>
+                </div>
+                <div class="pass-info-cell">
+                  <span class="pass-lbl">HALTE DILALUI:</span>
+                  <strong class="pass-val" id="pass-scenes-count">5 / 5 Bab</strong>
+                </div>
+                <div class="pass-info-cell">
+                  <span class="pass-lbl">MISI DIKUNJUNGI:</span>
+                  <strong class="pass-val" id="pass-missions-count">8 / 8 Misi</strong>
+                </div>
+              </div>
+            </div>
+            <div class="pass-stub-side">
+              <div class="pass-notch top"></div>
+              <div class="pass-notch bottom"></div>
+              <div class="pass-barcode-vertical">
+                <span class="barcode-lines">||| | |||| || |||||| | ||| ||</span>
+                <span class="barcode-text">VIBE-2026-PASS</span>
+              </div>
+              <div class="pass-stamp-seal">
+                <span class="seal-inner">印</span>
+                <small>VERIFIED</small>
+              </div>
+            </div>
+          </div>
+          <div class="pass-action-bar">
+            <button type="button" class="btn-copy-pass" id="btn-copy-pass" title="Salin Ringkasan Tiket Paspor ke Clipboard">
+              📋 Salin Tiket Paspor
+            </button>
+            <span class="pass-hint">Kenang-kenangan digital ekspedisimu di dunia D:\VIBE CODING</span>
+          </div>
+        </div>
+
+        <div class="epilog-actions">
+          <button type="button" id="btn-open-achievements" class="btn-hero secondary" data-cursor="PRESTASI">
+            Detail Achievement 🏆 (<span class="achieve-counter-num">1</span>/9)
+          </button>
+          <a href="#scene-prolog" class="btn-hero primary" data-cursor="ATAS">Kembali ke Atas ↑</a>
+        </div>
+
+        <p style="font-size: 0.74rem; color: var(--text-muted); font-family: var(--font-mono); margin-top: 8px;">
+          © 2026 Yusuf, S.Stat · Ilustrasi Karakter &amp; Kode Interaktif · Tekan Ctrl+Shift+C untuk Mode Kalibrasi Mata
+        </p>
+
+        <!-- Tombol Rahasia Tersembunyi di Latar (Bagian 9 Cetak Biru) -->
+        <button type="button" id="hidden-secret-trigger" class="hidden-secret-trigger" title="Sebuah lipatan kertas kecil di sudut ruangan...">
+          [ 印 · lipatan catatan rahasia ]
+        </button>
+      </div>
+    </section>
+
+  </main>
+
+  <!-- Mode Ringkas (1 Halaman Bersih untuk Recruiter dalam 10 Detik) -->
+  <section class="compact-recruiter-view" id="compact-recruiter-content" aria-label="Ringkasan Portofolio Cepat"></section>
+
+  <!-- Modal Detail Misi (Bab 3: Misinya, Perlengkapan, Rintangan, Hadiah) -->
+  <div class="project-modal" id="project-modal" role="dialog" aria-modal="true">
+    <div class="modal-content-box">
+      <button class="modal-close-btn" id="modal-close-btn" aria-label="Tutup">&times;</button>
+      <span class="vn-speaker-tag" id="modal-code-badge">MISI #01</span>
+      <h3 id="modal-title" style="font-family: var(--font-serif); font-size: 1.5rem; margin-top: 4px;"></h3>
+      <p id="modal-tagline" style="color: var(--text-muted); font-size: 0.9rem; margin-top: 4px;"></p>
+
+      <div id="modal-image-preview" style="margin: 12px 0 6px 0; border-radius: 8px; overflow: hidden; max-height: 200px; display: none; border: 1px solid var(--border-subtle);">
+        <img id="modal-img" src="" alt="Pratinjau Misi" style="width: 100%; height: 200px; object-fit: cover; display: block;">
+      </div>
+
+      <div class="modal-grid-sections">
+        <div class="modal-section">
+          <h4>1. Misinya (Latar Masalah)</h4>
+          <p id="modal-mission"></p>
+        </div>
+        <div class="modal-section">
+          <h4>2. Perlengkapan (Peran &amp; Alat)</h4>
+          <p id="modal-equip"></p>
+        </div>
+        <div class="modal-section">
+          <h4>3. Rintangan (Tantangan)</h4>
+          <p id="modal-obstacle"></p>
+        </div>
+        <div class="modal-section">
+          <h4>4. Hadiah (Hasil &amp; Angka)</h4>
+          <p id="modal-reward"></p>
+        </div>
+      </div>
+
+      <div class="modal-character-note" id="modal-comment"></div>
+
+      <div class="modal-actions">
+        <a href="#" id="modal-demo-btn" target="_blank" rel="noopener" class="btn-hero primary">Lihat Demo ↗</a>
+        <a href="#" id="modal-code-btn" target="_blank" rel="noopener" class="btn-hero secondary">Lihat Kode ↗</a>
+        <button type="button" id="modal-open-vibe-btn" class="btn-hero secondary" style="border-color: rgba(168, 85, 247, 0.45); color: #a855f7;">
+          🔮 Rahasia Vibe
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Modal Bedah Prompt & Rahasia Vibe (Fitur Unik #2: The Vibe Blueprint) -->
+  <div class="project-modal vibe-blueprint-modal" id="vibe-blueprint-modal" role="dialog" aria-modal="true" aria-label="Bedah Prompt dan Rahasia Vibe Coding">
+    <div class="modal-content-box vibe-blueprint-box">
+      <button class="modal-close-btn" id="vibe-blueprint-close-btn" aria-label="Tutup">&times;</button>
+      
+      <div class="vibe-blueprint-header">
+        <div class="vibe-blueprint-meta">
+          <span class="vn-speaker-tag vibe-purple-tag" id="vb-code-badge">MISI #01</span>
+          <span class="vibe-arch-tag">🔮 CETAK BIRU VIBE CODING</span>
+        </div>
+        <h3 id="vb-title" class="vb-title">Judul Proyek</h3>
+        <p id="vb-vibe-summary" class="vb-summary">Ringkasan filosofi arsitektur dan vibe visual.</p>
+        <div class="vb-build-pill" id="vb-build-time">
+          ⏱️ 4 Jam Pengerjaan · Iterasi Shader &amp; Solver Fluida
+        </div>
+      </div>
+
+      <!-- Kotak Prompt AI Asli -->
+      <div class="vb-prompt-card">
+        <div class="vb-prompt-topbar">
+          <div class="vb-prompt-dotgroup">
+            <span class="vb-dot red"></span>
+            <span class="vb-dot yellow"></span>
+            <span class="vb-dot green"></span>
+            <span class="vb-prompt-label">📜 PROMPT INTENT &amp; ARAHAN SYSTEM (AI ORCHESTRATION)</span>
+          </div>
+          <button type="button" class="vb-copy-prompt-btn" id="vb-copy-prompt-btn" title="Salin Prompt ke Clipboard">
+            📋 Salin Prompt
+          </button>
+        </div>
+        <div class="vb-prompt-code-wrap">
+          <pre class="vb-prompt-code"><code id="vb-prompt-text"></code></pre>
+        </div>
+      </div>
+
+      <!-- Rahasia Vibe / The Secret Sauce -->
+      <div class="vb-secret-box">
+        <div class="vb-secret-title">
+          <span class="vb-secret-icon">🧪</span>
+          <span>Rahasia Vibe &amp; Arsitektur Teknis (The Secret Sauce)</span>
+        </div>
+        <p id="vb-secret-sauce" class="vb-secret-desc"></p>
+      </div>
+
+      <!-- Tech Stack Tags -->
+      <div class="vb-tags-wrap" id="vb-tags-wrap"></div>
+
+      <!-- Actions -->
+      <div class="modal-actions vb-actions">
+        <a href="#" id="vb-demo-btn" target="_blank" rel="noopener" class="btn-hero primary" data-cursor="DEMO">
+          ⚡ Buka Demo Langsung ↗
+        </a>
+        <button type="button" id="vb-case-study-btn" class="btn-hero secondary" data-cursor="KASUS">
+          📄 Baca Kasus Lengkap
+        </button>
+        <button type="button" id="vb-close-footer-btn" class="btn-hero text-only">
+          Tutup
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Modal Studio Sinema & Desain Grafis (Atelier Visual) -->
+  <div class="project-modal" id="creative-modal" role="dialog" aria-modal="true">
+    <div class="modal-content-box creative-modal-box">
+      <button class="modal-close-btn" id="creative-modal-close" aria-label="Tutup">&times;</button>
+      <div class="creative-modal-head">
+        <span class="vn-speaker-tag" id="cmodal-code-badge">CINEMA #01</span>
+        <span class="creative-format-badge" id="cmodal-format-badge">16:9 · 4K 60FPS</span>
+      </div>
+      <h3 id="cmodal-title" style="font-family: var(--font-serif); font-size: 1.55rem; margin-top: 6px;"></h3>
+      <p id="cmodal-tagline" style="color: var(--text-muted); font-size: 0.92rem; margin-top: 4px;"></p>
+
+      <!-- Video / Design Preview Area -->
+      <div class="cmodal-media-frame" id="cmodal-media-frame">
+        <div id="cmodal-video-container" class="cmodal-video-wrap">
+          <img id="cmodal-video-poster" src="" alt="Thumbnail Video" class="cmodal-poster">
+          <div class="creative-play-overlay">
+            <span class="play-circle-btn">▶</span>
+          </div>
+        </div>
+        <div id="cmodal-design-container" class="cmodal-design-wrap" style="display:none;">
+          <img id="cmodal-design-img" src="" alt="Karya Desain Grafis" class="cmodal-full-design">
+        </div>
+      </div>
+
+      <!-- Highlight Box (Color Grade info atau Palette Swatches) -->
+      <div class="cmodal-highlight-box" id="cmodal-highlight-box"></div>
+
+      <div class="modal-grid-sections">
+        <div class="modal-section">
+          <h4>1. Konsep &amp; Visi Visual</h4>
+          <p id="cmodal-concept"></p>
+        </div>
+        <div class="modal-section">
+          <h4>2. Alat &amp; Perangkat Lunak</h4>
+          <p id="cmodal-software"></p>
+        </div>
+        <div class="modal-section">
+          <h4>3. Teknik Produksi &amp; Alur Kerja</h4>
+          <p id="cmodal-techniques"></p>
+        </div>
+        <div class="modal-section">
+          <h4>4. Output &amp; Deliverables</h4>
+          <p id="cmodal-deliverable"></p>
+        </div>
+      </div>
+
+      <div class="modal-character-note" id="cmodal-comment"></div>
+
+      <div class="modal-actions" id="cmodal-actions"></div>
+    </div>
+  </div>
+
+  <!-- Modal Gulungan CV Terbuka (Bab 5: Unduh CV) -->
+  <div class="project-modal" id="cv-scroll-modal" role="dialog" aria-modal="true">
+    <div class="modal-content-box cv-scroll-paper">
+      <button class="modal-close-btn" id="cv-scroll-close" aria-label="Tutup">&times;</button>
+      <span class="vn-speaker-tag">GULUNGAN RIWAYAT — YUSUF</span>
+      <h3 style="font-family: var(--font-serif); font-size: 1.45rem; margin: 6px 0;">
+        Yusuf, S.Stat — Web &amp; Frontend Developer
+      </h3>
+      <p style="font-size: 0.86rem; color: #555; line-height: 1.55; margin-bottom: 14px;">
+        Spesialis antarmuka web interaktif, visual novel layout, performa frontend, dan analisis statistik terapan.
+      </p>
+      <div style="border-top: 1px dashed rgba(0,0,0,0.2); border-bottom: 1px dashed rgba(0,0,0,0.2); padding: 12px 0; font-size: 0.84rem; display: flex; flex-direction: column; gap: 6px;">
+        <div><strong>Keahlian Utama:</strong> JavaScript/TypeScript, Modern CSS/HTML5, UI/UX Engineering, Data/Statistika</div>
+        <div><strong>Pengalaman:</strong> 3+ Tahun merancang web interaktif &amp; sistem frontend responsif</div>
+        <div><strong>Kontak:</strong> yusufdarwis097@gmail.com · GitHub: my-system · IG: @m._.systm</div>
+      </div>
+      <div class="modal-actions" style="margin-top: 18px;">
+        <a href="mailto:yusufdarwis097@gmail.com?subject=Undangan%20Kerja%20/%20Kolaborasi%20Yusuf" class="btn-hero primary">
+          Hubungi Langsung ✉️
+        </a>
+        <a href="https://www.linkedin.com/in/yusuf-s-stat-41420931a/" target="_blank" rel="noopener" class="btn-hero secondary">
+          Lihat LinkedIn ↗
+        </a>
+      </div>
+    </div>
+  </div>
+
+  <!-- Modal Rangkuman 9 Achievement -->
+  <div class="achievements-modal" id="achievements-modal" role="dialog" aria-modal="true">
+    <div class="achieve-modal-box">
+      <button class="modal-close-btn" id="achievements-modal-close" aria-label="Tutup">&times;</button>
+      <div class="achieve-modal-head">
+        <span class="vn-speaker-tag">JEJAK PENJELAJAH</span>
+        <h3 style="font-family: var(--font-serif); font-size: 1.4rem;">Daftar Achievement &amp; Rahasia 🏆</h3>
+        <p id="achieve-modal-label" style="font-size: 0.8rem; color: var(--text-muted); font-family: var(--font-mono); margin-top: 4px;">
+          0 / 9 Pencapaian Terbuka (0%)
+        </p>
+        <div class="achieve-progress-bar-wrap">
+          <div class="achieve-progress-fill" id="achieve-modal-progress" style="width: 0%;"></div>
+        </div>
+      </div>
+      <div class="achieve-modal-list" id="achievements-modal-list"></div>
+    </div>
+  </div>
+
+  <!-- Toast Achievement Terbuka -->
+  <div class="achievement-toast" id="achievement-toast" role="status" aria-live="polite">
+    <div class="achieve-icon">⛩️</div>
+    <div class="achieve-info">
+      <h4 class="achieve-title">Achievement Terbuka!</h4>
+      <p class="achieve-desc">Salam Pertama</p>
+    </div>
+  </div>
+
+  <!-- Toast Komentar Suasana & Easter Egg -->
+  <div class="mood-toast" id="mood-toast"></div>
+  <div class="rain-wipe-hint" id="rain-wipe-hint" aria-hidden="true">🌧️ Usap kursor di layar untuk menyeka embun kaca</div>
+
+  <!-- Modal Kalibrasi Area Mata (Ctrl+Shift+C) -->
+  <div id="calibration-modal">
+    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px;">
+      <strong style="color: var(--accent-green);">Kalibrasi Mata (Ctrl+Shift+C)</strong>
+      <button type="button" id="calib-close-btn" style="background:none;border:none;cursor:pointer;color:var(--text-primary);">✕</button>
+    </div>
+    <label>Kiri CX <input type="range" id="calib-lcx" min="0.35" max="0.52" step="0.001" value="0.436"></label>
+    <label>Kiri CY <input type="range" id="calib-lcy" min="0.25" max="0.40" step="0.001" value="0.314"></label>
+    <label>Kiri RX <input type="range" id="calib-lrx" min="0.010" max="0.045" step="0.001" value="0.025"></label>
+    <label>Kiri RY <input type="range" id="calib-lry" min="0.008" max="0.035" step="0.001" value="0.015"></label>
+    <hr style="margin: 6px 0; border: none; border-top: 1px dashed var(--border-subtle);">
+    <label>Kanan CX <input type="range" id="calib-rcx" min="0.50" max="0.68" step="0.001" value="0.583"></label>
+    <label>Kanan CY <input type="range" id="calib-rcy" min="0.25" max="0.40" step="0.001" value="0.314"></label>
+    <label>Kanan RX <input type="range" id="calib-rrx" min="0.010" max="0.045" step="0.001" value="0.025"></label>
+    <label>Kanan RY <input type="range" id="calib-rry" min="0.008" max="0.035" step="0.001" value="0.015"></label>
+  </div>
+
+  
+  <!-- Panel HUD Mode Kalibrasi Interaktif (Pintasan: Tekan Tombol 'K' atau Ctrl+Shift+C) -->
+  <aside id="calibration-hud" class="calibration-hud hidden" aria-label="HUD Mode Kalibrasi">
+    <div class="hud-header">
+      <h3>⚙ Panel Kalibrasi Hero (K)</h3>
+      <button id="btn-hud-close" class="hud-close-btn" type="button" aria-label="Tutup panel kalibrasi">×</button>
+    </div>
+
+    <div class="hud-section">
+      <h4>1. Perbandingan Foto &amp; Ilustrasi</h4>
+      <div class="hud-slider-group">
+        <label for="slider-photo-opacity">
+          <span>Opasitas Foto Asli:</span>
+          <strong id="val-photo-opacity">0%</strong>
+        </label>
+        <input type="range" id="slider-photo-opacity" min="0" max="1" step="0.01" value="0">
+      </div>
+    </div>
+
+    <div class="hud-section">
+      <h4>2. Parameter Simulasi Fluida</h4>
+      <div class="hud-slider-group">
+        <label for="slider-max-reveal">
+          <span>Bukaan Maksimal Kursor (Akumulasi Sapuan Kuas):</span>
+          <strong id="val-max-reveal">70%</strong>
+        </label>
+        <input type="range" id="slider-max-reveal" min="0.20" max="1.00" step="0.05" value="0.70">
+      </div>
+
+      <div class="hud-slider-group">
+        <label for="slider-fluid-radius">
+          <span>Radius Fluida:</span>
+          <strong id="val-fluid-radius">0.0035</strong>
+        </label>
+        <input type="range" id="slider-fluid-radius" min="0.001" max="0.020" step="0.0005" value="0.0035">
+      </div>
+
+      <div class="hud-slider-group">
+        <label for="slider-dissipation">
+          <span>Dissipation (Laju Pudar):</span>
+          <strong id="val-dissipation">0.978</strong>
+        </label>
+        <input type="range" id="slider-dissipation" min="0.900" max="0.990" step="0.001" value="0.978">
+      </div>
+
+      <div class="hud-slider-group">
+        <label for="slider-distortion">
+          <span>Kekuatan Distorsi Tepi:</span>
+          <strong id="val-distortion">0.002</strong>
+        </label>
+        <input type="range" id="slider-distortion" min="0" max="0.040" step="0.001" value="0.002">
+      </div>
+    </div>
+
+    <div class="hud-section">
+      <h4>3. Area Mata (Geser &amp; Tarik Sudut)</h4>
+      <p class="hud-note">
+        Geser kotak hijau di atas mata karakter atau tarik sudutnya untuk mengubah ukuran.
+      </p>
+      <div class="hud-row">
+        <span>Mata Kiri (%):</span>
+        <code id="label-coord-lefteye">x:43.4% y:31.2% w:6.2% h:2.8%</code>
+      </div>
+      <div class="hud-row">
+        <span>Mata Kanan (%):</span>
+        <code id="label-coord-righteye">x:58.4% y:31.2% w:6.2% h:2.8%</code>
+      </div>
+      <button id="btn-copy-config" class="hud-copy-btn" type="button">
+        📋 Salin Konfigurasi ke config.js
+      </button>
+    </div>
+  </aside>
+
+  <!-- Modal Simulasi Vibe Prompt Console (Fitur Unik #3) -->
+  <div class="vibe-console-modal" id="vibe-console-modal" role="dialog" aria-modal="true" aria-label="Simulasi Vibe Prompt Console">
+    <div class="vibe-console-backdrop" id="vibe-console-backdrop"></div>
+    <div class="vibe-console-window">
+      <!-- Title Bar -->
+      <div class="console-title-bar">
+        <div class="console-mac-dots">
+          <span class="dot red" id="vibe-console-dot-close" title="Tutup"></span>
+          <span class="dot yellow"></span>
+          <span class="dot green"></span>
+        </div>
+        <div class="console-title-text">
+          <span class="console-icon">🔮</span>
+          <span>vibe-terminal · Antigravity AI Orchestrator v2.6</span>
+        </div>
+        <button type="button" class="console-close-x" id="vibe-console-close-btn" aria-label="Tutup">&times;</button>
+      </div>
+
+      <!-- Presets / Quick Prompt Chips -->
+      <div class="console-prompt-selector">
+        <span class="selector-label">Pilih Skenario Vibe Coding:</span>
+        <div class="prompt-chip-list">
+          <button type="button" class="prompt-chip active" data-scenario="cafe">☕ Kafe WebGL 60FPS</button>
+          <button type="button" class="prompt-chip" data-scenario="rpa">🏥 Bot RPA RSB BAZNAS</button>
+          <button type="button" class="prompt-chip" data-scenario="zerohour">⏱️ Infinite Zoom Horologi</button>
+          <button type="button" class="prompt-chip" data-scenario="ccve">📊 Audit Data BPJS CCVE</button>
+        </div>
+      </div>
+
+      <!-- Terminal Body / Stream Output -->
+      <div class="console-body-screen" id="console-stream-screen">
+        <div class="console-prompt-line">
+          <span class="prompt-prefix">user@yusuf-station:~$</span>
+          <span class="prompt-typed-text" id="console-user-prompt"></span>
+          <span class="prompt-cursor">█</span>
+        </div>
+        <div class="console-agent-log" id="console-agent-log"></div>
+        <div class="console-result-card" id="console-result-card" style="display: none;"></div>
+      </div>
+
+      <!-- Footer Info -->
+      <div class="console-footer-bar">
+        <span>Status: <strong class="text-green" id="console-status-text">SIAP · 60 FPS ORCHESTRATION</strong></span>
+        <span class="console-hint">Tekan [Esc] untuk menutup</span>
+      </div>
+    </div>
+  </div>
+
+  <!-- Main JavaScript Module -->
+  <script type="module" src="js/main.js"></script>
+</body>
+</html>

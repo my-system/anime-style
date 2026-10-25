@@ -1,0 +1,5902 @@
+/* ==========================================================================
+   Scenes CSS (Gerbang, Prolog, Bab 1-5, Epilog, dan Mode Ringkas)
+   Sesuai Cetak Biru Portofolio Hyouka (Versi 2)
+   ========================================================================== */
+
+/* --------------------------------------------------------------------------
+   0. Scene 0: Suzume no Tojimari Cinematic Video Opening (Gerbang Pembuka)
+   -------------------------------------------------------------------------- */
+.eye-loader-overlay {
+  position: fixed;
+  inset: 0;
+  z-index: 99999;
+  background-color: #ffffff;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  overflow: hidden;
+  transition: opacity 0.65s cubic-bezier(0.22, 1, 0.36, 1), visibility 0.65s ease;
+  pointer-events: auto;
+  user-select: none;
+}
+
+.eye-loader-overlay.hidden,
+.eye-loader-overlay.fade-out {
+  opacity: 0 !important;
+  visibility: hidden !important;
+  pointer-events: none !important;
+}
+
+/* Kontainer Video Sinematik Fullscreen (16:9 Aspect Preservation) */
+.loader-video-container {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  overflow: hidden;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background-color: #ffffff;
+}
+
+/* Lapisan Video Sinematik 2-Tahap */
+.loader-video-layer {
+  position: absolute;
+  inset: 0;
+  width: 100vw;
+  height: 100vh;
+  object-fit: cover;
+  object-position: center center;
+  will-change: transform, opacity;
+  transform: translateZ(0);
+}
+
+.loader-idle-video {
+  z-index: 1;
+  opacity: 1;
+  transition: opacity 0.75s ease;
+}
+
+.loader-intro-video {
+  z-index: 2;
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 0.5s ease;
+}
+
+.loader-intro-video.playing {
+  opacity: 1;
+  pointer-events: auto;
+}
+
+/* Area Interaktif Hotspot Pintu Suzume di Tengah Layar */
+.suzume-door-hotspot {
+  position: absolute;
+  left: 50%;
+  top: 51%;
+  transform: translate(-50%, -50%);
+  width: 13vw;
+  min-width: 150px;
+  max-width: 220px;
+  height: 39vh;
+  min-height: 270px;
+  max-height: 410px;
+  z-index: 4;
+  cursor: pointer;
+  border-radius: 8px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  touch-action: manipulation;
+  transition: transform 0.35s cubic-bezier(0.34, 1.56, 0.64, 1);
+}
+
+.suzume-door-hotspot:hover {
+  transform: translate(-50%, -50%) scale(1.035);
+}
+
+/* Aura Cahaya Berdenyut Lembut di Sekitar Pintu */
+.door-glow-pulse {
+  position: absolute;
+  inset: -6px;
+  border-radius: 12px;
+  border: 1.5px solid rgba(250, 204, 21, 0.45);
+  box-shadow: 0 0 25px rgba(250, 204, 21, 0.35), inset 0 0 20px rgba(52, 211, 153, 0.2);
+  opacity: 0.65;
+  animation: doorAuraBreathing 2.4s ease-in-out infinite;
+  pointer-events: none;
+}
+
+.suzume-door-hotspot:hover .door-glow-pulse {
+  opacity: 1;
+  border-color: rgba(250, 204, 21, 0.9);
+  box-shadow: 0 0 38px rgba(250, 204, 21, 0.65), inset 0 0 25px rgba(52, 211, 153, 0.4);
+}
+
+@keyframes doorAuraBreathing {
+  0%, 100% {
+    transform: scale(0.985);
+    opacity: 0.45;
+  }
+  50% {
+    transform: scale(1.015);
+    opacity: 0.85;
+  }
+}
+
+/* Kilauan di Gagang Pintu */
+.door-keyhole-sparkle {
+  position: absolute;
+  left: 9%;
+  top: 52%;
+  width: 14px;
+  height: 14px;
+  border-radius: 50%;
+  background: radial-gradient(circle, #ffffff 30%, rgba(250, 204, 21, 0.9) 70%, transparent 100%);
+  box-shadow: 0 0 16px #fde047;
+  animation: keySparkle 1.8s ease-in-out infinite;
+  pointer-events: none;
+}
+
+@keyframes keySparkle {
+  0%, 100% { transform: scale(0.8); opacity: 0.4; }
+  50% { transform: scale(1.4); opacity: 1; }
+}
+
+/* Tooltip Mengambang di Atas Pintu */
+.door-hover-tooltip {
+  position: absolute;
+  top: -46px;
+  left: 50%;
+  transform: translateX(-50%) translateY(4px);
+  background: rgba(15, 23, 42, 0.72);
+  backdrop-filter: blur(14px);
+  -webkit-backdrop-filter: blur(14px);
+  border: 1px solid rgba(250, 204, 21, 0.5);
+  color: #fef08a;
+  font-family: var(--font-mono, monospace);
+  font-size: 0.78rem;
+  letter-spacing: 1.5px;
+  padding: 6px 14px;
+  border-radius: 999px;
+  white-space: nowrap;
+  pointer-events: none;
+  opacity: 0.92;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  box-shadow: 0 4px 18px rgba(0, 0, 0, 0.4);
+  transition: opacity 0.3s ease, transform 0.3s ease;
+  animation: tooltipFloat 2s ease-in-out infinite;
+}
+
+@keyframes tooltipFloat {
+  0%, 100% { transform: translateX(-50%) translateY(0); }
+  50% { transform: translateX(-50%) translateY(-5px); }
+}
+
+.suzume-door-hotspot:hover .door-hover-tooltip {
+  opacity: 1;
+  color: #ffffff;
+  border-color: rgba(250, 204, 21, 0.9);
+  box-shadow: 0 0 22px rgba(250, 204, 21, 0.45);
+}
+
+/* Riak Air / Shockwave Saat Pintu Diklik */
+.door-click-ripple {
+  position: absolute;
+  left: 50%;
+  top: 50%;
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
+  border: 2px solid rgba(255, 255, 255, 0.9);
+  box-shadow: 0 0 30px rgba(250, 204, 21, 0.8);
+  transform: translate(-50%, -50%) scale(0);
+  opacity: 0;
+  pointer-events: none;
+  z-index: 5;
+  transition: transform 0.65s cubic-bezier(0.16, 1, 0.3, 1), opacity 0.65s ease;
+}
+
+.door-click-ripple.active {
+  transform: translate(-50%, -50%) scale(35);
+  opacity: 0;
+}
+
+/* Tabir Putih Murni di Akhir Video untuk Transisi Mulus ke Hero */
+.video-whiteout-veil {
+  position: absolute;
+  inset: 0;
+  background-color: #ffffff;
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 0.4s ease;
+  z-index: 5;
+}
+
+.video-whiteout-veil.active {
+  opacity: 1;
+}
+
+/* Indikator Status & Subteks di Bawah */
+.loader-sub-text {
+  position: absolute;
+  bottom: 36px;
+  font-family: var(--font-mono, monospace);
+  font-size: 0.74rem;
+  letter-spacing: 2px;
+  color: #f8fafc;
+  text-transform: uppercase;
+  background: rgba(15, 23, 42, 0.62);
+  backdrop-filter: blur(14px);
+  -webkit-backdrop-filter: blur(14px);
+  padding: 8px 20px;
+  border-radius: 999px;
+  border: 1px solid rgba(255, 255, 255, 0.24);
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.35);
+  opacity: 0;
+  transition: opacity 0.5s ease;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  pointer-events: none;
+  z-index: 10;
+}
+
+.loader-sub-text.visible {
+  opacity: 0.95;
+}
+
+.loader-sub-dot {
+  width: 7px;
+  height: 7px;
+  border-radius: 50%;
+  background: #34d399;
+  display: inline-block;
+  box-shadow: 0 0 10px #34d399;
+  animation: eyePulseDot 1.4s ease-in-out infinite;
+}
+
+@keyframes eyePulseDot {
+  0%, 100% { transform: scale(1); opacity: 0.7; }
+  50% { transform: scale(1.4); opacity: 1; }
+}
+
+/* Kontrol Atas (Audio & Skip) */
+.loader-top-controls {
+  position: absolute;
+  top: 24px;
+  right: 28px;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  z-index: 10;
+}
+
+.loader-audio-toggle,
+.loader-skip-btn {
+  background: rgba(15, 23, 42, 0.55);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  border-radius: 999px;
+  padding: 7px 16px;
+  font-family: var(--font-mono, monospace);
+  font-size: 0.72rem;
+  color: #f8fafc;
+  cursor: pointer;
+  transition: all 0.25s ease;
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.25);
+}
+
+.loader-audio-toggle:hover,
+.loader-skip-btn:hover {
+  background: rgba(16, 185, 129, 0.75);
+  border-color: rgba(52, 211, 153, 0.85);
+  color: #ffffff;
+  transform: translateY(-1px);
+}
+
+.loader-audio-toggle.active {
+  background: rgba(16, 185, 129, 0.8);
+  border-color: rgba(52, 211, 153, 0.9);
+  color: #ffffff;
+}
+
+/* Efek Tinta Menyebar dari Titik Klik */
+.ink-gate-ripple {
+  position: fixed;
+  width: 24px;
+  height: 24px;
+  border-radius: 50%;
+  background: radial-gradient(circle, #181818 40%, #22c55e 78%, transparent 100%);
+  pointer-events: none;
+  z-index: 100000;
+  transform: translate(-50%, -50%) scale(0);
+  transition: transform 0.65s cubic-bezier(0.16, 1, 0.3, 1), opacity 0.55s ease;
+}
+
+.ink-gate-ripple.expand {
+  transform: translate(-50%, -50%) scale(190);
+}
+
+.ink-gate-ripple.fade-out {
+  opacity: 0;
+}
+
+/* --------------------------------------------------------------------------
+   Persistent Character Stage & Koreografi Kamera per Scene (Bagian 4 & 5)
+   -------------------------------------------------------------------------- */
+.character-stage {
+  position: fixed;
+  bottom: 0;
+  right: 2%;
+  width: 54vw;
+  height: 94vh;
+  pointer-events: none;
+  display: flex;
+  align-items: flex-end;
+  justify-content: center;
+  transform-origin: 48% 31.4%; /* Titik tengah di antara kedua mata hijau Hyouka */
+  transition: transform 0.95s var(--ease-smooth),
+              filter 0.75s ease,
+              opacity 0.75s ease;
+  z-index: 12;
+}
+
+/* Saat baru masuk dari Gerbang: zoom-out halus dari 108% ke 100% */
+.character-stage.entrance-zoom-start {
+  transform: scale(1.08);
+  opacity: 0;
+}
+
+/* Tabel Crop & Zoom per Scene (Bagian 4 Cetak Biru) */
+body[data-scene="scene-prolog"] .character-stage {
+  transform: scale(1) translate3d(0, 0, 0);
+  filter: none;
+  opacity: 1;
+}
+
+body[data-scene="scene-whoami"] .character-stage {
+  /* Zoom ~135% ke area mata dan alis sehingga tatapan terasa dekat dan intim */
+  transform: scale(1.38) translate3d(-2%, 5%, 0);
+  filter: none;
+  opacity: 1;
+}
+
+body[data-scene="scene-skills"] .character-stage {
+  /* Karakter di latar belakang dengan blur lembut & transparan agar kartu keahlian terbaca sempurna */
+  transform: scale(1.48) translate3d(6%, -2%, 0);
+  filter: blur(6px);
+  opacity: 0.16;
+  z-index: 2;
+  pointer-events: none;
+}
+
+body[data-scene="scene-projects"] .character-stage {
+  /* Karakter bergeser lembut ke tepi kanan sebagai ambient presence tanpa menabrak kartu */
+  transform-origin: bottom right;
+  transform: scale(0.92) translate3d(24vw, 2%, 0);
+  filter: blur(2px);
+  opacity: 0.28;
+  z-index: 2;
+  pointer-events: none;
+}
+
+body[data-scene="scene-timeline"] .character-stage {
+  /* Wajah penuh, blur di latar */
+  transform: scale(1.04) translate3d(4%, 0, 0);
+  filter: blur(5px);
+  opacity: 0.20;
+  z-index: 2;
+  pointer-events: none;
+}
+
+body[data-scene="scene-contact"] .character-stage {
+  /* Wajah penuh, 105%, menatap lurus - bergeser seimbang di sisi kanan */
+  transform: scale(1.05) translate3d(8%, 0, 0);
+  filter: none;
+  opacity: 0.96;
+}
+
+body[data-scene="scene-epilog"] .character-stage {
+  /* Karakter bergeser ke kanan dengan mata terpejam tenang, tidak menabrak teks epilog di tengah */
+  transform-origin: bottom right;
+  transform: scale(0.96) translate3d(24vw, 2%, 0);
+  filter: blur(1.5px);
+  opacity: 0.35;
+  z-index: 2;
+  pointer-events: none;
+}
+
+.character-wrap {
+  position: relative;
+  width: auto;
+  height: 100%;
+  max-height: 92vh;
+  aspect-ratio: 768 / 1024;
+  user-select: none;
+  filter: drop-shadow(0 16px 38px rgba(0, 0, 0, 0.08));
+  transition: transform 0.35s var(--ease-spring), filter 0.5s ease;
+}
+
+body[data-theme="night"] .character-wrap {
+  filter: drop-shadow(0 16px 40px rgba(0, 0, 0, 0.55))
+          drop-shadow(0 0 28px rgba(74, 222, 128, 0.22));
+}
+
+.character-wrap.clicked-pulse {
+  transform: scale(1.025);
+}
+
+.character-wrap.step-back {
+  transform: scale(0.94) translateY(8px);
+}
+
+/* Layer Stack Ekspresi dengan Cross-Fade 150ms (Bagian 5.2) */
+.expr-layer {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
+  object-position: bottom center;
+  display: block;
+  opacity: 0;
+  transition: opacity 150ms ease;
+  pointer-events: none;
+}
+
+.expr-layer[data-expr="base"] {
+  position: relative;
+  opacity: 1;
+}
+
+.expr-layer.active {
+  opacity: 1;
+}
+
+/* Layer Gerak Mata Mengikuti Kursor (Clip-path 2 - 4 px) */
+.character-eyes-layer {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  pointer-events: none;
+  clip-path: url(#eyes-clip);
+  transition: transform 0.05s linear, opacity 120ms ease;
+  z-index: 4;
+}
+
+.character-eyes-layer.hidden-eye-track {
+  opacity: 0;
+}
+
+.character-eyes-layer img {
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
+  object-position: bottom center;
+  display: block;
+}
+
+/* Lingkar Cahaya Hijau Samar di Mata pada Mode Malam */
+.eyes-glow-overlay {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  pointer-events: none;
+  opacity: 0;
+  background:
+    radial-gradient(circle at 43.6% 31.4%, var(--accent-green-glow) 0%, transparent 5.5%),
+    radial-gradient(circle at 58.3% 31.4%, var(--accent-green-glow) 0%, transparent 5.5%);
+  mix-blend-mode: screen;
+  transition: opacity 0.5s ease;
+  z-index: 5;
+}
+
+/* Indikator Tidur "z z z" saat Idle 30 Detik */
+.character-zzz-floating {
+  position: absolute;
+  top: 18%;
+  left: 62%;
+  font-family: var(--font-pencil);
+  font-size: 1.6rem;
+  color: var(--accent-green);
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 0.4s ease;
+  animation: floatZzz 2.4s ease-in-out infinite;
+  z-index: 10;
+}
+
+.character-zzz-floating.active {
+  opacity: 1;
+}
+
+@keyframes floatZzz {
+  0%, 100% { transform: translateY(0) rotate(-5deg); }
+  50% { transform: translateY(-10px) rotate(6deg); }
+}
+
+/* Area Klik Wajah Karakter (Hanya aktif di Prolog & Contact agar tidak menghalangi kartu) */
+.character-click-area {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  cursor: var(--cursor-brush-pointer, pointer);
+  pointer-events: none;
+  z-index: 12;
+  touch-action: manipulation;
+}
+
+body[data-scene="scene-prolog"] .character-click-area,
+body[data-scene="scene-whoami"] .character-click-area,
+body[data-scene="scene-contact"] .character-click-area {
+  pointer-events: auto;
+}
+
+/* Kotak Debug Kalibrasi Area Mata */
+.eye-debug-boxes {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  display: none;
+  z-index: 30;
+}
+
+.eye-debug-boxes.active {
+  display: block;
+}
+
+.eye-debug-box {
+  position: absolute;
+  border: 1.5px dashed #22c55e;
+  background: rgba(34, 197, 94, 0.18);
+  border-radius: 50%;
+}
+
+/* Bubble Komentar Penonton Hyouka pada Bab 3 (Projects) */
+.spectator-bubble {
+  position: fixed;
+  top: 78px;
+  right: 220px;
+  max-width: 310px;
+  background: var(--bg-surface);
+  border: 1px solid var(--accent-green);
+  border-radius: var(--radius-md);
+  padding: 10px 14px;
+  font-family: var(--font-mono);
+  font-size: 0.76rem;
+  line-height: 1.45;
+  color: var(--text-primary);
+  box-shadow: 0 8px 26px rgba(0, 0, 0, 0.08);
+  backdrop-filter: blur(10px);
+  z-index: 30;
+  opacity: 0;
+  pointer-events: none;
+  transform: translateY(-6px);
+  transition: all 0.35s ease;
+}
+
+body[data-scene="scene-projects"] .spectator-bubble {
+  opacity: 1;
+  transform: translateY(0);
+}
+
+.spectator-tag {
+  display: block;
+  font-size: 0.66rem;
+  color: var(--accent-green);
+  text-transform: uppercase;
+  margin-bottom: 3px;
+  font-weight: 600;
+}
+
+/* --------------------------------------------------------------------------
+   1. Scene 1: Prolog ("Hi! I'm Hyouka")
+   -------------------------------------------------------------------------- */
+.prolog-scene {
+  justify-content: flex-start;
+}
+
+.prolog-content {
+  width: 48%;
+  max-width: 560px;
+  z-index: 15;
+  display: flex;
+  flex-direction: column;
+  gap: 22px;
+  position: relative;
+}
+
+/* Teks Besar Judul di Latar (Opasitas 12-18% sesuai Bagian 2 Cetak Biru) */
+.hero-bg-whisper {
+  font-family: var(--font-display);
+  font-weight: 200;
+  font-size: clamp(3.8rem, 7.5vw, 6.8rem);
+  color: var(--text-faint);
+  line-height: 0.92;
+  letter-spacing: -2px;
+  user-select: none;
+  pointer-events: none;
+  margin-bottom: -28px;
+}
+
+/* Judul Gaya Tulisan Tangan Tipis seperti Coretan Pensil */
+.hero-pencil-heading {
+  font-family: var(--font-pencil);
+  font-size: clamp(2.1rem, 3.8vw, 3.3rem);
+  font-weight: 400;
+  color: var(--text-primary);
+  line-height: 1.25;
+  min-height: 1.3em;
+  position: relative;
+}
+
+.hero-pencil-heading::after {
+  content: "";
+  display: inline-block;
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background: var(--accent-green);
+  margin-left: 8px;
+  vertical-align: middle;
+}
+
+.hero-role-subtitle {
+  font-family: var(--font-mono);
+  font-size: 0.82rem;
+  color: var(--text-muted);
+  letter-spacing: 0.8px;
+  text-transform: uppercase;
+}
+
+/* Sekuens masuk bertahap */
+.seq-hidden {
+  opacity: 0;
+  transform: translateY(10px);
+}
+
+/* Bubble Dialog Visual Novel */
+.vn-dialog-bubble {
+  background: var(--bg-surface);
+  border: 1px solid var(--border-subtle);
+  border-left: 3px solid var(--accent-green);
+  border-radius: var(--radius-md);
+  padding: 18px 22px;
+  backdrop-filter: blur(12px);
+  box-shadow: 0 10px 32px rgba(0, 0, 0, 0.04);
+  transition: opacity 0.5s ease, transform 0.5s ease;
+}
+
+.vn-bubble-head {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 8px;
+}
+
+.vn-speaker-tag {
+  font-family: var(--font-mono);
+  font-size: 0.74rem;
+  font-weight: 600;
+  text-transform: uppercase;
+  color: var(--accent-green);
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.vn-speaker-tag::before {
+  content: "";
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background: var(--accent-green);
+}
+
+.vn-expr-pill {
+  font-family: var(--font-mono);
+  font-size: 0.68rem;
+  color: var(--text-muted);
+  border: 1px solid var(--border-subtle);
+  padding: 2px 8px;
+  border-radius: var(--radius-full);
+}
+
+.vn-dialog-text {
+  font-family: var(--font-serif);
+  font-size: 1.02rem;
+  line-height: 1.68;
+  color: var(--text-primary);
+  min-height: 2.6em;
+}
+
+/* Tombol Contact dan Who i'm (Serif Tegas sesuai Bagian 2 & 4) */
+.hero-actions {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  transition: opacity 0.5s ease, transform 0.5s ease;
+}
+
+.btn-hero {
+  padding: 11px 26px;
+  border-radius: var(--radius-sm);
+  font-family: var(--font-serif);
+  font-size: 0.94rem;
+  font-weight: 600;
+  text-decoration: none;
+  transition: all var(--duration-fast) ease;
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  cursor: var(--cursor-brush-pointer, pointer);
+  border: 1px solid var(--border-strong);
+}
+
+.btn-hero.primary {
+  background: var(--text-primary);
+  color: var(--text-inverse);
+  border-color: var(--text-primary);
+}
+
+.btn-hero.primary:hover {
+  background: var(--accent-green);
+  border-color: var(--accent-green);
+  color: #fff;
+  transform: translateY(-2px);
+  box-shadow: 0 6px 20px var(--accent-green-glow);
+}
+
+.btn-hero.secondary {
+  background: var(--bg-surface);
+  color: var(--text-primary);
+}
+
+.btn-hero.secondary:hover {
+  border-color: var(--accent-green);
+  color: var(--accent-green);
+  transform: translateY(-2px);
+}
+
+/* Widget Emoji ("Berikan emoji...") */
+.emoji-widget {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  transition: opacity 0.5s ease, transform 0.5s ease;
+}
+
+.emoji-widget-label {
+  font-family: var(--font-hand);
+  font-size: 1.2rem;
+  color: var(--text-muted);
+}
+
+.emoji-bar {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  background: var(--bg-surface);
+  border: 1px solid var(--border-subtle);
+  padding: 7px 14px;
+  border-radius: var(--radius-full);
+  width: fit-content;
+  backdrop-filter: blur(10px);
+}
+
+.emoji-btn {
+  background: transparent;
+  border: 1px solid transparent;
+  font-size: 1.12rem;
+  cursor: var(--cursor-brush-pointer, pointer);
+  padding: 4px 8px;
+  border-radius: var(--radius-full);
+  transition: all var(--duration-fast) var(--ease-spring);
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  color: var(--text-primary);
+}
+
+.emoji-btn:hover {
+  transform: translateY(-2px) scale(1.12);
+  border-color: var(--border-subtle);
+  background: var(--accent-green-soft);
+}
+
+.emoji-count {
+  font-size: 0.72rem;
+  font-family: var(--font-mono);
+  color: var(--text-muted);
+}
+
+.floating-emoji {
+  position: fixed;
+  font-size: 1.75rem;
+  pointer-events: none;
+  z-index: 9999;
+  animation: floatUp 1.5s ease-out forwards;
+}
+
+@keyframes floatUp {
+  0% { transform: translateY(0) scale(0.7); opacity: 1; }
+  100% { transform: translateY(-110px) scale(1.25); opacity: 0; }
+}
+
+.scroll-indicator {
+  position: absolute;
+  bottom: 24px;
+  left: 50%;
+  transform: translateX(-50%);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 4px;
+  font-size: 0.72rem;
+  font-family: var(--font-mono);
+  color: var(--text-muted);
+  text-decoration: none;
+  opacity: 0.72;
+  transition: opacity var(--duration-fast);
+}
+
+.scroll-indicator:hover {
+  opacity: 1;
+  color: var(--accent-green);
+}
+
+.scroll-indicator .arrow {
+  animation: bounce 1.8s infinite;
+}
+
+@keyframes bounce {
+  0%, 20%, 50%, 80%, 100% { transform: translateY(0); }
+  40% { transform: translateY(5px); }
+  60% { transform: translateY(2px); }
+}
+
+/* --------------------------------------------------------------------------
+   2. Scene 2: Bab 1 ("Who I'm") — Visual Novel Interaktif
+   -------------------------------------------------------------------------- */
+.whoami-scene {
+  justify-content: flex-start;
+}
+
+.scene-watermark {
+  font-family: var(--font-display);
+  font-size: clamp(4.5rem, 11vw, 9rem);
+  font-weight: 200;
+  color: var(--text-faint);
+  position: absolute;
+  top: 52px;
+  left: 7vw;
+  z-index: 1;
+  pointer-events: none;
+  user-select: none;
+  line-height: 0.85;
+  letter-spacing: -3px;
+}
+
+.whoami-content {
+  width: 48%;
+  max-width: 560px;
+  z-index: 15;
+}
+
+.vn-card {
+  background: var(--bg-surface);
+  border: 1px solid var(--border-strong);
+  border-left: 4px solid var(--accent-green);
+  border-radius: var(--radius-md);
+  padding: 30px 32px;
+  backdrop-filter: blur(16px);
+  box-shadow: 0 16px 44px rgba(0, 0, 0, 0.06);
+  cursor: var(--cursor-brush-pointer, pointer);
+  position: relative;
+}
+
+.vn-card-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 16px;
+}
+
+.vn-step-badge {
+  font-family: var(--font-mono);
+  font-size: 0.72rem;
+  color: var(--text-muted);
+}
+
+.vn-main-dialogue {
+  font-family: var(--font-serif);
+  font-size: 1.14rem;
+  line-height: 1.78;
+  color: var(--text-primary);
+  min-height: 5.2em;
+  margin-bottom: 18px;
+}
+
+.vn-next-prompt {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  font-family: var(--font-mono);
+  font-size: 0.75rem;
+  color: var(--accent-green);
+  animation: pulsePrompt 1.3s ease-in-out infinite;
+}
+
+@keyframes pulsePrompt {
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0.45; }
+}
+
+.vn-choices {
+  display: none;
+  gap: 12px;
+  flex-wrap: wrap;
+  margin-top: 12px;
+  padding-top: 16px;
+  border-top: 1px dashed var(--border-subtle);
+}
+
+.vn-choices.visible {
+  display: flex;
+}
+
+.btn-choice {
+  background: var(--bg-primary);
+  border: 1px solid var(--border-strong);
+  color: var(--text-primary);
+  padding: 9px 18px;
+  border-radius: var(--radius-sm);
+  font-family: var(--font-serif);
+  font-size: 0.88rem;
+  cursor: var(--cursor-brush-pointer, pointer);
+  transition: all var(--duration-fast) ease;
+}
+
+.btn-choice:hover {
+  background: var(--accent-green);
+  color: #fff;
+  border-color: var(--accent-green);
+  transform: translateY(-2px);
+}
+
+/* --------------------------------------------------------------------------
+   3. Scene 3: Bab 2 (Jurus / Skills) — RPG Status & Bar Hijau Beranimasi
+   -------------------------------------------------------------------------- */
+.skills-scene {
+  justify-content: center;
+}
+
+.skills-container {
+  width: 100%;
+  max-width: var(--container-max);
+  z-index: 15;
+  display: grid;
+  grid-template-columns: 310px 1fr;
+  gap: 32px;
+  align-items: start;
+}
+
+.rpg-status-card {
+  background: var(--bg-surface);
+  border: 1px solid var(--border-strong);
+  border-radius: var(--radius-md);
+  padding: 24px;
+  backdrop-filter: blur(14px);
+  box-shadow: 0 12px 32px rgba(0, 0, 0, 0.05);
+}
+
+.rpg-avatar-row {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  margin-bottom: 16px;
+}
+
+.rpg-avatar-row img {
+  width: 56px;
+  height: 56px;
+  border-radius: 50%;
+  border: 2px solid var(--accent-green);
+  object-fit: cover;
+}
+
+.rpg-badge {
+  font-family: var(--font-mono);
+  font-size: 0.68rem;
+  background: var(--accent-green-soft);
+  color: var(--accent-green);
+  padding: 3px 8px;
+  border-radius: var(--radius-sm);
+  display: inline-block;
+  margin-bottom: 4px;
+}
+
+.rpg-title {
+  font-family: var(--font-serif);
+  font-size: 1.35rem;
+  font-weight: 600;
+}
+
+.rpg-meta-table {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  font-family: var(--font-mono);
+  font-size: 0.78rem;
+  padding: 12px 0;
+  border-top: 1px dashed var(--border-subtle);
+  border-bottom: 1px dashed var(--border-subtle);
+}
+
+.rpg-meta-row {
+  display: flex;
+  justify-content: space-between;
+}
+
+.rpg-comment-box {
+  margin-top: 14px;
+  background: var(--accent-green-soft);
+  border-left: 3px solid var(--accent-green);
+  padding: 10px 12px;
+  border-radius: var(--radius-sm);
+  font-family: var(--font-serif);
+  font-size: 0.84rem;
+  line-height: 1.5;
+  color: var(--text-primary);
+}
+
+.skills-grid-panel {
+  display: flex;
+  flex-direction: column;
+  gap: 18px;
+}
+
+.skill-group-head {
+  display: flex;
+  align-items: baseline;
+  gap: 10px;
+  margin-bottom: 8px;
+}
+
+.skill-category-title {
+  font-family: var(--font-serif);
+  font-size: 1.05rem;
+  font-weight: 600;
+}
+
+.skill-category-sub {
+  font-family: var(--font-mono);
+  font-size: 0.72rem;
+  color: var(--text-muted);
+}
+
+.skills-pill-group {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(235px, 1fr));
+  gap: 10px;
+}
+
+.skill-card {
+  text-align: left;
+  background: var(--bg-card);
+  border: 1px solid var(--border-subtle);
+  border-radius: var(--radius-sm);
+  padding: 11px 14px;
+  cursor: var(--cursor-brush-pointer, pointer);
+  transition: all var(--duration-fast) ease;
+  color: var(--text-primary);
+  font-family: inherit;
+}
+
+.skill-card:hover,
+.skill-card.selected {
+  border-color: var(--accent-green);
+  transform: translateY(-2px);
+  box-shadow: 0 6px 18px rgba(0, 0, 0, 0.06);
+}
+
+.skill-header {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 8px;
+  margin-bottom: 6px;
+}
+
+.skill-name {
+  font-size: 0.88rem;
+  font-weight: 600;
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.skill-level-badge {
+  font-size: 0.68rem;
+  font-family: var(--font-mono);
+  color: var(--accent-green);
+  white-space: nowrap;
+}
+
+.skill-bar-track {
+  width: 100%;
+  height: 5px;
+  background: var(--border-subtle);
+  border-radius: var(--radius-full);
+  overflow: hidden;
+  margin-bottom: 6px;
+}
+
+.skill-bar-fill {
+  height: 100%;
+  background: var(--accent-green);
+  border-radius: var(--radius-full);
+  transition: width 1.1s cubic-bezier(0.22, 1, 0.36, 1);
+}
+
+.skill-desc {
+  font-size: 0.75rem;
+  color: var(--text-muted);
+  line-height: 1.38;
+}
+
+/* --------------------------------------------------------------------------
+   4. Scene 4: Bab 3 (Misi / Projects) — Lembar Misi & Stempel
+   -------------------------------------------------------------------------- */
+.projects-scene {
+  justify-content: center;
+}
+
+.projects-container {
+  width: 100%;
+  max-width: var(--container-max);
+  z-index: 15;
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+}
+
+.section-head {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-end;
+  max-width: 680px;
+}
+
+.section-head h2 {
+  font-family: var(--font-serif);
+  font-size: 1.9rem;
+  font-weight: 600;
+}
+
+.section-head p {
+  color: var(--text-muted);
+  font-size: 0.9rem;
+  margin-top: 4px;
+}
+
+.projects-cards-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+  gap: 18px;
+}
+
+.mission-card {
+  background: var(--bg-card);
+  border: 1px solid var(--border-subtle);
+  border-radius: var(--radius-md);
+  overflow: hidden;
+  cursor: var(--cursor-brush-pointer, pointer);
+  position: relative;
+  transition: all var(--duration-normal) var(--ease-spring);
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+}
+
+.mission-card:hover {
+  border-color: var(--accent-green);
+  transform: translateY(-5px);
+  box-shadow: 0 14px 34px rgba(0, 0, 0, 0.09);
+}
+
+.mission-thumb {
+  height: 92px;
+  padding: 14px 18px;
+  position: relative;
+  border-bottom: 1px dashed var(--border-subtle);
+  background:
+    radial-gradient(circle at 85% 20%, var(--accent-green-soft), transparent 60%),
+    linear-gradient(120deg, var(--bg-surface) 0%, var(--bg-secondary) 100%);
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+}
+
+.mission-thumb-art {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.mission-code {
+  font-family: var(--font-mono);
+  font-size: 0.74rem;
+  font-weight: 600;
+  color: var(--accent-green);
+}
+
+.mission-year {
+  font-family: var(--font-mono);
+  font-size: 0.68rem;
+  color: var(--text-muted);
+}
+
+.mission-stamp {
+  border: 1.5px solid var(--accent-green);
+  color: var(--accent-green);
+  padding: 2px 8px;
+  border-radius: 3px;
+  font-family: var(--font-mono);
+  font-size: 0.66rem;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.8px;
+  transform: rotate(5deg);
+}
+
+.mission-body {
+  padding: 16px 18px 12px;
+}
+
+.mission-cat {
+  font-family: var(--font-mono);
+  font-size: 0.68rem;
+  color: var(--text-muted);
+  text-transform: uppercase;
+  margin-bottom: 4px;
+}
+
+.mission-body h3 {
+  font-family: var(--font-serif);
+  font-size: 1.15rem;
+  font-weight: 600;
+  margin-bottom: 6px;
+}
+
+.mission-body p {
+  font-size: 0.84rem;
+  color: var(--text-muted);
+  line-height: 1.48;
+}
+
+.mission-footer {
+  padding: 10px 18px 16px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+}
+
+.mission-tags {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 5px;
+}
+
+.tag-pill {
+  background: var(--border-subtle);
+  color: var(--text-primary);
+  font-family: var(--font-mono);
+  font-size: 0.68rem;
+  padding: 2px 7px;
+  border-radius: 4px;
+}
+
+.mission-open-hint {
+  font-family: var(--font-mono);
+  font-size: 0.7rem;
+  color: var(--accent-green);
+  white-space: nowrap;
+}
+
+/* Modal Detail Misi */
+.project-modal {
+  position: fixed;
+  inset: 0;
+  background: rgba(12, 15, 13, 0.62);
+  backdrop-filter: blur(8px);
+  z-index: 20000;
+  display: none;
+  align-items: center;
+  justify-content: center;
+  padding: 20px;
+}
+
+.project-modal.active {
+  display: flex;
+}
+
+.modal-content-box {
+  background: var(--bg-primary);
+  border: 1px solid var(--border-strong);
+  border-radius: var(--radius-md);
+  max-width: 640px;
+  width: 100%;
+  padding: 30px 32px;
+  position: relative;
+  box-shadow: 0 24px 64px rgba(0, 0, 0, 0.25);
+  max-height: 90vh;
+  overflow-y: auto;
+}
+
+.modal-close-btn {
+  position: absolute;
+  top: 16px;
+  right: 18px;
+  background: none;
+  border: none;
+  font-size: 1.6rem;
+  color: var(--text-primary);
+  cursor: var(--cursor-brush-pointer, pointer);
+  line-height: 1;
+}
+
+.modal-grid-sections {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 14px;
+  margin-top: 16px;
+}
+
+.modal-section {
+  background: var(--bg-surface);
+  border: 1px solid var(--border-subtle);
+  padding: 12px 14px;
+  border-radius: var(--radius-sm);
+}
+
+.modal-section h4 {
+  font-family: var(--font-mono);
+  font-size: 0.72rem;
+  color: var(--accent-green);
+  text-transform: uppercase;
+  margin-bottom: 4px;
+}
+
+.modal-section p {
+  font-size: 0.85rem;
+  line-height: 1.52;
+}
+
+.modal-character-note {
+  background: var(--accent-green-soft);
+  border-left: 3px solid var(--accent-green);
+  padding: 10px 14px;
+  border-radius: var(--radius-sm);
+  margin-top: 16px;
+  font-family: var(--font-hand);
+  font-size: 1.22rem;
+  color: var(--text-primary);
+}
+
+.modal-actions {
+  display: flex;
+  gap: 12px;
+  margin-top: 20px;
+}
+
+/* --------------------------------------------------------------------------
+   5. Scene 5: Bab 4 (Jejak / Timeline) — Jalan Setapak Interaktif
+   -------------------------------------------------------------------------- */
+.timeline-scene {
+  justify-content: flex-start;
+}
+
+.timeline-container {
+  width: 100%;
+  max-width: 780px;
+  z-index: 15;
+  display: flex;
+  flex-direction: column;
+  gap: 18px;
+}
+
+.timeline-path {
+  position: relative;
+  padding-left: 28px;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.timeline-path::before {
+  content: "";
+  position: absolute;
+  left: 7px;
+  top: 10px;
+  bottom: 10px;
+  width: 2px;
+  background: var(--border-strong);
+}
+
+.timeline-node {
+  position: relative;
+  cursor: var(--cursor-brush-pointer, pointer);
+}
+
+.timeline-dot {
+  position: absolute;
+  left: -28px;
+  top: 14px;
+  width: 15px;
+  height: 15px;
+  border-radius: 50%;
+  background: var(--bg-primary);
+  border: 3px solid var(--accent-green);
+  transition: transform var(--duration-fast) var(--ease-spring), box-shadow var(--duration-fast);
+}
+
+.timeline-node:hover .timeline-dot,
+.timeline-node.expanded .timeline-dot {
+  transform: scale(1.35);
+  box-shadow: 0 0 12px var(--accent-green);
+  background: var(--accent-green);
+}
+
+.timeline-card {
+  background: var(--bg-card);
+  border: 1px solid var(--border-subtle);
+  border-radius: var(--radius-sm);
+  padding: 12px 16px;
+  transition: border-color var(--duration-fast);
+}
+
+.timeline-node.expanded .timeline-card {
+  border-color: var(--accent-green);
+}
+
+.timeline-card-head {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.timeline-year {
+  font-family: var(--font-mono);
+  font-size: 0.74rem;
+  color: var(--accent-green);
+  font-weight: 600;
+}
+
+.timeline-expand-hint {
+  font-family: var(--font-mono);
+  font-size: 0.68rem;
+  color: var(--text-muted);
+}
+
+.timeline-role {
+  font-family: var(--font-serif);
+  font-size: 1rem;
+  font-weight: 600;
+}
+
+.timeline-org {
+  font-size: 0.8rem;
+  color: var(--text-muted);
+  margin-bottom: 4px;
+}
+
+.timeline-summary {
+  font-size: 0.84rem;
+  line-height: 1.45;
+}
+
+.timeline-detail {
+  display: none;
+  margin-top: 8px;
+  padding-top: 8px;
+  border-top: 1px dashed var(--border-subtle);
+  font-size: 0.82rem;
+  color: var(--text-muted);
+  line-height: 1.5;
+}
+
+.timeline-node.expanded .timeline-detail {
+  display: block;
+}
+
+.timeline-thought-banner {
+  background: var(--bg-surface);
+  border-left: 3px solid var(--accent-green);
+  padding: 10px 14px;
+  border-radius: var(--radius-sm);
+  font-family: var(--font-serif);
+  font-size: 0.86rem;
+  font-style: italic;
+}
+
+/* --------------------------------------------------------------------------
+   6. Scene 6: Bab 5 (Surat / Contact, CV Gulungan & Ofuda)
+   -------------------------------------------------------------------------- */
+.contact-scene {
+  justify-content: flex-start;
+}
+
+.contact-container {
+  position: relative;
+  width: 62%;
+  max-width: 780px;
+  z-index: 15;
+  display: grid;
+  grid-template-columns: 1.05fr 0.95fr;
+  gap: 20px;
+  align-items: start;
+}
+
+.contact-letter-card {
+  background: var(--bg-surface);
+  border: 1px solid var(--border-strong);
+  border-radius: var(--radius-md);
+  padding: 22px 24px;
+  backdrop-filter: blur(14px);
+}
+
+.contact-form {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  margin-top: 12px;
+}
+
+.form-group {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.form-group label {
+  font-family: var(--font-mono);
+  font-size: 0.7rem;
+  color: var(--text-muted);
+}
+
+.form-input, .form-textarea {
+  background: var(--bg-primary);
+  border: 1px solid var(--border-subtle);
+  border-radius: var(--radius-sm);
+  padding: 8px 12px;
+  color: var(--text-primary);
+  font-family: inherit;
+  font-size: 0.86rem;
+  outline: none;
+}
+
+.form-input:focus, .form-textarea:focus {
+  border-color: var(--accent-green);
+}
+
+.contact-side-info {
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+}
+
+.social-links-list {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 8px;
+}
+
+.social-pill {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 9px 12px;
+  border-radius: var(--radius-sm);
+  background: var(--bg-surface);
+  border: 1px solid var(--border-subtle);
+  color: var(--text-primary);
+  text-decoration: none;
+  font-size: 0.8rem;
+  transition: all var(--duration-fast);
+}
+
+.social-pill:hover {
+  border-color: var(--accent-green);
+  transform: translateY(-2px);
+}
+
+.social-pill.cv-scroll-btn {
+  grid-column: span 2;
+  border-color: var(--accent-green);
+  background: var(--accent-green-soft);
+  font-family: var(--font-serif);
+  font-weight: 600;
+  justify-content: center;
+}
+
+/* Dinding Buku Tamu Ofuda */
+.ofuda-wall-panel {
+  background: var(--bg-surface);
+  border: 1px solid var(--border-subtle);
+  border-radius: var(--radius-md);
+  padding: 16px;
+}
+
+.ofuda-wall-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 10px;
+}
+
+.ofuda-wall-header h3 {
+  font-family: var(--font-serif);
+  font-size: 0.92rem;
+}
+
+.ofuda-wall-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(115px, 1fr));
+  gap: 8px;
+  max-height: 155px;
+  overflow-y: auto;
+  padding: 2px;
+  margin-bottom: 10px;
+}
+
+.ofuda-paper-card {
+  background: #fffdf6;
+  border: 1px solid #dfd5be;
+  color: #2c261e;
+  padding: 8px 36px 8px 10px;
+  border-radius: 4px;
+  position: relative;
+  box-shadow: 1px 2px 6px rgba(0, 0, 0, 0.05);
+}
+
+body[data-theme="night"] .ofuda-paper-card {
+  background: #222b24;
+  border-color: #39493d;
+  color: #e6ece8;
+}
+
+.ofuda-stamp-mark {
+  position: absolute;
+  top: 5px;
+  right: 5px;
+  width: 15px;
+  height: 15px;
+  border: 1px solid #dc2626;
+  color: #dc2626;
+  font-size: 0.55rem;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.ofuda-author {
+  font-family: var(--font-serif);
+  font-size: 0.68rem;
+  font-weight: 600;
+  color: #8c7355;
+  margin-bottom: 2px;
+}
+
+.ofuda-body {
+  font-size: 0.72rem;
+  line-height: 1.35;
+  word-break: break-word;
+}
+
+.ofuda-date {
+  font-size: 0.6rem;
+  font-family: var(--font-mono);
+  color: #888;
+  display: block;
+  text-align: right;
+}
+
+.ofuda-form {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  width: 100%;
+}
+
+.ofuda-inputs-row {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  width: 100%;
+}
+
+.ofuda-input-name {
+  width: 110px;
+  min-width: 100px;
+  flex-shrink: 0;
+}
+
+.ofuda-input-msg {
+  flex: 1;
+  min-width: 0;
+}
+
+.ofuda-input {
+  background: var(--bg-primary);
+  border: 1px solid var(--border-subtle);
+  border-radius: var(--radius-sm);
+  padding: 6px 8px;
+  font-size: 0.76rem;
+  color: var(--text-primary);
+  outline: none;
+}
+
+.ofuda-btn-submit {
+  background: var(--accent-green);
+  color: #fff;
+  border: none;
+  border-radius: var(--radius-sm);
+  padding: 6px 12px;
+  white-space: nowrap;
+  flex-shrink: 0;
+  font-size: 0.76rem;
+  font-weight: 600;
+  cursor: var(--cursor-brush-pointer, pointer);
+}
+
+/* Modal Animasi Gulungan CV Terbuka */
+.cv-scroll-paper {
+  max-width: 540px;
+  background: #fdfbf4;
+  color: #1c1c1c;
+  border-top: 10px solid #3a2e21;
+  border-bottom: 10px solid #3a2e21;
+  animation: unrollScroll 0.55s cubic-bezier(0.22, 1, 0.36, 1) forwards;
+  transform-origin: top center;
+}
+
+@keyframes unrollScroll {
+  0% { transform: scaleY(0.08); opacity: 0; }
+  100% { transform: scaleY(1); opacity: 1; }
+}
+
+/* --------------------------------------------------------------------------
+   7. Scene 7: Epilog (Layar Memutih, Achievement & Petunjuk Easter Egg)
+   -------------------------------------------------------------------------- */
+.epilog-scene {
+  justify-content: center;
+  text-align: center;
+}
+
+.epilog-box {
+  max-width: 600px;
+  z-index: 15;
+  background: rgba(255, 255, 255, 0.95);
+  border: 1px solid var(--border-subtle);
+  border-radius: 20px;
+  padding: 24px 28px;
+  backdrop-filter: blur(20px);
+  box-shadow: 0 16px 45px rgba(0, 0, 0, 0.08);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 12px;
+  margin: 0 auto;
+}
+
+body[data-theme="night"] .epilog-box {
+  background: rgba(17, 23, 38, 0.94);
+  box-shadow: 0 20px 55px rgba(0, 0, 0, 0.65);
+}
+
+.epilog-title {
+  font-family: var(--font-hand);
+  font-size: clamp(1.8rem, 3.2vw, 2.5rem);
+  line-height: 1.15;
+  margin: 0;
+}
+
+.epilog-achievements-preview {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: 8px;
+  margin: 6px 0;
+}
+
+.epilog-badge-pill {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 5px 11px;
+  border-radius: var(--radius-full);
+  font-family: var(--font-mono);
+  font-size: 0.72rem;
+  border: 1px solid var(--border-subtle);
+  background: var(--bg-primary);
+}
+
+.epilog-badge-pill.unlocked {
+  border-color: var(--accent-green);
+  background: var(--accent-green-soft);
+}
+
+.epilog-badge-pill.locked {
+  opacity: 0.55;
+}
+
+.epilog-easter-hint {
+  font-family: var(--font-mono);
+  font-size: 0.76rem;
+  color: var(--text-muted);
+  background: var(--bg-primary);
+  padding: 8px 14px;
+  border-radius: var(--radius-sm);
+  border: 1px dashed var(--border-strong);
+}
+
+.epilog-actions {
+  display: flex;
+  gap: 12px;
+  flex-wrap: wrap;
+  justify-content: center;
+}
+
+/* Tombol Rahasia Tersembunyi di Latar (Bagian 9 Cetak Biru) */
+.hidden-secret-trigger {
+  background: none;
+  border: none;
+  font-family: var(--font-mono);
+  font-size: 0.68rem;
+  color: var(--text-muted);
+  opacity: 0.28;
+  cursor: var(--cursor-brush-pointer, pointer);
+  margin-top: 6px;
+  transition: opacity 0.25s;
+}
+
+.hidden-secret-trigger:hover {
+  opacity: 1;
+  color: var(--accent-green);
+}
+
+/* --------------------------------------------------------------------------
+   Modal Rangkuman 9 Achievement
+   -------------------------------------------------------------------------- */
+.achievements-modal {
+  position: fixed;
+  inset: 0;
+  background: rgba(12, 15, 13, 0.65);
+  backdrop-filter: blur(8px);
+  z-index: 25000;
+  display: none;
+  align-items: center;
+  justify-content: center;
+  padding: 20px;
+}
+
+.achievements-modal.active {
+  display: flex;
+}
+
+.achieve-modal-box {
+  background: var(--bg-primary);
+  border: 1px solid var(--border-strong);
+  border-radius: var(--radius-md);
+  max-width: 640px;
+  width: 100%;
+  padding: 28px 30px;
+  position: relative;
+  max-height: 85vh;
+  display: flex;
+  flex-direction: column;
+}
+
+.achieve-progress-bar-wrap {
+  width: 100%;
+  height: 7px;
+  background: var(--border-subtle);
+  border-radius: 999px;
+  overflow: hidden;
+  margin: 10px 0 16px;
+}
+
+.achieve-progress-fill {
+  height: 100%;
+  background: var(--accent-green);
+  transition: width 0.5s ease;
+}
+
+.achieve-modal-list {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  overflow-y: auto;
+}
+
+.achieve-card {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  padding: 12px 16px;
+  border-radius: var(--radius-sm);
+  border: 1px solid var(--border-subtle);
+  background: var(--bg-surface);
+}
+
+.achieve-card.unlocked {
+  border-color: var(--accent-green);
+  background: var(--accent-green-soft);
+}
+
+.achieve-card.locked {
+  opacity: 0.65;
+}
+
+.achieve-card-icon {
+  font-size: 1.5rem;
+  width: 40px;
+  height: 40px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 50%;
+  background: var(--bg-primary);
+}
+
+.achieve-card-info {
+  flex: 1;
+}
+
+.achieve-card-header {
+  display: flex;
+  justify-content: space-between;
+  margin-bottom: 3px;
+}
+
+.achieve-card-title {
+  font-weight: 600;
+  font-size: 0.9rem;
+}
+
+.achieve-status-badge {
+  font-size: 0.68rem;
+  font-family: var(--font-mono);
+  padding: 2px 7px;
+  border-radius: 4px;
+  background: var(--border-subtle);
+}
+
+.achieve-card.unlocked .achieve-status-badge {
+  background: var(--accent-green);
+  color: #fff;
+}
+
+.achieve-card-desc {
+  font-size: 0.78rem;
+  color: var(--text-muted);
+}
+
+/* --------------------------------------------------------------------------
+   Mode Ringkas (1 Halaman Bersih untuk Recruiter dalam 10 Detik)
+   -------------------------------------------------------------------------- */
+.compact-recruiter-view {
+  display: none;
+  max-width: 1020px;
+  margin: 0 auto;
+  padding: 96px 28px 80px;
+  position: relative;
+  z-index: 50;
+}
+
+body.mode-compact .story-scroll-container,
+body.mode-compact .character-stage,
+body.mode-compact .scene-dots,
+body.mode-compact .spectator-bubble {
+  display: none !important;
+}
+
+body.mode-compact .compact-recruiter-view {
+  display: flex;
+  flex-direction: column;
+  gap: 28px;
+}
+
+.compact-header-card {
+  display: flex;
+  align-items: center;
+  gap: 24px;
+  background: var(--bg-surface);
+  border: 1px solid var(--border-strong);
+  padding: 28px;
+  border-radius: var(--radius-md);
+}
+
+.compact-avatar {
+  width: 96px;
+  height: 96px;
+  border-radius: 50%;
+  border: 2px solid var(--accent-green);
+  object-fit: cover;
+}
+
+.compact-tag {
+  font-family: var(--font-mono);
+  font-size: 0.72rem;
+  color: var(--accent-green);
+}
+
+.compact-bio h1 {
+  font-family: var(--font-serif);
+  font-size: 1.75rem;
+  margin: 4px 0 8px;
+}
+
+.compact-bio p {
+  font-size: 0.92rem;
+  color: var(--text-muted);
+  line-height: 1.55;
+  margin-bottom: 14px;
+}
+
+.compact-quick-links {
+  display: flex;
+  gap: 10px;
+  flex-wrap: wrap;
+}
+
+.compact-grid-two {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 24px;
+}
+
+.compact-section {
+  background: var(--bg-surface);
+  border: 1px solid var(--border-subtle);
+  padding: 22px 24px;
+  border-radius: var(--radius-md);
+}
+
+.compact-section h2 {
+  font-family: var(--font-serif);
+  font-size: 1.2rem;
+  margin-bottom: 14px;
+  padding-bottom: 8px;
+  border-bottom: 1px solid var(--border-subtle);
+}
+
+.compact-skills-list {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 8px;
+}
+
+.compact-skill-pill {
+  display: flex;
+  flex-direction: column;
+  padding: 8px 10px;
+  background: var(--bg-primary);
+  border-radius: var(--radius-sm);
+  font-size: 0.82rem;
+}
+
+.compact-skill-pill span {
+  font-family: var(--font-mono);
+  font-size: 0.7rem;
+  color: var(--accent-green);
+}
+
+.compact-timeline-list {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.compact-tl-item {
+  font-size: 0.84rem;
+}
+
+.compact-tl-item .tl-y {
+  display: block;
+  font-family: var(--font-mono);
+  font-size: 0.72rem;
+  color: var(--accent-green);
+}
+
+.compact-projects-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 14px;
+}
+
+.compact-proj-card {
+  background: var(--bg-primary);
+  border: 1px solid var(--border-subtle);
+  padding: 16px;
+  border-radius: var(--radius-sm);
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.cp-head {
+  display: flex;
+  justify-content: space-between;
+  font-family: var(--font-mono);
+  font-size: 0.7rem;
+  color: var(--accent-green);
+}
+
+.cp-reward {
+  font-size: 0.8rem;
+  color: var(--text-primary);
+}
+
+/* Toast Achievement */
+.achievement-toast {
+  position: fixed;
+  top: 76px;
+  right: 36px;
+  background: var(--bg-surface);
+  border: 1px solid var(--accent-green);
+  border-left: 4px solid var(--accent-green);
+  border-radius: var(--radius-md);
+  padding: 12px 18px;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  box-shadow: 0 12px 32px rgba(0, 0, 0, 0.14);
+  backdrop-filter: blur(12px);
+  z-index: 10000;
+  transform: translateX(130%);
+  transition: transform 0.4s var(--ease-spring);
+}
+
+.achievement-toast.show {
+  transform: translateX(0);
+}
+
+.achieve-icon {
+  font-size: 1.65rem;
+}
+
+.achieve-info h4 {
+  font-size: 0.84rem;
+  font-weight: 700;
+}
+
+.achieve-info p {
+  font-size: 0.74rem;
+  color: var(--text-muted);
+}
+
+/* Modal Kalibrasi Mata (Ctrl+Shift+C) */
+#calibration-modal {
+  position: fixed;
+  bottom: 84px;
+  right: 36px;
+  background: var(--bg-surface);
+  border: 1px solid var(--accent-green);
+  border-radius: var(--radius-md);
+  padding: 16px;
+  width: 310px;
+  z-index: 99999;
+  display: none;
+  font-family: var(--font-mono);
+  font-size: 0.75rem;
+  box-shadow: 0 12px 34px rgba(0, 0, 0, 0.18);
+  backdrop-filter: blur(12px);
+}
+
+#calibration-modal.active {
+  display: block;
+}
+
+#calibration-modal label {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin: 5px 0;
+}
+
+#calibration-modal input[type="range"] {
+  width: 145px;
+}
+
+/* Responsif Layar HP (Karakter sebagai Latar Belakang Sinematik Ambient) */
+@media (max-width: 960px) {
+  .character-stage {
+    position: fixed !important;
+    inset: 0 !important;
+    width: 100vw !important;
+    height: 100vh !important;
+    height: 100dvh !important;
+    z-index: 1 !important;
+    pointer-events: none !important;
+    transform: none !important;
+    display: flex !important;
+    align-items: flex-end !important;
+    justify-content: center !important;
+    opacity: 0.22 !important;
+    filter: blur(2.5px) !important;
+    transition: opacity 0.5s ease, filter 0.5s ease;
+  }
+
+  body[data-scene="scene-prolog"] .character-stage {
+    opacity: 0.28 !important;
+    filter: blur(1.5px) !important;
+    transform: scale(0.95) translate3d(0, 4%, 0) !important;
+  }
+
+  body[data-scene="scene-whoami"] .character-stage {
+    opacity: 0.20 !important;
+    filter: blur(3px) !important;
+    transform: scale(1.05) translate3d(0, 0, 0) !important;
+  }
+
+  body[data-scene="scene-skills"] .character-stage {
+    opacity: 0.16 !important;
+    filter: blur(4px) !important;
+    transform: scale(1.1) translate3d(0, 0, 0) !important;
+  }
+
+  body[data-scene="scene-projects"] .character-stage {
+    opacity: 0.18 !important;
+    filter: blur(3px) !important;
+    transform: scale(0.95) translate3d(0, 2%, 0) !important;
+  }
+
+  body[data-scene="scene-timeline"] .character-stage {
+    opacity: 0.18 !important;
+    filter: blur(4px) !important;
+    transform: scale(1) translate3d(0, 0, 0) !important;
+  }
+
+  body[data-scene="scene-contact"] .character-stage {
+    opacity: 0.20 !important;
+    filter: blur(3px) !important;
+    transform: scale(1) translate3d(0, 0, 0) !important;
+  }
+
+  body[data-scene="scene-epilog"] .character-stage {
+    opacity: 0.20 !important;
+    filter: blur(3px) !important;
+    transform: scale(0.95) translate3d(0, 2%, 0) !important;
+  }
+
+  .interactive-desk-cup {
+    display: none !important;
+  }
+
+  .prolog-content,
+  .whoami-content,
+  .skills-container,
+  .contact-container {
+    width: 100% !important;
+    max-width: 100% !important;
+    position: relative !important;
+    z-index: 10 !important;
+  }
+
+  .skills-container,
+  .contact-container {
+    grid-template-columns: 1fr !important;
+    gap: 16px;
+  }
+
+  .modal-grid-sections,
+  .compact-grid-two,
+  .compact-projects-grid {
+    grid-template-columns: 1fr !important;
+  }
+}
+
+/* Optimasi Mendalam untuk Smartphone (< 768px) */
+@media (max-width: 768px) {
+  /* Prolog Hero Mobile */
+  .hero-title {
+    font-size: clamp(1.8rem, 7vw, 2.3rem) !important;
+    line-height: 1.15;
+    text-align: center;
+  }
+  .hero-subtitle {
+    font-size: 0.68rem !important;
+    letter-spacing: 0.08em;
+    text-align: center;
+    margin: 6px auto 14px;
+  }
+  .dialog-card {
+    padding: 16px 14px !important;
+  }
+  .dialog-text {
+    font-size: 0.88rem !important;
+    line-height: 1.5;
+  }
+  .hero-actions {
+    display: grid !important;
+    grid-template-columns: 1fr 1fr;
+    gap: 10px;
+    width: 100%;
+  }
+  .hero-actions .btn-hero {
+    padding: 10px 12px !important;
+    font-size: 0.78rem !important;
+    text-align: center;
+  }
+  .hero-reactions {
+    gap: 6px !important;
+    justify-content: center;
+  }
+  .emoji-btn {
+    padding: 4px 8px !important;
+    font-size: 0.74rem !important;
+  }
+
+  /* Whoami Mobile */
+  .vn-card {
+    padding: 18px 16px !important;
+  }
+  .vn-dialogue-text {
+    font-size: 0.94rem !important;
+    line-height: 1.55;
+  }
+  .vn-choices {
+    flex-direction: column;
+    gap: 8px;
+  }
+
+  /* Skills Mobile */
+  .skills-container {
+    gap: 16px;
+  }
+  .skill-item-card {
+    padding: 12px 14px;
+  }
+
+  /* Projects Mobile */
+  .projects-header {
+    text-align: center;
+  }
+  .filter-pills-bar {
+    justify-content: center;
+    gap: 6px;
+  }
+  .filter-pill {
+    padding: 5px 10px;
+    font-size: 0.72rem;
+  }
+  .mission-card-3d {
+    height: 440px;
+  }
+
+  /* Timeline Mobile */
+  .metro-line-wrapper {
+    padding: 14px 10px;
+  }
+  .station-card {
+    padding: 14px 12px;
+  }
+
+  /* Contact & Ofuda Mobile */
+  .contact-letter-card {
+    padding: 18px 14px;
+  }
+  .buku-tamu-section {
+    padding: 16px 12px;
+  }
+  .hanko-selector-bar {
+    display: flex;
+    gap: 6px;
+    overflow-x: auto;
+    white-space: nowrap;
+    -webkit-overflow-scrolling: touch;
+    padding-bottom: 4px;
+  }
+  .ofuda-inputs-row {
+    flex-wrap: wrap;
+    gap: 8px;
+  }
+  .ofuda-input-name {
+    width: 100% !important;
+  }
+  .ofuda-input-msg {
+    width: 100% !important;
+  }
+  .ofuda-btn-submit {
+    width: 100% !important;
+    height: 42px;
+  }
+
+  /* Epilog & Boarding Pass Mobile */
+  .epilog-box {
+    padding: 20px 14px !important;
+  }
+  .vibe-pass-card {
+    flex-direction: column !important;
+  }
+  .pass-stub-side {
+    width: 100% !important;
+    border-left: none !important;
+    border-top: 1px dashed var(--border-subtle) !important;
+    flex-direction: row !important;
+    justify-content: space-between !important;
+    align-items: center !important;
+    padding: 10px 14px !important;
+  }
+  .pass-barcode-lines {
+    transform: rotate(90deg);
+  }
+  .epilog-actions {
+    flex-direction: column;
+    gap: 8px;
+    width: 100%;
+  }
+  .epilog-actions button {
+    width: 100%;
+  }
+
+  /* Toast Pencapaian & Suasana Mobile */
+  .achievement-toast {
+    top: auto !important;
+    bottom: 74px !important;
+    left: 14px !important;
+    right: 14px !important;
+    max-width: calc(100vw - 28px) !important;
+    transform: translateY(140%) !important;
+  }
+  .achievement-toast.show {
+    transform: translateY(0) !important;
+  }
+}
+
+
+/* ==========================================================================
+   WebGL 2D Navier-Stokes Fluid Reveal Canvas & HUD Kalibrasi (Tombol K)
+   ========================================================================== */
+.character-fluid-canvas {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
+  object-position: bottom center;
+  z-index: 3;
+  pointer-events: auto;
+  touch-action: none;
+  cursor: inherit;
+}
+
+.character-eyes-layer.fade-for-reveal {
+  opacity: 0 !important;
+  transition: opacity 0.25s ease;
+}
+
+.calibration-hud {
+  position: fixed;
+  top: 24px;
+  right: 24px;
+  width: 350px;
+  max-height: calc(100vh - 48px);
+  overflow-y: auto;
+  background: rgba(20, 20, 24, 0.95);
+  color: #f5f5f5;
+  border: 1px solid rgba(255, 255, 255, 0.16);
+  border-radius: 16px;
+  padding: 18px 20px;
+  z-index: 99999;
+  box-shadow: 0 24px 60px rgba(0, 0, 0, 0.5);
+  backdrop-filter: blur(12px);
+  font-family: var(--font-mono, monospace);
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+  transition: opacity 0.22s ease, transform 0.22s ease;
+}
+
+.calibration-hud.hidden {
+  opacity: 0;
+  transform: translateY(-8px) scale(0.97);
+  pointer-events: none;
+}
+
+.hud-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.12);
+  padding-bottom: 10px;
+}
+
+.hud-header h3 {
+  font-size: 0.88rem;
+  color: var(--accent-green, #22c55e);
+  font-weight: 600;
+}
+
+.hud-close-btn {
+  background: none;
+  border: none;
+  color: #aaa;
+  font-size: 1.25rem;
+  cursor: pointer;
+  line-height: 1;
+}
+
+.hud-close-btn:hover {
+  color: #fff;
+}
+
+.hud-section {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.hud-section h4 {
+  font-size: 0.72rem;
+  color: #9ca3af;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+}
+
+.hud-note {
+  font-size: 0.68rem;
+  color: #9ca3af;
+  line-height: 1.4;
+}
+
+.hud-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  font-size: 0.7rem;
+  background: rgba(255, 255, 255, 0.05);
+  padding: 6px 8px;
+  border-radius: 6px;
+}
+
+.hud-row code {
+  color: #86efac;
+  font-size: 0.68rem;
+}
+
+.hud-slider-group {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.hud-slider-group label {
+  font-size: 0.72rem;
+  color: #d1d5db;
+  display: flex;
+  justify-content: space-between;
+}
+
+.hud-slider-group input[type="range"] {
+  width: 100%;
+  accent-color: var(--accent-green, #22c55e);
+  cursor: pointer;
+}
+
+.hud-copy-btn {
+  background: var(--accent-green, #22c55e);
+  color: #071e0e;
+  border: none;
+  padding: 10px 14px;
+  border-radius: 8px;
+  font-family: var(--font-mono, monospace);
+  font-size: 0.74rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: background 0.2s ease;
+  margin-top: 4px;
+}
+
+.hud-copy-btn:hover {
+  background: #16a34a;
+  color: #ffffff;
+}
+
+.eye-calibration-overlay {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  z-index: 50;
+  display: none;
+}
+
+.eye-calibration-overlay.active {
+  display: block;
+}
+
+.eye-target-box {
+  position: absolute;
+  border: 2px dashed var(--accent-green, #22c55e);
+  background: rgba(34, 197, 94, 0.22);
+  border-radius: 8px;
+  cursor: move;
+  transform: translate(-50%, -50%);
+  pointer-events: auto;
+  user-select: none;
+  touch-action: none;
+}
+
+.eye-target-box::before {
+  content: attr(data-label);
+  position: absolute;
+  bottom: calc(100% + 4px);
+  left: 50%;
+  transform: translateX(-50%);
+  background: #1c1c1c;
+  color: var(--accent-green, #22c55e);
+  font-family: var(--font-mono, monospace);
+  font-size: 0.6rem;
+  padding: 2px 6px;
+  border-radius: 4px;
+  white-space: nowrap;
+  pointer-events: none;
+}
+
+.eye-resize-handle {
+  position: absolute;
+  right: -6px;
+  bottom: -6px;
+  width: 12px;
+  height: 12px;
+  background: var(--accent-green, #22c55e);
+  border: 2px solid #1c1c1c;
+  border-radius: 50%;
+  cursor: nwse-resize;
+}
+
+
+/* Chapter Badge Eyebrow Pill */
+.chapter-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  font-family: var(--font-mono);
+  font-size: 0.72rem;
+  font-weight: 600;
+  letter-spacing: 1.2px;
+  color: var(--accent-green);
+  text-transform: uppercase;
+  background: rgba(34, 197, 94, 0.08);
+  border: 1px solid rgba(34, 197, 94, 0.22);
+  padding: 5px 14px;
+  border-radius: var(--radius-full);
+  width: fit-content;
+  margin-bottom: 6px;
+}
+
+.chapter-badge .chapter-dot {
+  width: 6px;
+  height: 6px;
+  background: var(--accent-green);
+  border-radius: 50%;
+  box-shadow: 0 0 8px var(--accent-green);
+  animation: pulse-live 2s infinite ease-in-out;
+}
+
+
+.prolog-scene {
+  justify-content: flex-start;
+  align-items: center;
+}
+
+.prolog-content {
+  width: 50%;
+  max-width: 620px;
+  z-index: 15;
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+  position: relative;
+}
+
+.hero-pencil-heading {
+  font-family: var(--font-display, "Outfit", sans-serif);
+  font-size: clamp(2.6rem, 4.2vw, 3.8rem);
+  font-weight: 700;
+  color: var(--text-primary);
+  line-height: 1.15;
+  letter-spacing: -1px;
+}
+
+.hero-pencil-heading .highlight-hand {
+  font-family: var(--font-pencil, "Caveat", cursive);
+  font-weight: 500;
+  color: var(--accent-green);
+  font-size: 1.15em;
+  margin-right: 4px;
+}
+
+.hero-pencil-heading .hero-aka {
+  font-size: 0.65em;
+  font-weight: 400;
+  color: var(--text-muted);
+}
+
+.hero-role-subtitle {
+  font-family: var(--font-body, sans-serif);
+  font-size: 1.05rem;
+  color: var(--text-muted);
+  line-height: 1.5;
+  margin-top: -8px;
+}
+
+/* Bubble Dialog Visual Novel */
+.vn-dialog-bubble {
+  background: rgba(255, 255, 255, 0.85);
+  border: 1px solid rgba(0, 0, 0, 0.08);
+  border-left: 4px solid var(--accent-green);
+  border-radius: var(--radius-md);
+  padding: 22px 24px;
+  backdrop-filter: blur(16px);
+  -webkit-backdrop-filter: blur(16px);
+  box-shadow: 0 14px 38px rgba(0, 0, 0, 0.05);
+  transition: opacity 0.5s ease, transform 0.5s ease;
+}
+
+body[data-theme="night"] .vn-dialog-bubble {
+  background: rgba(22, 25, 32, 0.88);
+  border-color: rgba(255, 255, 255, 0.1);
+  border-left-color: var(--accent-green);
+  box-shadow: 0 14px 40px rgba(0, 0, 0, 0.45);
+}
+
+.vn-bubble-head {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 10px;
+}
+
+.vn-speaker-tag {
+  font-family: var(--font-mono);
+  font-size: 0.74rem;
+  font-weight: 600;
+  color: var(--accent-green);
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+.vn-expr-pill {
+  font-family: var(--font-mono);
+  font-size: 0.7rem;
+  color: var(--text-muted);
+  background: rgba(0, 0, 0, 0.04);
+  padding: 3px 10px;
+  border-radius: var(--radius-full);
+}
+
+body[data-theme="night"] .vn-expr-pill {
+  background: rgba(255, 255, 255, 0.08);
+}
+
+.vn-dialog-text {
+  font-family: var(--font-serif);
+  font-size: 1.02rem;
+  line-height: 1.65;
+  color: var(--text-primary);
+  min-height: 2.8em;
+}
+
+.vn-guide-hint {
+  margin-top: 10px;
+  padding-top: 10px;
+  border-top: 1px dashed var(--border-subtle);
+  font-family: var(--font-mono);
+  font-size: 0.72rem;
+  color: var(--accent-green);
+  opacity: 0.85;
+}
+
+.hero-actions {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  flex-wrap: wrap;
+}
+
+.btn-hero {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  padding: 12px 24px;
+  border-radius: var(--radius-full);
+  font-family: var(--font-body, sans-serif);
+  font-size: 0.88rem;
+  font-weight: 600;
+  text-decoration: none;
+  cursor: pointer;
+  transition: all var(--duration-normal) var(--ease-spring);
+}
+
+.btn-hero.primary {
+  background: var(--text-primary);
+  color: var(--bg-primary);
+  box-shadow: 0 6px 20px rgba(0, 0, 0, 0.12);
+}
+
+.btn-hero.primary:hover {
+  background: var(--accent-green);
+  color: #fff;
+  transform: translateY(-2px);
+  box-shadow: 0 10px 24px rgba(34, 197, 94, 0.28);
+}
+
+.btn-hero.secondary {
+  background: rgba(0, 0, 0, 0.04);
+  color: var(--text-primary);
+  border: 1px solid rgba(0, 0, 0, 0.1);
+}
+
+body[data-theme="night"] .btn-hero.secondary {
+  background: rgba(255, 255, 255, 0.06);
+  border-color: rgba(255, 255, 255, 0.14);
+}
+
+.btn-hero.secondary:hover {
+  border-color: var(--accent-green);
+  color: var(--accent-green);
+  transform: translateY(-2px);
+}
+
+/* Emoji Widget */
+.emoji-widget {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  background: rgba(0, 0, 0, 0.02);
+  border: 1px solid var(--border-subtle);
+  padding: 6px 14px;
+  border-radius: var(--radius-full);
+  width: fit-content;
+}
+
+body[data-theme="night"] .emoji-widget {
+  background: rgba(255, 255, 255, 0.03);
+}
+
+.emoji-widget-label {
+  font-family: var(--font-mono);
+  font-size: 0.72rem;
+  color: var(--text-muted);
+}
+
+.emoji-bar {
+  display: flex;
+  gap: 6px;
+}
+
+.emoji-btn {
+  background: none;
+  border: 1px solid transparent;
+  padding: 3px 8px;
+  border-radius: var(--radius-full);
+  font-size: 0.8rem;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  color: var(--text-primary);
+}
+
+.emoji-btn:hover {
+  background: rgba(34, 197, 94, 0.1);
+  border-color: rgba(34, 197, 94, 0.2);
+  transform: scale(1.08);
+}
+
+.emoji-count {
+  font-family: var(--font-mono);
+  font-size: 0.7rem;
+  color: var(--text-muted);
+}
+
+
+/* ==========================================================================
+   BAB 3: SHOWCASE MISI D:\VIBE CODING (ELEVAN & MEGAH)
+   ========================================================================== */
+.projects-scene {
+  padding: 110px 5vw 100px;
+  align-items: center;
+}
+
+.projects-container {
+  width: 100%;
+  max-width: 1360px;
+  margin: 0 auto;
+  z-index: 15;
+  display: flex;
+  flex-direction: column;
+  gap: 28px;
+}
+
+.projects-header-wrapper {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-end;
+  gap: 28px;
+  flex-wrap: wrap;
+}
+
+.section-head {
+  max-width: 720px;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.section-head h2 {
+  font-family: var(--font-display, "Outfit", sans-serif);
+  font-size: clamp(2rem, 3.4vw, 2.8rem);
+  font-weight: 700;
+  letter-spacing: -0.5px;
+  color: var(--text-primary);
+  line-height: 1.2;
+}
+
+.section-head p {
+  color: var(--text-muted);
+  font-size: 1rem;
+  line-height: 1.55;
+}
+
+/* Spectator Companion Card (Sticky Guide Banner di Bab 3) */
+.spectator-card {
+  position: sticky;
+  top: 76px;
+  z-index: 85;
+  background: rgba(255, 255, 255, 0.92);
+  border: 1px solid rgba(34, 197, 94, 0.45);
+  border-radius: 14px;
+  padding: 10px 18px;
+  max-width: 1098px;
+  width: 100%;
+  margin: 0 auto;
+  backdrop-filter: blur(16px);
+  -webkit-backdrop-filter: blur(16px);
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.08);
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+  transition: all 0.25s ease;
+}
+
+body[data-theme="night"] .spectator-card {
+  background: rgba(18, 22, 28, 0.92);
+  border-color: rgba(34, 197, 94, 0.5);
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.6);
+}
+
+.spectator-card-top {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  flex-shrink: 0;
+}
+
+.spectator-avatar {
+  width: 34px;
+  height: 34px;
+  border-radius: 50%;
+  border: 1.5px solid var(--accent-green);
+  object-fit: cover;
+  box-shadow: 0 0 12px rgba(34, 197, 94, 0.35);
+}
+
+.spectator-meta {
+  display: flex;
+  flex-direction: column;
+  gap: 1px;
+}
+
+.spectator-name {
+  font-family: var(--font-mono);
+  font-size: 0.76rem;
+  font-weight: 700;
+  color: var(--accent-green);
+  text-transform: uppercase;
+  letter-spacing: 0.6px;
+}
+
+.spectator-status-pill {
+  font-family: var(--font-mono);
+  font-size: 0.64rem;
+  color: var(--text-muted);
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+}
+
+.spectator-comment-text {
+  font-family: var(--font-serif);
+  font-size: 0.88rem;
+  line-height: 1.45;
+  color: var(--text-primary);
+  margin: 0;
+  flex-grow: 1;
+  text-align: left;
+}
+
+@media (max-width: 820px) {
+  .spectator-card {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 8px;
+    padding: 10px 14px;
+  }
+}
+
+/* Filter Bar */
+.projects-filter-bar {
+  display: flex;
+  gap: 10px;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: center;
+  max-width: 1140px;
+  margin: 0 auto;
+  width: 100%;
+}
+
+.proj-filter-btn {
+  background: rgba(0, 0, 0, 0.04);
+  border: 1px solid var(--border-subtle);
+  color: var(--text-muted);
+  padding: 7px 16px;
+  border-radius: var(--radius-full);
+  font-family: var(--font-mono);
+  font-size: 0.78rem;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+body[data-theme="night"] .proj-filter-btn {
+  background: rgba(255, 255, 255, 0.05);
+  border-color: rgba(255, 255, 255, 0.1);
+}
+
+.proj-filter-btn:hover {
+  color: var(--text-primary);
+  border-color: var(--accent-green);
+}
+
+.proj-filter-btn.active {
+  background: var(--text-primary);
+  color: var(--bg-primary);
+  border-color: var(--text-primary);
+}
+
+body[data-theme="night"] .proj-filter-btn.active {
+  background: var(--accent-green);
+  color: #0b131e;
+  border-color: var(--accent-green);
+}
+
+/* Grid 9 Proyek & Studio Creative (Tepat 3 Kartu Per Baris & Terpusat di Tengah) */
+.projects-cards-grid {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 350px));
+  gap: 24px;
+  justify-content: center;
+  max-width: 1140px;
+  width: 100%;
+  margin: 8px auto 0;
+  perspective: 1400px;
+}
+
+@media (max-width: 1140px) {
+  .projects-cards-grid {
+    grid-template-columns: repeat(2, minmax(0, 360px));
+    gap: 20px;
+    justify-content: center;
+  }
+}
+
+@media (max-width: 740px) {
+  .projects-cards-grid {
+    grid-template-columns: minmax(0, 420px);
+    gap: 18px;
+    justify-content: center;
+  }
+}
+
+/* ==========================================================================
+   3D Flip Card System (Animasi Berputar 180° Halus & Ergonomis)
+   ========================================================================== */
+.mission-card-3d {
+  position: relative;
+  height: 420px;
+  perspective: 1200px;
+  background: transparent;
+  border: none;
+  border-radius: 18px;
+  user-select: none;
+  cursor: pointer;
+}
+
+.mission-card-3d .card-flip-inner {
+  position: relative;
+  width: 100%;
+  height: 100%;
+  transform-style: preserve-3d;
+  transition: transform 0.65s cubic-bezier(0.2, 0.85, 0.25, 1.15);
+  border-radius: 18px;
+}
+
+.mission-card-3d.is-flipped .card-flip-inner {
+  transform: rotateY(180deg);
+}
+
+.card-face {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  -webkit-backface-visibility: hidden;
+  backface-visibility: hidden;
+  border-radius: 18px;
+  background: var(--bg-surface);
+  border: 1px solid rgba(0, 0, 0, 0.08);
+  box-shadow: 0 4px 18px rgba(0, 0, 0, 0.035);
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+  transition: border-color 0.25s, box-shadow 0.25s;
+}
+
+body[data-theme="night"] .card-face {
+  background: rgba(22, 26, 34, 0.88);
+  border-color: rgba(255, 255, 255, 0.08);
+  box-shadow: 0 6px 22px rgba(0, 0, 0, 0.4);
+}
+
+.mission-card-3d:hover .card-face {
+  border-color: var(--card-accent, var(--accent-green));
+  box-shadow: 0 12px 30px rgba(0, 0, 0, 0.08);
+}
+
+body[data-theme="night"] .mission-card-3d:hover .card-face {
+  box-shadow: 0 14px 34px rgba(0, 0, 0, 0.65), 0 0 20px rgba(34, 197, 94, 0.15);
+}
+
+/* ---------------- FRONT FACE ---------------- */
+.card-front {
+  z-index: 2;
+  transform: rotateY(0deg);
+  display: flex;
+  flex-direction: column;
+}
+
+.mission-thumb-wrap {
+  width: 100%;
+  height: 155px;
+  position: relative;
+  overflow: hidden;
+  background: #0f172a;
+  flex-shrink: 0;
+}
+
+.mission-thumb-img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  transition: transform 0.6s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.mission-thumb-video {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  display: block;
+  position: absolute;
+  inset: 0;
+  z-index: 1;
+  pointer-events: none;
+  transition: transform 0.6s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.mission-card-3d:hover .mission-thumb-img,
+.mission-card-3d:hover .mission-thumb-video {
+  transform: scale(1.06);
+}
+
+.video-indicator-badge {
+  position: absolute;
+  top: 10px;
+  right: 48px;
+  background: rgba(15, 23, 42, 0.88);
+  backdrop-filter: blur(8px);
+  color: var(--accent-green);
+  font-family: var(--font-mono);
+  font-size: 0.62rem;
+  font-weight: 700;
+  padding: 3px 7px;
+  border-radius: 5px;
+  border: 1px solid rgba(34, 197, 94, 0.4);
+  z-index: 2;
+  display: inline-flex;
+  align-items: center;
+  gap: 3px;
+  letter-spacing: 0.5px;
+  animation: pulse-live-video 2.5s infinite ease-in-out;
+}
+
+@keyframes pulse-live-video {
+  0%, 100% { opacity: 0.95; }
+  50% { opacity: 0.6; }
+}
+
+.mission-badge-code {
+  position: absolute;
+  top: 10px;
+  left: 10px;
+  background: rgba(15, 23, 42, 0.88);
+  backdrop-filter: blur(8px);
+  color: var(--accent-green);
+  font-family: var(--font-mono);
+  font-size: 0.68rem;
+  font-weight: 700;
+  padding: 3px 8px;
+  border-radius: 5px;
+  border: 1px solid rgba(34, 197, 94, 0.3);
+  z-index: 2;
+}
+
+.mission-badge-cat {
+  position: absolute;
+  bottom: 10px;
+  left: 10px;
+  background: rgba(15, 23, 42, 0.88);
+  backdrop-filter: blur(8px);
+  color: #fff;
+  font-family: var(--font-mono);
+  font-size: 0.64rem;
+  font-weight: 500;
+  padding: 3px 8px;
+  border-radius: 5px;
+  border: 1px solid rgba(255, 255, 255, 0.15);
+  z-index: 2;
+  max-width: 170px;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+/* Tombol Ikon Balik Kartu di Pojok Kanan Thumbnail */
+.btn-flip-trigger-corner {
+  position: absolute;
+  top: 10px;
+  right: 10px;
+  width: 30px;
+  height: 30px;
+  border-radius: 50%;
+  background: rgba(15, 23, 42, 0.88);
+  backdrop-filter: blur(8px);
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  color: #fff;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 0.95rem;
+  cursor: pointer;
+  z-index: 3;
+  transition: all 0.25s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.btn-flip-trigger-corner:hover {
+  background: var(--accent-green);
+  color: #0b131e;
+  border-color: var(--accent-green);
+  transform: rotate(180deg) scale(1.12);
+}
+
+.card-front .mission-body {
+  padding: 12px 14px 8px;
+  display: flex;
+  flex-direction: column;
+  gap: 5px;
+  flex: 1;
+}
+
+.card-front .mission-body h3 {
+  font-family: var(--font-display, "Outfit", sans-serif);
+  font-size: 1.02rem;
+  font-weight: 700;
+  color: var(--text-primary);
+  line-height: 1.25;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  margin: 0;
+}
+
+.card-front .mission-body p {
+  font-size: 0.77rem;
+  line-height: 1.4;
+  color: var(--text-muted);
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+  margin: 0;
+}
+
+.card-front .mission-tags {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 5px;
+  margin-top: auto;
+  padding-top: 4px;
+}
+
+.tag-pill {
+  font-family: var(--font-mono);
+  font-size: 0.63rem;
+  background: rgba(0, 0, 0, 0.04);
+  color: var(--text-muted);
+  padding: 2px 7px;
+  border-radius: 4px;
+}
+
+body[data-theme="night"] .tag-pill {
+  background: rgba(255, 255, 255, 0.06);
+  color: #94a3b8;
+}
+
+.card-front .mission-actions-bar {
+  padding: 8px 12px 10px;
+  border-top: 1px solid var(--border-subtle);
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 6px;
+  background: var(--bg-surface);
+}
+
+.btn-card-demo {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  background: var(--text-primary);
+  color: var(--bg-primary);
+  padding: 6px 11px;
+  border-radius: var(--radius-full);
+  font-family: var(--font-mono);
+  font-size: 0.71rem;
+  font-weight: 600;
+  text-decoration: none;
+  cursor: pointer;
+  border: none;
+  transition: all 0.2s ease;
+  white-space: nowrap;
+}
+
+.btn-card-demo:hover {
+  background: var(--accent-green);
+  color: #0b131e;
+  transform: translateY(-1px);
+}
+
+.btn-card-flip-btn {
+  background: rgba(34, 197, 94, 0.1);
+  color: var(--accent-green);
+  border: 1px solid rgba(34, 197, 94, 0.3);
+  font-family: var(--font-mono);
+  font-size: 0.69rem;
+  font-weight: 600;
+  padding: 5px 9px;
+  border-radius: var(--radius-full);
+  cursor: pointer;
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  transition: all 0.2s ease;
+  white-space: nowrap;
+}
+
+.btn-card-flip-btn:hover {
+  background: var(--accent-green);
+  color: #0b131e;
+  transform: translateY(-1px);
+}
+
+.btn-card-detail {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  background: transparent;
+  color: var(--text-muted);
+  padding: 5px 9px;
+  border-radius: var(--radius-full);
+  font-family: var(--font-mono);
+  font-size: 0.69rem;
+  font-weight: 500;
+  border: 1px solid var(--border-subtle);
+  cursor: pointer;
+  transition: all 0.2s ease;
+  white-space: nowrap;
+}
+
+.btn-card-detail:hover {
+  color: var(--text-primary);
+  border-color: var(--text-primary);
+}
+
+/* ---------------- BACK FACE (3D LEMBAR CATATAN TEKNIS) ---------------- */
+.card-back {
+  transform: rotateY(180deg);
+  z-index: 1;
+  background:
+    radial-gradient(circle at 90% 10%, rgba(34, 197, 94, 0.09), transparent 60%),
+    linear-gradient(155deg, var(--bg-surface) 0%, var(--bg-secondary) 100%);
+  border: 1.5px solid rgba(34, 197, 94, 0.4);
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+}
+
+body[data-theme="night"] .card-back {
+  background:
+    radial-gradient(circle at 90% 10%, rgba(34, 197, 94, 0.12), transparent 60%),
+    linear-gradient(155deg, #131720 0%, #0e1219 100%);
+  border-color: rgba(34, 197, 94, 0.45);
+}
+
+.card-back-header {
+  padding: 10px 14px 8px;
+  border-bottom: 1px dashed var(--border-subtle);
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  background: rgba(34, 197, 94, 0.05);
+}
+
+.card-back-header-left {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  overflow: hidden;
+}
+
+.card-back-badge {
+  font-family: var(--font-mono);
+  font-size: 0.64rem;
+  font-weight: 700;
+  color: var(--accent-green);
+  letter-spacing: 0.5px;
+  text-transform: uppercase;
+}
+
+.card-back-title {
+  font-family: var(--font-display, "Outfit", sans-serif);
+  font-size: 0.92rem;
+  font-weight: 700;
+  color: var(--text-primary);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  margin: 0;
+}
+
+.btn-flip-back-circle {
+  width: 28px;
+  height: 28px;
+  border-radius: 50%;
+  background: rgba(0, 0, 0, 0.06);
+  border: 1px solid var(--border-subtle);
+  color: var(--text-primary);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 0.85rem;
+  cursor: pointer;
+  flex-shrink: 0;
+  transition: all 0.2s ease;
+}
+
+body[data-theme="night"] .btn-flip-back-circle {
+  background: rgba(255, 255, 255, 0.08);
+}
+
+.btn-flip-back-circle:hover {
+  background: var(--accent-green);
+  color: #0b131e;
+  border-color: var(--accent-green);
+  transform: rotate(-180deg);
+}
+
+.card-back-content {
+  padding: 10px 14px;
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  gap: 7px;
+  overflow-y: auto;
+  font-size: 0.74rem;
+  line-height: 1.42;
+}
+
+.card-back-content::-webkit-scrollbar {
+  width: 4px;
+}
+.card-back-content::-webkit-scrollbar-thumb {
+  background: rgba(34, 197, 94, 0.3);
+  border-radius: 4px;
+}
+
+.card-back-field {
+  display: flex;
+  flex-direction: column;
+  gap: 1px;
+}
+
+.card-back-field-label {
+  font-family: var(--font-mono);
+  font-size: 0.64rem;
+  font-weight: 700;
+  color: var(--accent-green);
+  text-transform: uppercase;
+  letter-spacing: 0.4px;
+}
+
+.card-back-field-val {
+  color: var(--text-primary);
+  font-size: 0.74rem;
+}
+
+.card-back-hyouka-quote {
+  margin-top: auto;
+  padding: 7px 9px;
+  background: rgba(34, 197, 94, 0.08);
+  border-left: 2.5px solid var(--accent-green);
+  border-radius: 0 6px 6px 0;
+  font-style: italic;
+  font-size: 0.71rem;
+  color: var(--text-muted);
+  display: flex;
+  align-items: flex-start;
+  gap: 5px;
+}
+
+.card-back-actions {
+  padding: 8px 12px 10px;
+  border-top: 1px solid var(--border-subtle);
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 6px;
+  background: var(--bg-surface);
+}
+
+/* ==========================================================================
+   Dual Persona Switcher (Developer & Data ⇄ Studio Desain & Video)
+   ========================================================================== */
+.nav-persona-pill {
+  display: inline-flex;
+  align-items: center;
+  background: rgba(0, 0, 0, 0.04);
+  padding: 3px;
+  border-radius: var(--radius-full);
+  border: 1px solid var(--border-subtle);
+  gap: 2px;
+}
+
+body[data-theme="night"] .nav-persona-pill {
+  background: rgba(255, 255, 255, 0.05);
+  border-color: rgba(255, 255, 255, 0.1);
+}
+
+.btn-persona {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  background: transparent;
+  border: none;
+  border-radius: var(--radius-full);
+  padding: 5px 12px;
+  font-family: var(--font-body, sans-serif);
+  font-size: 0.78rem;
+  font-weight: 600;
+  color: var(--text-muted);
+  cursor: pointer;
+  transition: all 0.25s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.btn-persona:hover {
+  color: var(--text-primary);
+}
+
+.btn-persona.active {
+  background: var(--bg-surface);
+  color: var(--text-primary);
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+}
+
+body[data-theme="night"] .btn-persona.active {
+  background: rgba(34, 197, 94, 0.18);
+  color: #4ade80;
+  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.3);
+}
+
+/* In-Section Persona Switch Bar */
+.section-persona-switch {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 12px;
+  margin-top: 14px;
+}
+
+.persona-switch-label {
+  font-family: var(--font-mono);
+  font-size: 0.76rem;
+  color: var(--text-muted);
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+}
+
+.persona-switch-buttons {
+  display: inline-flex;
+  align-items: center;
+  background: var(--bg-subtle, rgba(0,0,0,0.03));
+  border: 1px solid var(--border-subtle);
+  border-radius: var(--radius-full);
+  padding: 4px;
+  gap: 4px;
+}
+
+body[data-theme="night"] .persona-switch-buttons {
+  background: rgba(255, 255, 255, 0.04);
+}
+
+.persona-switch-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  border: none;
+  background: transparent;
+  color: var(--text-muted);
+  font-family: var(--font-body, sans-serif);
+  font-size: 0.84rem;
+  font-weight: 600;
+  padding: 7px 16px;
+  border-radius: var(--radius-full);
+  cursor: pointer;
+  transition: all 0.25s ease;
+}
+
+.persona-switch-btn:hover {
+  color: var(--text-primary);
+}
+
+.persona-switch-btn.active {
+  background: var(--accent-green);
+  color: #fff;
+  box-shadow: 0 4px 14px rgba(34, 197, 94, 0.32);
+}
+
+/* Creative Cards (Video & Graphic Design) 3D Adaptations */
+.creative-card-3d {
+  position: relative;
+  height: 420px;
+  perspective: 1200px;
+}
+
+.creative-thumb-wrap {
+  position: relative;
+  width: 100%;
+  height: 155px;
+  overflow: hidden;
+  background: #090d16;
+  flex-shrink: 0;
+}
+
+.creative-thumb-wrap.is-vertical {
+  height: 155px;
+}
+
+.creative-thumb-img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  transition: transform 0.6s cubic-bezier(0.16, 1, 0.3, 1), filter 0.4s ease;
+}
+
+.mission-card-3d:hover .creative-thumb-img {
+  transform: scale(1.06);
+}
+
+.creative-play-overlay {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: rgba(0, 0, 0, 0.28);
+  transition: background 0.3s ease;
+}
+
+.mission-card-3d:hover .creative-play-overlay {
+  background: rgba(0, 0, 0, 0.42);
+}
+
+.play-circle-btn {
+  width: 44px;
+  height: 44px;
+  border-radius: 50%;
+  background: rgba(255, 255, 255, 0.95);
+  color: #0f172a;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 1rem;
+  padding-left: 2px;
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.3);
+  transition: transform 0.3s cubic-bezier(0.34, 1.56, 0.64, 1), background 0.2s ease, color 0.2s ease;
+}
+
+.mission-card-3d:hover .play-circle-btn {
+  transform: scale(1.12);
+  background: var(--card-accent, var(--accent-green));
+  color: #fff;
+  box-shadow: 0 10px 28px rgba(34, 197, 94, 0.45);
+}
+
+.creative-duration-pill {
+  position: absolute;
+  bottom: 8px;
+  right: 10px;
+  background: rgba(0, 0, 0, 0.82);
+  backdrop-filter: blur(6px);
+  color: #f8fafc;
+  font-family: var(--font-mono);
+  font-size: 0.65rem;
+  font-weight: 600;
+  padding: 2px 7px;
+  border-radius: 5px;
+  border: 1px solid rgba(255, 255, 255, 0.15);
+  z-index: 2;
+}
+
+.creative-palette-bar {
+  display: flex;
+  align-items: center;
+  gap: 7px;
+  margin-top: 6px;
+  padding: 6px 10px;
+  background: rgba(0, 0, 0, 0.03);
+  border-radius: 8px;
+  border: 1px solid var(--border-subtle);
+  width: fit-content;
+}
+
+body[data-theme="night"] .creative-palette-bar {
+  background: rgba(255, 255, 255, 0.04);
+}
+
+.palette-label {
+  font-family: var(--font-mono);
+  font-size: 0.66rem;
+  color: var(--text-muted);
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+}
+
+.palette-dots {
+  display: flex;
+  align-items: center;
+  gap: 5px;
+}
+
+.swatch-dot {
+  width: 14px;
+  height: 14px;
+  border-radius: 50%;
+  border: 1.5px solid rgba(255, 255, 255, 0.6);
+  box-shadow: 0 1px 4px rgba(0, 0, 0, 0.15);
+  transition: transform 0.2s ease;
+  cursor: pointer;
+}
+
+.swatch-dot:hover {
+  transform: scale(1.35);
+}
+
+/* Studio Creative Modal */
+.creative-modal-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 4px;
+}
+
+.creative-format-badge {
+  font-family: var(--font-mono);
+  font-size: 0.74rem;
+  color: var(--text-muted);
+  padding: 3px 9px;
+  border-radius: 6px;
+  background: rgba(0, 0, 0, 0.04);
+  border: 1px solid var(--border-subtle);
+}
+
+body[data-theme="night"] .creative-format-badge {
+  background: rgba(255, 255, 255, 0.06);
+}
+
+.cmodal-media-frame {
+  margin: 14px 0 16px;
+  border-radius: 12px;
+  overflow: hidden;
+  background: #000;
+  border: 1px solid var(--border-subtle);
+  position: relative;
+}
+
+.cmodal-video-wrap {
+  position: relative;
+  width: 100%;
+  aspect-ratio: 16 / 9;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.cmodal-video-wrap iframe,
+.cmodal-video-wrap video {
+  width: 100%;
+  height: 100%;
+  border: none;
+}
+
+.cmodal-poster {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.cmodal-design-wrap {
+  width: 100%;
+  max-height: 420px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: rgba(0, 0, 0, 0.03);
+  overflow: auto;
+}
+
+.cmodal-full-design {
+  max-width: 100%;
+  max-height: 420px;
+  object-fit: contain;
+  display: block;
+}
+
+.cmodal-highlight-box {
+  background: var(--bg-surface);
+  border: 1px solid var(--border-subtle);
+  border-radius: 10px;
+  padding: 12px 16px;
+  margin-bottom: 16px;
+  font-size: 0.85rem;
+}
+
+body[data-theme="night"] .cmodal-highlight-box {
+  background: rgba(255, 255, 255, 0.04);
+}
+
+.cmodal-colorgrade-row {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.cmodal-colorgrade-row strong {
+  color: var(--accent-green);
+  font-family: var(--font-mono);
+  font-size: 0.8rem;
+}
+
+
+/* ==========================================================================
+   Fitur Interaktif Hero: Cangkir Kopi, Sentuh Karakter & Kaca Berembun
+   ========================================================================== */
+
+/* 1. Efek Flinch / Recoil Saat Karakter Disentuh */
+.character-wrap.poke-recoil {
+  animation: charPokeRecoil 0.38s cubic-bezier(0.34, 1.56, 0.64, 1);
+}
+
+@keyframes charPokeRecoil {
+  0% { transform: scale(1); }
+  35% { transform: scale(0.975) translateY(6px); }
+  68% { transform: scale(1.018) translateY(-3px); }
+  100% { transform: scale(1); }
+}
+
+/* Partikel Emoticon Visual Mengambang Saat Karakter Diklik */
+.character-touch-effects {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  z-index: 28;
+  overflow: visible;
+}
+
+.touch-reaction-pop {
+  position: absolute;
+  display: inline-block;
+  font-family: 'Apple Color Emoji', 'Segoe UI Emoji', 'Segoe UI Symbol', 'Noto Color Emoji', sans-serif;
+  font-size: 2.4rem;
+  line-height: 1;
+  user-select: none;
+  pointer-events: none;
+  z-index: 35;
+  animation: touchReactionFloat 1s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+  filter: drop-shadow(0 6px 16px rgba(0, 0, 0, 0.32));
+  will-change: transform, opacity;
+}
+
+@keyframes touchReactionFloat {
+  0% {
+    opacity: 0;
+    transform: translate(-50%, -50%) scale(0.3) rotate(-18deg);
+  }
+  24% {
+    opacity: 1;
+    transform: translate(-50%, -50%) scale(1.35) rotate(0deg);
+  }
+  100% {
+    opacity: 0;
+    transform: translate(-50%, calc(-50% - 54px)) scale(0.85) rotate(16deg);
+  }
+}
+
+/* 2. Cangkir Kopi Mengepul Hangat di Meja Yusuf */
+.interactive-desk-cup {
+  pointer-events: auto;
+  position: absolute;
+  left: 12%;
+  bottom: 4%;
+  width: 84px;
+  height: 72px;
+  cursor: pointer;
+  z-index: 22;
+  transition: transform 0.28s cubic-bezier(0.34, 1.56, 0.64, 1), opacity 0.5s ease;
+  user-select: none;
+  opacity: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: flex-end;
+}
+
+/* Hanya muncul jelas di adegan Prolog dan Kontak saat meja terlihat utuh */
+body:not([data-scene="scene-prolog"]):not([data-scene="scene-contact"]) .interactive-desk-cup {
+  opacity: 0;
+  pointer-events: none;
+}
+
+.interactive-desk-cup:hover {
+  transform: translateY(-4px) scale(1.06);
+}
+
+.interactive-desk-cup:active {
+  transform: translateY(2px) scale(0.95);
+}
+
+.coffee-cup-svg {
+  width: 100%;
+  height: 100%;
+  filter: drop-shadow(0 6px 14px rgba(15, 23, 42, 0.12));
+}
+
+/* Kepulan Uap Panas Dinamis */
+.cup-steam-wrap {
+  position: absolute;
+  top: -18px;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 48px;
+  height: 38px;
+  pointer-events: none;
+}
+
+.steam-wisp {
+  position: absolute;
+  bottom: 0;
+  width: 6px;
+  height: 22px;
+  border-radius: 50%;
+  background: linear-gradient(180deg, transparent 0%, rgba(203, 213, 225, 0.55) 50%, rgba(255, 255, 255, 0.85) 100%);
+  filter: blur(2.5px);
+  opacity: 0;
+  animation: steamDrift 2.8s ease-in-out infinite;
+}
+
+.steam-wisp.w1 {
+  left: 14px;
+  animation-delay: 0s;
+}
+.steam-wisp.w2 {
+  left: 22px;
+  height: 26px;
+  animation-delay: 0.9s;
+}
+.steam-wisp.w3 {
+  left: 30px;
+  animation-delay: 1.8s;
+}
+
+@keyframes steamDrift {
+  0% {
+    transform: translateY(0) scaleX(0.7) scaleY(0.6);
+    opacity: 0;
+  }
+  30% {
+    opacity: 0.75;
+    transform: translateY(-10px) scaleX(1.1) scaleY(1) rotate(-4deg);
+  }
+  70% {
+    opacity: 0.45;
+    transform: translateY(-24px) scaleX(1.4) scaleY(1.3) rotate(6deg);
+  }
+  100% {
+    transform: translateY(-36px) scaleX(1.8) scaleY(1.5) rotate(-6deg);
+    opacity: 0;
+  }
+}
+
+/* Tooltip Badge saat Hover Cangkir */
+.cup-hover-pill {
+  position: absolute;
+  top: -32px;
+  left: 50%;
+  transform: translateX(-50%) translateY(4px);
+  background: rgba(15, 23, 42, 0.75);
+  color: #fef08a;
+  font-family: var(--font-mono, monospace);
+  font-size: 0.68rem;
+  letter-spacing: 1px;
+  padding: 4px 10px;
+  border-radius: 999px;
+  border: 1px solid rgba(254, 240, 138, 0.35);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.25);
+  white-space: nowrap;
+  pointer-events: none;
+  opacity: 0;
+  transition: opacity 0.25s ease, transform 0.25s ease;
+  backdrop-filter: blur(8px);
+}
+
+.interactive-desk-cup:hover .cup-hover-pill {
+  opacity: 1;
+  transform: translateX(-50%) translateY(0);
+}
+
+/* 3. Kanvas Kaca Berembun Interaktif (Rain Window Glass Wipe) */
+.window-glass-canvas {
+  position: fixed;
+  inset: 0;
+  width: 100vw;
+  height: 100vh;
+  pointer-events: none;
+  z-index: 11;
+  opacity: 0;
+  transition: opacity 0.85s cubic-bezier(0.22, 1, 0.36, 1);
+}
+
+body[data-theme="rain"] .window-glass-canvas {
+  opacity: 1;
+}
+
+/* Petunjuk Usap Jendela Hujan */
+.rain-wipe-hint {
+  position: fixed;
+  bottom: 42px;
+  left: 50%;
+  transform: translateX(-50%) translateY(12px);
+  background: rgba(15, 23, 42, 0.68);
+  backdrop-filter: blur(14px);
+  -webkit-backdrop-filter: blur(14px);
+  border: 1px solid rgba(56, 189, 248, 0.35);
+  color: #e0f2fe;
+  font-family: var(--font-mono, monospace);
+  font-size: 0.74rem;
+  letter-spacing: 1.5px;
+  padding: 7px 18px;
+  border-radius: 999px;
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.3);
+  pointer-events: none;
+  opacity: 0;
+  transition: opacity 0.6s ease, transform 0.6s ease;
+  z-index: 40;
+}
+
+.rain-wipe-hint.active {
+  opacity: 0.95;
+  transform: translateX(-50%) translateY(0);
+}
+
+/* ==========================================================================
+   FITUR UNIK BAB 2 (JURUS & KEALIAN)
+   1. Radar Heksagonal RPG di Kartu Status Yusuf
+   2. Jembatan Jurus ke Bukti Proyek (Skill-to-Project Bridge)
+   3. Simulasi Vibe Prompt Console (Interactive Playground)
+   ========================================================================== */
+
+/* --------------------------------------------------------------------------
+   1. Tab Switcher & Radar Heksagonal RPG
+   -------------------------------------------------------------------------- */
+.rpg-tab-row {
+  display: flex;
+  gap: 6px;
+  margin-bottom: 12px;
+  background: var(--bg-primary);
+  padding: 3px;
+  border-radius: var(--radius-sm);
+  border: 1px solid var(--border-subtle);
+}
+
+.rpg-tab-btn {
+  flex: 1;
+  background: transparent;
+  border: none;
+  padding: 6px 10px;
+  font-family: var(--font-mono, monospace);
+  font-size: 0.72rem;
+  color: var(--text-muted);
+  border-radius: 6px;
+  cursor: pointer;
+  transition: all 0.25s ease;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 5px;
+}
+
+.rpg-tab-btn:hover {
+  color: var(--text-primary);
+}
+
+.rpg-tab-btn.active {
+  background: var(--bg-surface);
+  color: var(--accent-green);
+  font-weight: 600;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+}
+
+body[data-theme="night"] .rpg-tab-btn.active {
+  background: #1e293b;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.35);
+}
+
+.rpg-radar-panel {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  padding: 6px 0 8px;
+  animation: fadeInRadar 0.35s ease;
+}
+
+@keyframes fadeInRadar {
+  from { opacity: 0; transform: scale(0.96); }
+  to { opacity: 1; transform: scale(1); }
+}
+
+.radar-svg {
+  width: 100%;
+  max-width: 250px;
+  height: auto;
+  overflow: visible;
+}
+
+.radar-grid-polygon {
+  fill: none;
+  stroke: var(--border-strong);
+  stroke-width: 1px;
+}
+
+.radar-axis-line {
+  stroke: var(--border-subtle);
+  stroke-width: 1px;
+  stroke-dasharray: 2 2;
+}
+
+.radar-polygon {
+  fill: rgba(34, 197, 94, 0.24);
+  stroke: var(--accent-green);
+  stroke-width: 2.2px;
+  stroke-linejoin: round;
+  filter: drop-shadow(0 0 10px rgba(34, 197, 94, 0.45));
+  transition: all 0.4s cubic-bezier(0.34, 1.56, 0.64, 1);
+}
+
+body[data-theme="night"] .radar-polygon {
+  fill: rgba(74, 222, 128, 0.32);
+  stroke: #4ade80;
+  filter: drop-shadow(0 0 14px rgba(74, 222, 128, 0.6));
+}
+
+.radar-point {
+  fill: #ffffff;
+  stroke: var(--accent-green);
+  stroke-width: 2px;
+  cursor: pointer;
+  transition: transform 0.2s ease, r 0.2s ease, fill 0.2s ease;
+}
+
+.radar-point:hover {
+  r: 5.5px;
+  fill: var(--accent-green);
+}
+
+.radar-label {
+  font-family: var(--font-mono, monospace);
+  font-size: 9px;
+  fill: var(--text-muted);
+  text-anchor: middle;
+  dominant-baseline: central;
+  font-weight: 500;
+  transition: fill 0.2s ease;
+}
+
+.radar-stat-tip {
+  margin-top: 4px;
+  font-family: var(--font-mono, monospace);
+  font-size: 0.72rem;
+  color: var(--accent-green);
+  text-align: center;
+  min-height: 18px;
+}
+
+/* --------------------------------------------------------------------------
+   2. Jembatan Jurus ke Bukti Proyek (Skill-to-Project Bridge)
+   -------------------------------------------------------------------------- */
+.rpg-project-bridge {
+  margin-top: 10px;
+  padding-top: 10px;
+  border-top: 1px dashed var(--border-subtle);
+  animation: bridgeSlideDown 0.3s ease;
+}
+
+@keyframes bridgeSlideDown {
+  from { opacity: 0; transform: translateY(-4px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+.bridge-label {
+  display: block;
+  font-family: var(--font-mono, monospace);
+  font-size: 0.68rem;
+  letter-spacing: 0.5px;
+  color: var(--accent-green);
+  font-weight: 600;
+  margin-bottom: 6px;
+  text-transform: uppercase;
+}
+
+.bridge-chips-list {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+}
+
+.btn-bridge-chip {
+  background: var(--accent-green-soft);
+  border: 1px solid var(--accent-green);
+  color: var(--text-primary);
+  font-family: var(--font-mono, monospace);
+  font-size: 0.70rem;
+  padding: 4px 10px;
+  border-radius: 999px;
+  cursor: pointer;
+  transition: all 0.22s ease;
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+}
+
+.btn-bridge-chip:hover {
+  background: var(--accent-green);
+  color: #0b131e;
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(34, 197, 94, 0.4);
+}
+
+/* Animasi Golden Spotlight Pulse pada Kartu Proyek yang Dituju */
+.mission-card-3d.card-spotlight-pulse {
+  animation: cardSpotlightPulse 2.8s cubic-bezier(0.22, 1, 0.36, 1) forwards;
+  z-index: 25;
+}
+
+@keyframes cardSpotlightPulse {
+  0% {
+    transform: scale(1);
+    box-shadow: 0 0 0 0 rgba(250, 204, 21, 0.9), 0 0 0 0 rgba(34, 197, 94, 0.7);
+  }
+  25% {
+    transform: scale(1.035) translateY(-6px);
+    box-shadow: 0 0 35px 8px rgba(250, 204, 21, 0.85), 0 0 50px 14px rgba(34, 197, 94, 0.6);
+  }
+  60% {
+    transform: scale(1.015) translateY(-2px);
+    box-shadow: 0 0 20px 4px rgba(250, 204, 21, 0.5), 0 0 30px 8px rgba(34, 197, 94, 0.4);
+  }
+  100% {
+    transform: scale(1) translateY(0);
+    box-shadow: none;
+  }
+}
+
+/* --------------------------------------------------------------------------
+   3. Simulasi Vibe Prompt Console Modal
+   -------------------------------------------------------------------------- */
+.btn-open-vibe-console {
+  margin-top: 14px;
+  width: 100%;
+  background: linear-gradient(135deg, rgba(34, 197, 94, 0.14) 0%, rgba(16, 185, 129, 0.24) 100%);
+  border: 1px solid var(--accent-green);
+  border-radius: var(--radius-sm);
+  padding: 9px 14px;
+  font-family: var(--font-mono, monospace);
+  font-size: 0.74rem;
+  letter-spacing: 0.5px;
+  color: var(--text-primary);
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  transition: all 0.28s cubic-bezier(0.34, 1.56, 0.64, 1);
+  box-shadow: 0 2px 10px rgba(34, 197, 94, 0.15);
+}
+
+.btn-open-vibe-console:hover {
+  background: linear-gradient(135deg, rgba(34, 197, 94, 0.3) 0%, rgba(16, 185, 129, 0.45) 100%);
+  transform: translateY(-2px);
+  box-shadow: 0 6px 20px rgba(34, 197, 94, 0.35);
+  border-color: #4ade80;
+}
+
+.btn-open-vibe-console .btn-pulse-sparkle {
+  animation: sparkleRotate 2s linear infinite;
+  display: inline-block;
+}
+
+@keyframes sparkleRotate {
+  0% { transform: scale(0.9) rotate(0deg); opacity: 0.7; }
+  50% { transform: scale(1.2) rotate(15deg); opacity: 1; }
+  100% { transform: scale(0.9) rotate(0deg); opacity: 0.7; }
+}
+
+.vibe-console-modal {
+  position: fixed;
+  inset: 0;
+  z-index: 99999;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  opacity: 0;
+  visibility: hidden;
+  transition: opacity 0.35s ease, visibility 0.35s ease;
+}
+
+.vibe-console-modal.active {
+  opacity: 1;
+  visibility: visible;
+}
+
+.vibe-console-backdrop {
+  position: absolute;
+  inset: 0;
+  background: rgba(11, 19, 30, 0.78);
+  backdrop-filter: blur(14px);
+  -webkit-backdrop-filter: blur(14px);
+}
+
+.vibe-console-window {
+  position: relative;
+  z-index: 2;
+  width: 92%;
+  max-width: 760px;
+  background: #0f172a;
+  border: 1px solid rgba(52, 211, 153, 0.4);
+  border-radius: 16px;
+  box-shadow: 0 24px 64px rgba(0, 0, 0, 0.65), 0 0 35px rgba(16, 185, 129, 0.2);
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+  transform: scale(0.94) translateY(12px);
+  transition: transform 0.35s cubic-bezier(0.34, 1.56, 0.64, 1);
+}
+
+.vibe-console-modal.active .vibe-console-window {
+  transform: scale(1) translateY(0);
+}
+
+.console-title-bar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 12px 18px;
+  background: #1e293b;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+}
+
+.console-mac-dots {
+  display: flex;
+  align-items: center;
+  gap: 7px;
+}
+
+.console-mac-dots .dot {
+  width: 11px;
+  height: 11px;
+  border-radius: 50%;
+  cursor: pointer;
+}
+
+.console-mac-dots .dot.red { background: #ef4444; }
+.console-mac-dots .dot.yellow { background: #f59e0b; }
+.console-mac-dots .dot.green { background: #10b981; }
+
+.console-title-text {
+  font-family: var(--font-mono, monospace);
+  font-size: 0.76rem;
+  letter-spacing: 0.5px;
+  color: #94a3b8;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.console-close-x {
+  background: none;
+  border: none;
+  color: #94a3b8;
+  font-size: 1.3rem;
+  line-height: 1;
+  cursor: pointer;
+  padding: 0 4px;
+  transition: color 0.2s ease;
+}
+
+.console-close-x:hover {
+  color: #ffffff;
+}
+
+.console-prompt-selector {
+  padding: 12px 18px;
+  background: #141f32;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+}
+
+.selector-label {
+  display: block;
+  font-family: var(--font-mono, monospace);
+  font-size: 0.68rem;
+  color: #64748b;
+  margin-bottom: 8px;
+  text-transform: uppercase;
+  letter-spacing: 1px;
+}
+
+.prompt-chip-list {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.prompt-chip {
+  background: rgba(30, 41, 59, 0.85);
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  color: #cbd5e1;
+  font-family: var(--font-mono, monospace);
+  font-size: 0.72rem;
+  padding: 6px 12px;
+  border-radius: 8px;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.prompt-chip:hover {
+  background: rgba(52, 211, 153, 0.18);
+  border-color: rgba(52, 211, 153, 0.45);
+  color: #f8fafc;
+}
+
+.prompt-chip.active {
+  background: rgba(16, 185, 129, 0.28);
+  border-color: #34d399;
+  color: #6ee7b7;
+  font-weight: 600;
+  box-shadow: 0 0 14px rgba(16, 185, 129, 0.3);
+}
+
+.console-body-screen {
+  background: #090e17;
+  padding: 20px 22px;
+  min-height: 270px;
+  max-height: 380px;
+  overflow-y: auto;
+  font-family: var(--font-mono, monospace);
+  font-size: 0.80rem;
+  line-height: 1.6;
+  color: #e2e8f0;
+}
+
+.console-prompt-line {
+  display: flex;
+  align-items: baseline;
+  gap: 8px;
+  margin-bottom: 14px;
+}
+
+.prompt-prefix {
+  color: #34d399;
+  font-weight: 600;
+  white-space: nowrap;
+}
+
+.prompt-typed-text {
+  color: #f1f5f9;
+  font-weight: 500;
+}
+
+.prompt-cursor {
+  color: #34d399;
+  animation: cursorBlink 0.8s infinite;
+}
+
+@keyframes cursorBlink {
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0; }
+}
+
+.console-agent-log {
+  display: flex;
+  flex-direction: column;
+  gap: 7px;
+  margin-bottom: 14px;
+}
+
+.agent-step-row {
+  display: flex;
+  align-items: flex-start;
+  gap: 10px;
+  color: #94a3b8;
+  font-size: 0.76rem;
+  animation: fadeInStep 0.25s ease;
+}
+
+@keyframes fadeInStep {
+  from { opacity: 0; transform: translateX(-4px); }
+  to { opacity: 1; transform: translateX(0); }
+}
+
+.agent-step-row .step-tag {
+  color: #38bdf8;
+  font-weight: 600;
+}
+
+.agent-step-row .step-ok {
+  color: #34d399;
+}
+
+.console-result-card {
+  margin-top: 14px;
+  background: rgba(16, 185, 129, 0.1);
+  border: 1px solid rgba(52, 211, 153, 0.35);
+  border-radius: 10px;
+  padding: 14px 16px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+  animation: resultSlideUp 0.35s cubic-bezier(0.34, 1.56, 0.64, 1);
+}
+
+@keyframes resultSlideUp {
+  from { opacity: 0; transform: translateY(8px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+.result-meta {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.result-badge {
+  font-size: 0.72rem;
+  color: #34d399;
+  font-weight: 600;
+  letter-spacing: 0.5px;
+}
+
+.result-desc {
+  font-size: 0.78rem;
+  color: #cbd5e1;
+}
+
+.btn-console-demo {
+  background: #10b981;
+  color: #0b131e;
+  border: none;
+  font-family: var(--font-mono, monospace);
+  font-size: 0.75rem;
+  font-weight: 600;
+  padding: 7px 14px;
+  border-radius: 8px;
+  cursor: pointer;
+  white-space: nowrap;
+  transition: all 0.22s ease;
+}
+
+.btn-console-demo:hover {
+  background: #34d399;
+  transform: translateY(-2px);
+  box-shadow: 0 4px 16px rgba(52, 211, 153, 0.5);
+}
+
+.console-footer-bar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 10px 18px;
+  background: #141f32;
+  border-top: 1px solid rgba(255, 255, 255, 0.05);
+  font-family: var(--font-mono, monospace);
+  font-size: 0.68rem;
+  color: #64748b;
+}
+
+.text-green {
+  color: #34d399;
+}
+
+/* ==========================================================================
+   FITUR UNIK BAB 03: KARYA (MISI HYOUKA)
+   1. Efek Kartu Holografik 3D Tilt (Holographic Parallax Sheen)
+   2. Cetak Biru Prompt & Rahasia Vibe (The Vibe Blueprint Modal)
+   ========================================================================== */
+
+/* 1. Holographic 3D Tilt & Sheen */
+.mission-card-3d {
+  transform-style: preserve-3d;
+  will-change: transform;
+  transition: transform 0.28s cubic-bezier(0.2, 0.8, 0.25, 1), box-shadow 0.28s ease;
+}
+
+.card-holo-sheen {
+  position: absolute;
+  inset: 0;
+  border-radius: inherit;
+  pointer-events: none;
+  z-index: 6;
+  opacity: var(--sheen-opacity, 0);
+  transition: opacity 0.25s ease-out;
+  background:
+    radial-gradient(
+      circle at var(--sheen-x, 50%) var(--sheen-y, 50%),
+      rgba(255, 255, 255, 0.5) 0%,
+      rgba(52, 211, 153, 0.28) 22%,
+      rgba(168, 85, 247, 0.22) 48%,
+      transparent 72%
+    ),
+    linear-gradient(
+      135deg,
+      rgba(244, 63, 94, 0.08) 0%,
+      rgba(56, 189, 248, 0.08) 33%,
+      rgba(250, 204, 21, 0.08) 66%,
+      rgba(52, 211, 153, 0.08) 100%
+    );
+  mix-blend-mode: color-dodge;
+}
+
+body[data-theme="night"] .card-holo-sheen {
+  background:
+    radial-gradient(
+      circle at var(--sheen-x, 50%) var(--sheen-y, 50%),
+      rgba(255, 255, 255, 0.65) 0%,
+      rgba(52, 211, 153, 0.35) 24%,
+      rgba(168, 85, 247, 0.3) 50%,
+      transparent 75%
+    ),
+    linear-gradient(
+      135deg,
+      rgba(244, 63, 94, 0.12) 0%,
+      rgba(56, 189, 248, 0.12) 33%,
+      rgba(250, 204, 21, 0.12) 66%,
+      rgba(52, 211, 153, 0.12) 100%
+    );
+  mix-blend-mode: screen;
+}
+
+/* Tombol Vibe Blueprint di Kartu Misi */
+.btn-card-vibe {
+  display: inline-flex;
+  align-items: center;
+  gap: 3px;
+  background: linear-gradient(135deg, rgba(168, 85, 247, 0.12), rgba(34, 197, 94, 0.1));
+  color: #9333ea;
+  border: 1px solid rgba(168, 85, 247, 0.35);
+  font-family: var(--font-mono, monospace);
+  font-size: 0.69rem;
+  font-weight: 600;
+  padding: 5px 8px;
+  border-radius: var(--radius-full, 9999px);
+  cursor: pointer;
+  transition: all 0.22s cubic-bezier(0.16, 1, 0.3, 1);
+  white-space: nowrap;
+}
+
+body[data-theme="night"] .btn-card-vibe {
+  color: #c084fc;
+  border-color: rgba(192, 132, 252, 0.45);
+  background: linear-gradient(135deg, rgba(168, 85, 247, 0.22), rgba(34, 197, 94, 0.16));
+}
+
+.btn-card-vibe:hover {
+  background: linear-gradient(135deg, #a855f7, #34d399);
+  color: #ffffff;
+  border-color: transparent;
+  transform: translateY(-1.5px);
+  box-shadow: 0 4px 14px rgba(168, 85, 247, 0.45);
+}
+
+/* 2. Vibe Blueprint Modal System */
+.vibe-blueprint-modal {
+  z-index: 10005;
+}
+
+.vibe-blueprint-box {
+  max-width: 680px;
+  max-height: 88vh;
+  overflow-y: auto;
+  border: 1px solid rgba(168, 85, 247, 0.3);
+  box-shadow: 0 24px 60px rgba(0, 0, 0, 0.35), 0 0 30px rgba(168, 85, 247, 0.15);
+  background: var(--bg-surface, #ffffff);
+  border-radius: 18px;
+  padding: 24px 26px;
+  animation: vbModalPop 0.32s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+body[data-theme="night"] .vibe-blueprint-box {
+  background: #111726;
+  border-color: rgba(168, 85, 247, 0.35);
+  box-shadow: 0 28px 70px rgba(0, 0, 0, 0.65), 0 0 35px rgba(168, 85, 247, 0.2);
+}
+
+@keyframes vbModalPop {
+  0% {
+    opacity: 0;
+    transform: scale(0.94) translateY(12px);
+  }
+  100% {
+    opacity: 1;
+    transform: scale(1) translateY(0);
+  }
+}
+
+.vibe-blueprint-header {
+  margin-bottom: 16px;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.vibe-blueprint-meta {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  flex-wrap: wrap;
+}
+
+.vibe-purple-tag {
+  background: rgba(168, 85, 247, 0.15);
+  color: #a855f7;
+  border: 1px solid rgba(168, 85, 247, 0.3);
+  font-family: var(--font-mono, monospace);
+  font-size: 0.68rem;
+  font-weight: 700;
+  padding: 2px 8px;
+  border-radius: 4px;
+}
+
+body[data-theme="night"] .vibe-purple-tag {
+  color: #d8b4fe;
+}
+
+.vibe-arch-tag {
+  font-family: var(--font-mono, monospace);
+  font-size: 0.68rem;
+  color: var(--text-muted, #64748b);
+  letter-spacing: 0.5px;
+}
+
+.vb-title {
+  font-family: var(--font-serif, serif);
+  font-size: 1.55rem;
+  font-weight: 700;
+  color: var(--text-primary, #0f172a);
+  margin: 0;
+  line-height: 1.25;
+}
+
+.vb-summary {
+  font-size: 0.88rem;
+  line-height: 1.5;
+  color: var(--text-muted, #64748b);
+  margin: 0;
+}
+
+.vb-build-pill {
+  display: inline-flex;
+  align-items: center;
+  align-self: flex-start;
+  gap: 6px;
+  padding: 4px 10px;
+  background: rgba(52, 211, 153, 0.12);
+  border: 1px solid rgba(52, 211, 153, 0.3);
+  border-radius: 6px;
+  color: #059669;
+  font-family: var(--font-mono, monospace);
+  font-size: 0.72rem;
+  font-weight: 600;
+  margin-top: 4px;
+}
+
+body[data-theme="night"] .vb-build-pill {
+  color: #34d399;
+  background: rgba(52, 211, 153, 0.15);
+}
+
+/* Prompt Card Box */
+.vb-prompt-card {
+  margin: 16px 0;
+  border-radius: 12px;
+  background: #0b101c;
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  overflow: hidden;
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.2);
+}
+
+.vb-prompt-topbar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 8px 14px;
+  background: #131b2e;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.06);
+}
+
+.vb-prompt-dotgroup {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.vb-dot {
+  width: 9px;
+  height: 9px;
+  border-radius: 50%;
+  display: inline-block;
+}
+
+.vb-dot.red { background: #ef4444; }
+.vb-dot.yellow { background: #f59e0b; }
+.vb-dot.green { background: #10b981; }
+
+.vb-prompt-label {
+  font-family: var(--font-mono, monospace);
+  font-size: 0.66rem;
+  color: #94a3b8;
+  margin-left: 6px;
+  letter-spacing: 0.3px;
+}
+
+.vb-copy-prompt-btn {
+  background: rgba(255, 255, 255, 0.08);
+  color: #e2e8f0;
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  font-family: var(--font-mono, monospace);
+  font-size: 0.68rem;
+  padding: 3px 9px;
+  border-radius: 5px;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.vb-copy-prompt-btn:hover {
+  background: #a855f7;
+  color: #ffffff;
+  border-color: #a855f7;
+}
+
+.vb-copy-prompt-btn.copied {
+  background: #10b981;
+  color: #ffffff;
+  border-color: #10b981;
+}
+
+.vb-prompt-code-wrap {
+  padding: 12px 14px;
+  max-height: 140px;
+  overflow-y: auto;
+}
+
+.vb-prompt-code {
+  margin: 0;
+  font-family: var(--font-mono, monospace);
+  font-size: 0.78rem;
+  line-height: 1.6;
+  color: #a5f3fc;
+  white-space: pre-wrap;
+  word-break: break-word;
+}
+
+/* Secret Sauce Box */
+.vb-secret-box {
+  margin: 14px 0;
+  padding: 14px 16px;
+  border-radius: 12px;
+  background: rgba(168, 85, 247, 0.06);
+  border: 1px solid rgba(168, 85, 247, 0.22);
+}
+
+body[data-theme="night"] .vb-secret-box {
+  background: rgba(168, 85, 247, 0.09);
+  border-color: rgba(168, 85, 247, 0.28);
+}
+
+.vb-secret-title {
+  display: flex;
+  align-items: center;
+  gap: 7px;
+  font-family: var(--font-mono, monospace);
+  font-size: 0.76rem;
+  font-weight: 700;
+  color: #a855f7;
+  margin-bottom: 6px;
+}
+
+body[data-theme="night"] .vb-secret-title {
+  color: #d8b4fe;
+}
+
+.vb-secret-icon {
+  font-size: 0.95rem;
+}
+
+.vb-secret-desc {
+  font-size: 0.84rem;
+  line-height: 1.55;
+  color: var(--text-primary, #1e293b);
+  margin: 0;
+}
+
+body[data-theme="night"] .vb-secret-desc {
+  color: #e2e8f0;
+}
+
+/* Tags in Blueprint */
+.vb-tags-wrap {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+  margin-top: 12px;
+  margin-bottom: 16px;
+}
+
+.vb-tag-pill {
+  font-family: var(--font-mono, monospace);
+  font-size: 0.68rem;
+  color: var(--text-muted, #64748b);
+  background: var(--bg-secondary, rgba(0, 0, 0, 0.04));
+  border: 1px solid var(--border-subtle, rgba(0, 0, 0, 0.08));
+  padding: 2px 8px;
+  border-radius: 4px;
+}
+
+body[data-theme="night"] .vb-tag-pill {
+  background: rgba(255, 255, 255, 0.05);
+  border-color: rgba(255, 255, 255, 0.08);
+  color: #94a3b8;
+}
+
+/* Modal Actions */
+.vb-actions {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding-top: 12px;
+  border-top: 1px solid var(--border-subtle, rgba(0, 0, 0, 0.08));
+}
+
+.btn-hero.text-only {
+  background: transparent;
+  color: var(--text-muted, #64748b);
+  border: none;
+  cursor: pointer;
+  padding: 8px 14px;
+  font-family: var(--font-mono, monospace);
+  font-size: 0.78rem;
+  transition: color 0.2s ease;
+}
+
+.btn-hero.text-only:hover {
+  color: var(--text-primary, #0f172a);
+}
+
+/* ==========================================================================
+   FITUR UNIK BAB 04: PETA REL STASIUN JEJAK & TUR AUTOPLAY
+   ========================================================================== */
+.timeline-head-split {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+  flex-wrap: wrap;
+}
+
+.btn-autoplay-timeline {
+  display: inline-flex;
+  align-items: center;
+  gap: 7px;
+  background: linear-gradient(135deg, rgba(34, 197, 94, 0.14), rgba(56, 189, 248, 0.14));
+  color: #10b981;
+  border: 1px solid rgba(34, 197, 94, 0.4);
+  font-family: var(--font-mono, monospace);
+  font-size: 0.78rem;
+  font-weight: 700;
+  padding: 8px 16px;
+  border-radius: var(--radius-full, 9999px);
+  cursor: pointer;
+  transition: all 0.25s cubic-bezier(0.16, 1, 0.3, 1);
+  box-shadow: 0 4px 14px rgba(34, 197, 94, 0.12);
+}
+
+body[data-theme="night"] .btn-autoplay-timeline {
+  color: #34d399;
+  border-color: rgba(52, 211, 153, 0.45);
+  background: linear-gradient(135deg, rgba(34, 197, 94, 0.22), rgba(56, 189, 248, 0.18));
+}
+
+.btn-autoplay-timeline:hover {
+  background: linear-gradient(135deg, #10b981, #06b6d4);
+  color: #ffffff;
+  transform: translateY(-2px);
+  box-shadow: 0 6px 20px rgba(16, 185, 129, 0.4);
+}
+
+.btn-autoplay-timeline.is-playing {
+  background: linear-gradient(135deg, #f59e0b, #ef4444);
+  color: #ffffff;
+  border-color: transparent;
+  animation: pulseGlow 1.8s infinite;
+}
+
+@keyframes pulseGlow {
+  0%, 100% { box-shadow: 0 0 0 0 rgba(245, 158, 11, 0.5); }
+  50% { box-shadow: 0 0 16px 4px rgba(245, 158, 11, 0.4); }
+}
+
+/* Metro / Shinkansen Rail Track Visualizer */
+.metro-track-bar {
+  position: relative;
+  width: 100%;
+  margin: 18px 0 28px;
+  padding: 14px 20px;
+  background: var(--bg-surface, #ffffff);
+  border: 1px solid var(--border-subtle, rgba(0, 0, 0, 0.08));
+  border-radius: 14px;
+}
+
+body[data-theme="night"] .metro-track-bar {
+  background: rgba(22, 27, 34, 0.85);
+  border-color: rgba(255, 255, 255, 0.08);
+}
+
+.metro-track-line {
+  position: absolute;
+  top: 50%;
+  left: 32px;
+  right: 32px;
+  height: 4px;
+  background: rgba(0, 0, 0, 0.08);
+  border-radius: 2px;
+  transform: translateY(-50%);
+}
+
+body[data-theme="night"] .metro-track-line {
+  background: rgba(255, 255, 255, 0.1);
+}
+
+.metro-track-progress {
+  position: absolute;
+  top: 50%;
+  left: 32px;
+  height: 4px;
+  background: linear-gradient(90deg, #10b981, #38bdf8);
+  border-radius: 2px;
+  transform: translateY(-50%);
+  transition: width 0.55s cubic-bezier(0.2, 0.8, 0.25, 1);
+  box-shadow: 0 0 12px rgba(16, 185, 129, 0.6);
+}
+
+.metro-stations-dots {
+  position: relative;
+  display: flex;
+  justify-content: space-between;
+  z-index: 2;
+  padding: 0 12px;
+}
+
+.metro-dot {
+  position: relative;
+  width: 18px;
+  height: 18px;
+  border-radius: 50%;
+  background: var(--bg-surface, #ffffff);
+  border: 3px solid #94a3b8;
+  cursor: pointer;
+  transition: all 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.metro-dot small {
+  position: absolute;
+  top: -22px;
+  font-family: var(--font-mono, monospace);
+  font-size: 0.65rem;
+  font-weight: 700;
+  color: var(--text-muted, #64748b);
+  white-space: nowrap;
+}
+
+.metro-dot.active {
+  background: #10b981;
+  border-color: #ffffff;
+  transform: scale(1.3);
+  box-shadow: 0 0 16px rgba(16, 185, 129, 0.8);
+}
+
+body[data-theme="night"] .metro-dot.active {
+  border-color: #0b131e;
+}
+
+.metro-dot.active small {
+  color: #10b981;
+}
+
+/* Timeline Station Card Enhancements */
+.timeline-head-meta {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.timeline-station-code {
+  font-family: var(--font-mono, monospace);
+  font-size: 0.65rem;
+  font-weight: 700;
+  padding: 2px 6px;
+  border-radius: 4px;
+  background: rgba(16, 185, 129, 0.14);
+  color: #10b981;
+}
+
+.timeline-badge-pill {
+  font-family: var(--font-mono, monospace);
+  font-size: 0.68rem;
+  padding: 2px 8px;
+  border-radius: 12px;
+  background: rgba(56, 189, 248, 0.12);
+  color: #0284c7;
+  border: 1px solid rgba(56, 189, 248, 0.3);
+}
+
+body[data-theme="night"] .timeline-badge-pill {
+  color: #38bdf8;
+}
+
+.timeline-station-sub {
+  font-family: var(--font-mono, monospace);
+  font-size: 0.72rem;
+  color: var(--text-muted, #64748b);
+  margin: 3px 0 8px;
+}
+
+.timeline-loot-box {
+  margin-top: 10px;
+  padding: 8px 12px;
+  border-radius: 8px;
+  background: rgba(34, 197, 94, 0.08);
+  border: 1px dashed rgba(34, 197, 94, 0.35);
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-family: var(--font-mono, monospace);
+  font-size: 0.72rem;
+  color: #059669;
+}
+
+body[data-theme="night"] .timeline-loot-box {
+  color: #34d399;
+}
+
+.timeline-node.active-station .timeline-card {
+  border-color: rgba(16, 185, 129, 0.5);
+  box-shadow: 0 10px 30px rgba(16, 185, 129, 0.15);
+}
+
+/* ==========================================================================
+   FITUR UNIK BAB 05: DINDING OFUDA BERSTEMPEL HANKO & SUZU BELL
+   ========================================================================== */
+.ofuda-wall-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 12px;
+}
+
+.suzu-bell-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  background: rgba(245, 158, 11, 0.12);
+  border: 1px solid rgba(245, 158, 11, 0.35);
+  color: #d97706;
+  font-family: var(--font-mono, monospace);
+  font-size: 0.72rem;
+  font-weight: 600;
+  padding: 5px 10px;
+  border-radius: var(--radius-full, 9999px);
+  cursor: pointer;
+  transition: all 0.25s ease;
+}
+
+body[data-theme="night"] .suzu-bell-btn {
+  color: #fbbf24;
+  border-color: rgba(251, 191, 36, 0.4);
+}
+
+.suzu-bell-btn:hover {
+  background: rgba(245, 158, 11, 0.25);
+  transform: translateY(-1.5px);
+  box-shadow: 0 4px 12px rgba(245, 158, 11, 0.3);
+}
+
+.suzu-bell-btn.swinging .suzu-bell-icon {
+  animation: suzuSwing 0.8s ease-in-out;
+}
+
+@keyframes suzuSwing {
+  0% { transform: rotate(0deg); }
+  20% { transform: rotate(24deg); }
+  40% { transform: rotate(-20deg); }
+  60% { transform: rotate(12deg); }
+  80% { transform: rotate(-6deg); }
+  100% { transform: rotate(0deg); }
+}
+
+/* Hanko Selector in Ofuda Form */
+.hanko-selector-bar {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  margin-bottom: 8px;
+  flex-wrap: wrap;
+}
+
+.hanko-title {
+  font-family: var(--font-mono, monospace);
+  font-size: 0.68rem;
+  color: var(--text-muted, #64748b);
+}
+
+.hanko-chips-list {
+  display: flex;
+  align-items: center;
+  gap: 5px;
+  flex-wrap: wrap;
+}
+
+.hanko-chip {
+  background: transparent;
+  border: 1px solid var(--border-subtle, rgba(0, 0, 0, 0.12));
+  color: var(--text-muted, #64748b);
+  font-family: var(--font-mono, monospace);
+  font-size: 0.65rem;
+  padding: 3px 7px;
+  border-radius: 4px;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.hanko-chip:hover {
+  border-color: #ef4444;
+  color: #ef4444;
+}
+
+.hanko-chip.active {
+  background: rgba(239, 68, 68, 0.14);
+  border-color: #ef4444;
+  color: #dc2626;
+  font-weight: 700;
+}
+
+body[data-theme="night"] .hanko-chip.active {
+  color: #f87171;
+}
+
+.ofuda-inputs-row {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  width: 100%;
+}
+
+/* Ofuda Paper Card Stamp Mark */
+.ofuda-hanko-seal {
+  position: absolute;
+  top: 8px;
+  right: 8px;
+  width: 28px;
+  height: 28px;
+  border: 1.5px solid #dc2626;
+  border-radius: 5px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: rgba(239, 68, 68, 0.08);
+  transform: rotate(6deg);
+}
+
+.hanko-kanji {
+  font-family: var(--font-serif, serif);
+  font-size: 0.65rem;
+  font-weight: 900;
+  color: #dc2626;
+  line-height: 1;
+}
+
+.ofuda-footer-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-top: 6px;
+  padding-top: 4px;
+  border-top: 1px dashed rgba(0, 0, 0, 0.08);
+}
+
+.ofuda-badge-pill {
+  font-size: 0.72rem;
+}
+
+/* ==========================================================================
+   FITUR UNIK #3: STASIUN RADIO LO-FI TERPADU (NAVBAR HEADER)
+   ========================================================================== */
+.lofi-radio-widget {
+  position: relative;
+  font-family: var(--font-mono, monospace);
+  display: inline-flex;
+  align-items: center;
+  z-index: 9550;
+}
+
+.lofi-radio-pill {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  background: rgba(15, 23, 42, 0.90);
+  backdrop-filter: blur(14px);
+  -webkit-backdrop-filter: blur(14px);
+  border: 1px solid rgba(255, 255, 255, 0.16);
+  padding: 4px 10px 4px 8px;
+  border-radius: var(--radius-full, 9999px);
+  cursor: pointer;
+  box-shadow: 0 4px 14px rgba(0, 0, 0, 0.12);
+  transition: all 0.25s cubic-bezier(0.16, 1, 0.3, 1);
+  color: #f8fafc;
+  height: 36px;
+  box-sizing: border-box;
+  user-select: none;
+}
+
+body[data-theme="light"] .lofi-radio-pill {
+  background: rgba(15, 23, 42, 0.88);
+  border-color: rgba(255, 255, 255, 0.22);
+}
+
+.lofi-radio-pill:hover {
+  transform: translateY(-1px);
+  border-color: #34d399;
+  box-shadow: 0 6px 18px rgba(52, 211, 153, 0.25);
+}
+
+.cassette-mini-icon {
+  width: 26px;
+  height: 16px;
+  background: #1e293b;
+  border: 1px solid #475569;
+  border-radius: 3px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0 3px;
+  position: relative;
+  flex-shrink: 0;
+}
+
+.cassette-tape-bar {
+  position: absolute;
+  left: 6px;
+  right: 6px;
+  height: 2px;
+  background: #64748b;
+}
+
+.cassette-wheel {
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background: #94a3b8;
+  border: 1px dashed #0f172a;
+}
+
+.lofi-radio-widget.is-playing .cassette-wheel {
+  animation: spinReel 1.4s linear infinite;
+}
+
+@keyframes spinReel {
+  0% { transform: rotate(0deg); }
+  100% { transform: rotate(360deg); }
+}
+
+.lofi-pill-info {
+  display: flex;
+  flex-direction: column;
+  line-height: 1.1;
+  text-align: left;
+}
+
+.lofi-live-badge {
+  font-size: 0.58rem;
+  font-weight: 700;
+  color: #34d399;
+  display: flex;
+  align-items: center;
+  gap: 3px;
+}
+
+.live-dot {
+  width: 5px;
+  height: 5px;
+  background: #10b981;
+  border-radius: 50%;
+  animation: pulseDot 1.2s infinite;
+}
+
+@keyframes pulseDot {
+  0%, 100% { opacity: 1; transform: scale(1); }
+  50% { opacity: 0.4; transform: scale(0.7); }
+}
+
+.lofi-channel-name {
+  font-size: 0.68rem;
+  color: #cbd5e1;
+  white-space: nowrap;
+  max-width: 130px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.lofi-btn-play {
+  width: 24px;
+  height: 24px;
+  border-radius: 50%;
+  background: #10b981;
+  color: #0b131e;
+  border: none;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 0.68rem;
+  font-weight: 700;
+  cursor: pointer;
+  transition: transform 0.2s ease, background 0.2s ease;
+  flex-shrink: 0;
+}
+
+.lofi-btn-play:hover {
+  transform: scale(1.1);
+  background: #34d399;
+}
+
+/* Radio Drawer Panel - Dropdown Elegan dari Navbar */
+.lofi-radio-drawer {
+  position: absolute;
+  top: calc(100% + 10px);
+  right: 0;
+  left: auto;
+  bottom: auto;
+  width: 290px;
+  background: #0f172a;
+  border: 1px solid rgba(255, 255, 255, 0.15);
+  border-radius: 14px;
+  padding: 14px;
+  box-shadow: 0 18px 45px rgba(0, 0, 0, 0.65);
+  display: none;
+  z-index: 10000;
+  animation: lofiDrawerPop 0.22s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.lofi-radio-drawer.open {
+  display: block;
+}
+
+@keyframes lofiDrawerPop {
+  0% { opacity: 0; transform: translateY(-8px) scale(0.96); }
+  100% { opacity: 1; transform: translateY(0) scale(1); }
+}
+
+@media (max-width: 900px) {
+  .lofi-channel-name,
+  .lofi-live-badge {
+    display: none;
+  }
+  .lofi-radio-pill {
+    padding: 0 8px;
+    gap: 6px;
+  }
+}
+
+.lofi-drawer-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 10px;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+  padding-bottom: 6px;
+}
+
+.lofi-drawer-title {
+  font-size: 0.66rem;
+  font-weight: 700;
+  color: #38bdf8;
+}
+
+.lofi-drawer-close {
+  background: transparent;
+  color: #94a3b8;
+  border: none;
+  font-size: 1.1rem;
+  cursor: pointer;
+}
+
+.lofi-channel-list {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  margin-bottom: 12px;
+}
+
+.lofi-ch-btn {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 8px 10px;
+  background: rgba(255, 255, 255, 0.04);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  border-radius: 8px;
+  cursor: pointer;
+  text-align: left;
+  transition: all 0.2s ease;
+  color: #f1f5f9;
+}
+
+.lofi-ch-btn:hover {
+  background: rgba(255, 255, 255, 0.08);
+  border-color: rgba(52, 211, 153, 0.3);
+}
+
+.lofi-ch-btn.active {
+  background: rgba(52, 211, 153, 0.14);
+  border-color: #34d399;
+}
+
+.lofi-ch-btn.active strong {
+  color: #34d399;
+}
+
+.ch-icon { font-size: 1rem; }
+
+.ch-text {
+  display: flex;
+  flex-direction: column;
+  line-height: 1.2;
+}
+
+.ch-text strong {
+  font-size: 0.72rem;
+  font-weight: 600;
+}
+
+.ch-text small {
+  font-size: 0.62rem;
+  color: #94a3b8;
+}
+
+.lofi-volume-bar {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 0.68rem;
+  color: #94a3b8;
+}
+
+.lofi-volume-bar input[type="range"] {
+  flex: 1;
+  height: 4px;
+  accent-color: #34d399;
+}
+
+/* ==========================================================================
+   FITUR UNIK #4: TIKET PASPOR PENGELANA DIGITAL (SCENE EPILOG)
+   ========================================================================== */
+.vibe-boarding-pass-wrap {
+  margin: 10px 0 6px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 8px;
+  width: 100%;
+}
+
+.vibe-pass-card {
+  width: 100%;
+  max-width: 480px;
+  background: var(--bg-surface, #ffffff);
+  border: 1px solid var(--border-subtle, rgba(0, 0, 0, 0.12));
+  border-radius: 12px;
+  display: flex;
+  box-shadow: 0 8px 26px rgba(0, 0, 0, 0.06);
+  position: relative;
+  overflow: hidden;
+}
+
+body[data-theme="night"] .vibe-pass-card {
+  background: #111726;
+  border-color: rgba(255, 255, 255, 0.1);
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.5);
+}
+
+.pass-stub-main {
+  flex: 1;
+  padding: 10px 14px;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.pass-top-meta {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  font-family: var(--font-mono, monospace);
+  font-size: 0.64rem;
+  color: var(--text-muted, #64748b);
+  border-bottom: 1px dashed var(--border-subtle, rgba(0, 0, 0, 0.08));
+  padding-bottom: 4px;
+}
+
+.pass-route-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 3px 10px;
+  background: var(--bg-secondary, rgba(0, 0, 0, 0.03));
+  border-radius: 6px;
+}
+
+body[data-theme="night"] .pass-route-row {
+  background: rgba(255, 255, 255, 0.03);
+}
+
+.pass-station {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
+.station-code {
+  font-family: var(--font-mono, monospace);
+  font-size: 1.12rem;
+  font-weight: 900;
+  color: var(--text-primary, #0f172a);
+}
+
+.station-city {
+  font-size: 0.65rem;
+  color: var(--text-muted, #64748b);
+}
+
+.pass-arrow-path {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  color: #10b981;
+  font-family: var(--font-mono, monospace);
+  font-size: 0.68rem;
+}
+
+.pass-grid-info {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 6px 10px;
+  font-family: var(--font-mono, monospace);
+  font-size: 0.68rem;
+}
+
+.pass-info-cell {
+  display: flex;
+  flex-direction: column;
+}
+
+.pass-lbl {
+  font-size: 0.58rem;
+  color: var(--text-muted, #64748b);
+}
+
+.pass-val {
+  color: var(--text-primary, #0f172a);
+}
+
+/* Side Stub of Boarding Pass */
+.pass-stub-side {
+  width: 95px;
+  border-left: 1px dashed var(--border-subtle, rgba(0, 0, 0, 0.15));
+  padding: 10px 8px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: space-between;
+  position: relative;
+  background: rgba(0, 0, 0, 0.015);
+}
+
+body[data-theme="night"] .pass-stub-side {
+  background: rgba(255, 255, 255, 0.02);
+}
+
+.pass-notch {
+  position: absolute;
+  left: -8px;
+  width: 14px;
+  height: 14px;
+  border-radius: 50%;
+  background: var(--bg-primary, #f8fafc);
+  z-index: 2;
+}
+
+.pass-notch.top { top: -7px; }
+.pass-notch.bottom { bottom: -7px; }
+
+.pass-barcode-vertical {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  font-family: var(--font-mono, monospace);
+  letter-spacing: 0.5px;
+}
+
+.barcode-lines {
+  font-size: 0.85rem;
+  font-weight: 900;
+  color: var(--text-primary, #0f172a);
+}
+
+.barcode-text {
+  font-size: 0.52rem;
+  color: var(--text-muted, #64748b);
+}
+
+.pass-stamp-seal {
+  width: 32px;
+  height: 32px;
+  border: 1.5px dashed #dc2626;
+  border-radius: 50%;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  color: #dc2626;
+  transform: rotate(-8deg);
+}
+
+.seal-inner {
+  font-family: var(--font-serif, serif);
+  font-size: 0.72rem;
+  font-weight: 900;
+}
+
+.pass-stamp-seal small {
+  font-size: 0.42rem;
+  font-weight: 700;
+}
+
+.pass-action-bar {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.btn-copy-pass {
+  background: var(--bg-surface, #ffffff);
+  border: 1px solid var(--border-subtle, rgba(0, 0, 0, 0.15));
+  color: var(--text-primary, #0f172a);
+  font-family: var(--font-mono, monospace);
+  font-size: 0.74rem;
+  font-weight: 600;
+  padding: 6px 14px;
+  border-radius: var(--radius-full, 9999px);
+  cursor: pointer;
+  transition: all 0.22s ease;
+}
+
+body[data-theme="night"] .btn-copy-pass {
+  background: #1e293b;
+  color: #f8fafc;
+  border-color: rgba(255, 255, 255, 0.15);
+}
+
+.btn-copy-pass:hover {
+  background: #10b981;
+  color: #ffffff;
+  border-color: #10b981;
+  transform: translateY(-1px);
+}
+
+.btn-copy-pass.copied {
+  background: #10b981;
+  color: #ffffff;
+  border-color: #10b981;
+}
+
+.pass-hint {
+  font-size: 0.68rem;
+  color: var(--text-muted, #64748b);
+  font-family: var(--font-mono, monospace);
+}
+

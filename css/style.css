@@ -1,0 +1,909 @@
+/* ==========================================================================
+   Hero Portofolio — Fluida Membuka Foto
+   Palet: Latar #f7f7f5 | Teks #1c1c1c | Aksen Hijau #22c55e
+   Tipografi: Caveat / Homemade Apple (Tulisan tangan tipis) & Outfit (Sans tipis)
+   ========================================================================== */
+
+:root {
+  --bg-primary: #f7f7f5;
+  --bg-surface: rgba(255, 255, 255, 0.86);
+  --bg-card: #ffffff;
+  --text-primary: #1c1c1c;
+  --text-secondary: #4a4a48;
+  --text-muted: #6e6e6a;
+  --text-whisper: rgba(28, 28, 28, 0.085);
+  --accent-green: #22c55e;
+  --accent-green-dark: #16a34a;
+  --accent-green-soft: rgba(34, 197, 94, 0.14);
+  --border-subtle: rgba(28, 28, 28, 0.12);
+
+  --font-sans: 'Outfit', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+  --font-script: 'Caveat', 'Homemade Apple', cursive;
+  --font-hand: 'Homemade Apple', 'Caveat', cursive;
+  --font-mono: 'JetBrains Mono', monospace;
+
+  --ease-out: cubic-bezier(0.22, 1, 0.36, 1);
+}
+
+*, *::before, *::after {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
+
+html, body {
+  width: 100%;
+  min-height: 100%;
+  background-color: var(--bg-primary);
+  color: var(--text-primary);
+  font-family: var(--font-sans);
+  font-weight: 300;
+  overflow-x: hidden;
+  -webkit-font-smoothing: antialiased;
+}
+
+/* Tekstur Kertas Halus */
+body::before {
+  content: "";
+  position: fixed;
+  inset: 0;
+  background-image: radial-gradient(rgba(28, 28, 28, 0.045) 1px, transparent 0);
+  background-size: 26px 26px;
+  pointer-events: none;
+  z-index: 0;
+}
+
+/* Utilitas Aksesibilitas (Screen Reader Only & Fokus Keyboard) */
+.sr-only, .sr-svg {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  margin: -1px;
+  overflow: hidden;
+  clip: rect(0, 0, 0, 0);
+  white-space: nowrap;
+  border: 0;
+  pointer-events: none;
+}
+
+button:focus-visible,
+a:focus-visible,
+input:focus-visible,
+[tabindex]:focus-visible {
+  outline: 2.5px solid var(--accent-green);
+  outline-offset: 3px;
+}
+
+/* ==========================================================================
+   Preloader
+   ========================================================================== */
+.preloader {
+  position: fixed;
+  inset: 0;
+  background: var(--bg-primary);
+  z-index: 10000;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 14px;
+  transition: opacity 0.45s ease, visibility 0.45s ease;
+}
+
+.preloader.hidden {
+  opacity: 0;
+  visibility: hidden;
+  pointer-events: none;
+}
+
+.preloader-spinner {
+  width: 42px;
+  height: 42px;
+  border: 2.5px solid rgba(28, 28, 28, 0.12);
+  border-top-color: var(--accent-green);
+  border-radius: 50%;
+  animation: spin 0.75s linear infinite;
+}
+
+@keyframes spin {
+  to { transform: rotate(360deg); }
+}
+
+.preloader-text {
+  font-family: var(--font-mono);
+  font-size: 0.8rem;
+  color: var(--text-secondary);
+  letter-spacing: 0.05em;
+}
+
+/* ==========================================================================
+   Layout Hero (Desktop: Kiri Teks ~42%, Kanan Visual 58%)
+   ========================================================================== */
+.hero-container {
+  position: relative;
+  z-index: 2;
+  width: 100%;
+  min-height: 100vh;
+  max-width: 1480px;
+  margin: 0 auto;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 3vw;
+  padding: 24px 4vw 24px 6vw;
+}
+
+/* Sisi Kiri: Teks, Dialog, dan Tombol */
+.hero-text-side {
+  position: relative;
+  flex: 0 1 42%;
+  max-width: 540px;
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 22px;
+  z-index: 10;
+}
+
+/* Teks "Hi! I'm Hyouka" Besar Semi-Transparan */
+.hero-bg-whisper {
+  font-family: var(--font-script);
+  font-size: clamp(3.8rem, 7.2vw, 6.8rem);
+  font-weight: 500;
+  color: var(--text-whisper);
+  line-height: 0.88;
+  letter-spacing: -0.01em;
+  user-select: none;
+  pointer-events: none;
+  margin-bottom: -14px;
+  white-space: nowrap;
+}
+
+/* Bubble Dialog Sapaan Jam Lokal */
+.vn-dialog-bubble {
+  position: relative;
+  background: var(--bg-surface);
+  border: 1px solid var(--border-subtle);
+  border-left: 3.5px solid var(--accent-green);
+  border-radius: 16px 16px 16px 4px;
+  padding: 16px 20px;
+  box-shadow: 0 12px 32px rgba(28, 28, 28, 0.045);
+  backdrop-filter: blur(10px);
+  max-width: 460px;
+  cursor: pointer;
+  transition: transform 0.25s var(--ease-out), border-color 0.25s ease, box-shadow 0.25s ease;
+}
+
+.vn-dialog-bubble:hover {
+  transform: translateY(-2px);
+  border-color: var(--accent-green);
+  box-shadow: 0 16px 36px rgba(34, 197, 94, 0.10);
+}
+
+.vn-speaker-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 7px;
+  font-family: var(--font-mono);
+  font-size: 0.7rem;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  color: var(--text-muted);
+  margin-bottom: 4px;
+}
+
+.vn-status-dot {
+  width: 7px;
+  height: 7px;
+  border-radius: 50%;
+  background: var(--accent-green);
+  box-shadow: 0 0 0 3px var(--accent-green-soft);
+}
+
+.vn-greeting-title {
+  font-family: var(--font-script);
+  font-size: clamp(1.75rem, 2.8vw, 2.3rem);
+  font-weight: 600;
+  color: var(--text-primary);
+  line-height: 1.15;
+  margin-bottom: 4px;
+}
+
+.vn-greeting-sub {
+  font-size: 0.94rem;
+  font-weight: 300;
+  color: var(--text-secondary);
+  line-height: 1.5;
+}
+
+/* Judul Utama & Subjudul */
+.hero-title-group {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.hero-heading {
+  font-family: var(--font-hand);
+  font-size: clamp(1.65rem, 2.6vw, 2.35rem);
+  font-weight: 400;
+  color: var(--text-primary);
+  line-height: 1.35;
+}
+
+.hero-realname {
+  font-family: var(--font-sans);
+  font-size: 0.58em;
+  font-weight: 300;
+  color: var(--text-muted);
+  margin-left: 4px;
+}
+
+.hero-subtitle {
+  font-family: var(--font-sans);
+  font-size: clamp(0.98rem, 1.15vw, 1.08rem);
+  font-weight: 300;
+  color: var(--text-secondary);
+  line-height: 1.65;
+}
+
+/* Tombol Aksi (Who i'm, Contact, Lihat foto) */
+.hero-actions {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 12px;
+  margin-top: 4px;
+}
+
+.btn-hero {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  padding: 11px 24px;
+  border-radius: 999px;
+  font-family: var(--font-sans);
+  font-size: 0.94rem;
+  font-weight: 400;
+  letter-spacing: 0.02em;
+  cursor: pointer;
+  transition: all 0.25s var(--ease-out);
+  text-decoration: none;
+}
+
+.btn-primary {
+  background: var(--text-primary);
+  color: #ffffff;
+  border: 1px solid var(--text-primary);
+}
+
+.btn-primary:hover {
+  background: var(--accent-green);
+  border-color: var(--accent-green);
+  color: #091e10;
+  font-weight: 500;
+  transform: translateY(-2px);
+  box-shadow: 0 10px 24px rgba(34, 197, 94, 0.25);
+}
+
+.btn-arrow {
+  transition: transform 0.22s ease;
+}
+
+.btn-primary:hover .btn-arrow {
+  transform: translateX(3px);
+}
+
+.btn-outline {
+  background: rgba(255, 255, 255, 0.75);
+  color: var(--text-primary);
+  border: 1px solid rgba(28, 28, 28, 0.25);
+}
+
+.btn-outline:hover {
+  border-color: var(--accent-green);
+  background: #ffffff;
+  transform: translateY(-2px);
+  box-shadow: 0 8px 20px rgba(28, 28, 28, 0.06);
+}
+
+.btn-ghost {
+  background: transparent;
+  color: var(--text-secondary);
+  border: 1px dashed rgba(28, 28, 28, 0.24);
+  padding: 10px 18px;
+  font-size: 0.86rem;
+}
+
+.btn-ghost:hover,
+.btn-ghost[aria-pressed="true"] {
+  border-style: solid;
+  border-color: var(--accent-green);
+  background: var(--accent-green-soft);
+  color: var(--text-primary);
+}
+
+.dot-indicator {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background: var(--text-muted);
+  transition: background 0.2s ease, box-shadow 0.2s ease;
+}
+
+.btn-ghost[aria-pressed="true"] .dot-indicator {
+  background: var(--accent-green);
+  box-shadow: 0 0 0 3px rgba(34, 197, 94, 0.25);
+}
+
+.hero-hint {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  font-family: var(--font-mono);
+  font-size: 0.74rem;
+  color: var(--text-muted);
+}
+
+.hint-dot {
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background: var(--accent-green);
+}
+
+.hero-hint kbd {
+  background: var(--text-primary);
+  color: #ffffff;
+  padding: 1px 6px;
+  border-radius: 4px;
+  font-size: 0.68rem;
+}
+
+/* ==========================================================================
+   Sisi Kanan: Area Visual Canvas WebGL Fluida (55% - 60% Lebar Desktop)
+   ========================================================================== */
+.hero-visual-side {
+  flex: 0 0 56%;
+  width: 56%;
+  height: min(88vh, 880px);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  position: relative;
+}
+
+/* Bingkai Rasio 3:4 (1086 x 1448 / 768 x 1024) — Latar Transparan Tanpa Kotak */
+.fluid-stage {
+  position: relative;
+  height: 100%;
+  width: auto;
+  max-width: 100%;
+  aspect-ratio: 3 / 4;
+  overflow: visible;
+  background: transparent;
+  border: none;
+  box-shadow: none;
+  user-select: none;
+}
+
+#fluid-reveal-canvas {
+  width: 100%;
+  height: 100%;
+  display: block;
+  touch-action: none;
+  cursor: crosshair;
+}
+
+/* Lapisan Area Mata (Clip-Path) yang Mengikuti Kursor 2-4px */
+.eye-layer-wrapper {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  z-index: 4;
+  transition: opacity 0.25s ease;
+  will-change: transform, opacity;
+}
+
+.eye-layer-wrapper.fade-for-reveal {
+  opacity: 0;
+}
+
+.eye-layer-img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  object-position: 50% 44%;
+  clip-path: url(#eyes-clip);
+  -webkit-clip-path: url(#eyes-clip);
+  display: block;
+  pointer-events: none;
+}
+
+/* Badge Keterangan di Bawah Kanvas */
+.stage-caption {
+  position: absolute;
+  bottom: 14px;
+  left: 50%;
+  transform: translateX(-50%);
+  background: rgba(255, 255, 255, 0.82);
+  border: 1px solid rgba(28, 28, 28, 0.1);
+  padding: 5px 14px;
+  border-radius: 999px;
+  font-family: var(--font-mono);
+  font-size: 0.7rem;
+  color: var(--text-secondary);
+  display: inline-flex;
+  align-items: center;
+  gap: 7px;
+  backdrop-filter: blur(8px);
+  pointer-events: none;
+  z-index: 6;
+  white-space: nowrap;
+}
+
+.stage-caption-dot {
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background: var(--accent-green);
+}
+
+/* ==========================================================================
+   Modal Info ("Who i'm" & "Contact")
+   ========================================================================== */
+.info-modal {
+  position: fixed;
+  inset: 0;
+  z-index: 2000;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 20px;
+  transition: opacity 0.28s ease, visibility 0.28s ease;
+}
+
+.info-modal.hidden {
+  opacity: 0;
+  visibility: hidden;
+  pointer-events: none;
+}
+
+.info-modal-backdrop {
+  position: absolute;
+  inset: 0;
+  background: rgba(28, 28, 28, 0.32);
+  backdrop-filter: blur(6px);
+}
+
+.info-modal-card {
+  position: relative;
+  z-index: 2;
+  width: 100%;
+  max-width: 540px;
+  background: #ffffff;
+  border: 1px solid rgba(28, 28, 28, 0.12);
+  border-radius: 22px;
+  padding: 32px;
+  box-shadow: 0 28px 70px rgba(0, 0, 0, 0.16);
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.modal-close-btn {
+  position: absolute;
+  top: 20px;
+  right: 22px;
+  width: 34px;
+  height: 34px;
+  border-radius: 50%;
+  border: 1px solid var(--border-subtle);
+  background: var(--bg-primary);
+  color: var(--text-primary);
+  font-size: 1.2rem;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: all 0.2s ease;
+}
+
+.modal-close-btn:hover {
+  border-color: var(--accent-green);
+  background: var(--accent-green-soft);
+}
+
+.modal-eyebrow {
+  font-family: var(--font-mono);
+  font-size: 0.72rem;
+  color: var(--accent-green-dark);
+  letter-spacing: 0.1em;
+}
+
+.modal-title {
+  font-family: var(--font-script);
+  font-size: 2.2rem;
+  font-weight: 600;
+  color: var(--text-primary);
+  line-height: 1.1;
+}
+
+.modal-nick {
+  font-family: var(--font-sans);
+  font-size: 1.05rem;
+  font-weight: 300;
+  color: var(--text-muted);
+}
+
+.modal-desc {
+  font-size: 0.96rem;
+  color: var(--text-secondary);
+  line-height: 1.65;
+}
+
+.modal-pillars {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 12px;
+}
+
+.pillar-item {
+  background: var(--bg-primary);
+  border: 1px solid var(--border-subtle);
+  border-radius: 14px;
+  padding: 14px;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.pillar-item strong {
+  font-size: 0.88rem;
+  font-weight: 500;
+  color: var(--text-primary);
+}
+
+.pillar-item span {
+  font-size: 0.8rem;
+  color: var(--text-secondary);
+  line-height: 1.45;
+}
+
+.contact-links-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 10px;
+}
+
+.contact-card-link {
+  background: var(--bg-primary);
+  border: 1px solid var(--border-subtle);
+  border-radius: 14px;
+  padding: 12px 14px;
+  text-decoration: none;
+  color: var(--text-primary);
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  transition: all 0.2s ease;
+}
+
+.contact-card-link:hover {
+  border-color: var(--accent-green);
+  background: var(--accent-green-soft);
+  transform: translateY(-2px);
+}
+
+.contact-type {
+  font-family: var(--font-mono);
+  font-size: 0.68rem;
+  color: var(--text-muted);
+  text-transform: uppercase;
+}
+
+.contact-card-link strong {
+  font-size: 0.84rem;
+  font-weight: 500;
+  word-break: break-all;
+}
+
+.modal-footer-actions {
+  display: flex;
+  justify-content: flex-end;
+  gap: 10px;
+  margin-top: 6px;
+}
+
+/* ==========================================================================
+   Tombol Mute di Kanan Bawah & Tombol Kalibrasi di Kiri Bawah
+   ========================================================================== */
+.audio-mute-dock {
+  position: fixed;
+  bottom: 22px;
+  right: 26px;
+  z-index: 900;
+}
+
+.btn-mute,
+.calibration-badge-btn {
+  background: var(--bg-surface);
+  border: 1px solid var(--border-subtle);
+  color: var(--text-primary);
+  padding: 8px 16px;
+  border-radius: 999px;
+  font-family: var(--font-mono);
+  font-size: 0.75rem;
+  cursor: pointer;
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  backdrop-filter: blur(8px);
+  box-shadow: 0 6px 20px rgba(0, 0, 0, 0.05);
+  transition: all 0.2s ease;
+}
+
+.btn-mute:hover,
+.calibration-badge-btn:hover {
+  border-color: var(--accent-green);
+  background: #ffffff;
+  transform: translateY(-1px);
+}
+
+.mute-dot {
+  width: 7px;
+  height: 7px;
+  border-radius: 50%;
+  background: var(--text-muted);
+}
+
+.btn-mute[aria-pressed="true"] .mute-dot {
+  background: var(--accent-green);
+  box-shadow: 0 0 0 3px var(--accent-green-soft);
+}
+
+.calibration-badge-btn {
+  position: fixed;
+  bottom: 22px;
+  left: 26px;
+  z-index: 900;
+}
+
+.calibration-badge-btn kbd {
+  background: var(--text-primary);
+  color: #ffffff;
+  padding: 1px 6px;
+  border-radius: 4px;
+  font-size: 0.68rem;
+}
+
+/* ==========================================================================
+   MODE KALIBRASI HUD (Tekan 'K' untuk Tampil/Sembunyi)
+   ========================================================================== */
+.calibration-hud {
+  position: fixed;
+  top: 20px;
+  right: 20px;
+  width: 350px;
+  max-height: calc(100vh - 40px);
+  overflow-y: auto;
+  background: rgba(20, 20, 24, 0.94);
+  color: #f5f5f5;
+  border: 1px solid rgba(255, 255, 255, 0.16);
+  border-radius: 16px;
+  padding: 18px 20px;
+  z-index: 9999;
+  box-shadow: 0 24px 60px rgba(0, 0, 0, 0.45);
+  backdrop-filter: blur(12px);
+  font-family: var(--font-mono);
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+  transition: opacity 0.22s ease, transform 0.22s ease;
+}
+
+.calibration-hud.hidden {
+  opacity: 0;
+  transform: translateY(-8px) scale(0.97);
+  pointer-events: none;
+}
+
+.hud-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.12);
+  padding-bottom: 10px;
+}
+
+.hud-header h3 {
+  font-size: 0.88rem;
+  color: var(--accent-green);
+  font-weight: 600;
+}
+
+.hud-close-btn {
+  background: none;
+  border: none;
+  color: #aaa;
+  font-size: 1.25rem;
+  cursor: pointer;
+  line-height: 1;
+}
+
+.hud-close-btn:hover {
+  color: #fff;
+}
+
+.hud-section {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.hud-section h4 {
+  font-size: 0.72rem;
+  color: #9ca3af;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+}
+
+.hud-note {
+  font-size: 0.68rem;
+  color: #9ca3af;
+  line-height: 1.4;
+}
+
+.hud-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  font-size: 0.7rem;
+  background: rgba(255, 255, 255, 0.05);
+  padding: 6px 8px;
+  border-radius: 6px;
+}
+
+.hud-row code {
+  color: #86efac;
+  font-size: 0.68rem;
+}
+
+.hud-slider-group {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.hud-slider-group label {
+  font-size: 0.72rem;
+  color: #d1d5db;
+  display: flex;
+  justify-content: space-between;
+}
+
+.hud-slider-group input[type="range"] {
+  width: 100%;
+  accent-color: var(--accent-green);
+  cursor: pointer;
+}
+
+.hud-copy-btn {
+  background: var(--accent-green);
+  color: #071e0e;
+  border: none;
+  padding: 10px 14px;
+  border-radius: 8px;
+  font-family: var(--font-mono);
+  font-size: 0.74rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: background 0.2s ease;
+  margin-top: 4px;
+}
+
+.hud-copy-btn:hover {
+  background: #16a34a;
+  color: #ffffff;
+}
+
+/* Overlay Kotak Kalibrasi Mata (Geser & Ubah Ukuran) */
+.eye-calibration-overlay {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  z-index: 50;
+  display: none;
+}
+
+.eye-calibration-overlay.active {
+  display: block;
+}
+
+.eye-target-box {
+  position: absolute;
+  border: 2px dashed var(--accent-green);
+  background: rgba(34, 197, 94, 0.22);
+  border-radius: 8px;
+  cursor: move;
+  transform: translate(-50%, -50%);
+  pointer-events: auto;
+  user-select: none;
+  touch-action: none;
+}
+
+.eye-target-box::before {
+  content: attr(data-label);
+  position: absolute;
+  bottom: calc(100% + 4px);
+  left: 50%;
+  transform: translateX(-50%);
+  background: #1c1c1c;
+  color: var(--accent-green);
+  font-family: var(--font-mono);
+  font-size: 0.6rem;
+  padding: 2px 6px;
+  border-radius: 4px;
+  white-space: nowrap;
+  pointer-events: none;
+}
+
+.eye-resize-handle {
+  position: absolute;
+  right: -6px;
+  bottom: -6px;
+  width: 12px;
+  height: 12px;
+  background: var(--accent-green);
+  border: 2px solid #1c1c1c;
+  border-radius: 50%;
+  cursor: nwse-resize;
+}
+
+/* ==========================================================================
+   Responsif HP / Tablet (Gambar di Atas, Teks di Bawah)
+   ========================================================================== */
+@media (max-width: 920px) {
+  .hero-container {
+    flex-direction: column-reverse;
+    justify-content: flex-start;
+    padding: 18px 5vw 84px;
+    gap: 22px;
+  }
+
+  .hero-visual-side {
+    flex: none;
+    width: 100%;
+    height: min(58vh, 520px);
+  }
+
+  .hero-text-side {
+    flex: none;
+    width: 100%;
+    max-width: 580px;
+    align-items: center;
+    text-align: center;
+  }
+
+  .vn-dialog-bubble {
+    text-align: left;
+    width: 100%;
+  }
+
+  .hero-actions {
+    justify-content: center;
+  }
+
+  .modal-pillars,
+  .contact-links-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .calibration-hud {
+    width: calc(100vw - 28px);
+    right: 14px;
+    top: 14px;
+  }
+}

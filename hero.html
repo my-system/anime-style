@@ -1,0 +1,280 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Hi! I'm Hyouka — Portofolio Yusuf (S.Stat)</title>
+  <meta name="description" content="Portofolio interaktif Yusuf (S.Stat) dengan efek fluida WebGL 2D Navier-Stokes yang membuka foto asli di balik ilustrasi anime.">
+  <link rel="icon" type="image/svg+xml" href="favicon.svg">
+
+  <!-- Google Fonts: Caveat & Homemade Apple (Tulisan tangan tipis), Outfit (Sans tipis), JetBrains Mono (HUD) -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Caveat:wght@400;500;600&family=Homemade+Apple&family=JetBrains+Mono:wght@400;500&family=Outfit:wght@200;300;400;500;600&display=swap" rel="stylesheet">
+
+  <link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+
+  <!-- Layar Preloader Sederhana -->
+  <div id="preloader" class="preloader" role="status" aria-live="polite">
+    <div class="preloader-spinner" aria-hidden="true"></div>
+    <p class="preloader-text">Memuat ilustrasi &amp; foto...</p>
+  </div>
+
+  <!-- Definisi SVG Clip-Path untuk Lapisan Area Mata (Mengikuti Kursor 2-4px) -->
+  <svg width="0" height="0" class="sr-svg" aria-hidden="true">
+    <defs>
+      <clipPath id="eyes-clip" clipPathUnits="objectBoundingBox">
+        <ellipse id="clip-left-eye" cx="0.434" cy="0.312" rx="0.031" ry="0.014"></ellipse>
+        <ellipse id="clip-right-eye" cx="0.584" cy="0.312" rx="0.031" ry="0.014"></ellipse>
+      </clipPath>
+    </defs>
+  </svg>
+
+  <!-- Kontainer Utama Hero -->
+  <main class="hero-container">
+
+    <!-- Sisi Kiri: Tipografi, Bubble Dialog Sapaan Jam Lokal, dan Tombol Aksi -->
+    <section class="hero-text-side" aria-label="Perkenalan Portofolio">
+
+      <!-- Teks Besar Semi-Transparan di Latar -->
+      <div class="hero-bg-whisper" aria-hidden="true">Hi! I'm Hyouka</div>
+
+      <!-- Bubble Dialog Sapaan Sesuai Jam Lokal -->
+      <div class="vn-dialog-bubble" id="dialog-bubble" role="region" aria-live="polite" tabindex="0" title="Klik untuk sapaan berikutnya">
+        <span class="vn-speaker-badge">
+          <span class="vn-status-dot" aria-hidden="true"></span>
+          <span id="vn-time-label">Sapaan Waktu</span>
+        </span>
+        <p class="vn-greeting-title" id="vn-greeting-text">Konbanwa</p>
+        <p class="vn-greeting-sub" id="vn-greeting-sub">
+          Sentuh atau usap kursor pada ilustrasi di samping untuk melihat sosok asliku di balik kanvas.
+        </p>
+      </div>
+
+      <!-- Judul Bergaya Tulisan Tangan Tipis & Subjudul Outfit Tipis -->
+      <div class="hero-title-group">
+        <h1 class="hero-heading">Hi! I'm Hyouka <span class="hero-realname">/ Yusuf, S.Stat</span></h1>
+        <p class="hero-subtitle">
+          Creative Frontend Developer &amp; Data Analyst yang senang meracik antarmuka web interaktif, simulasi fisika visual, dan pemodelan data yang presisi.
+        </p>
+      </div>
+
+      <!-- Dua Tombol Utama (Who i'm & Contact) + Tombol Lihat Foto (Crossfade / Reduced Motion) -->
+      <div class="hero-actions" role="group" aria-label="Navigasi Profil dan Kontak">
+        <button type="button" id="btn-whoim" class="btn-hero btn-primary">
+          <span>Who i'm</span>
+          <span class="btn-arrow" aria-hidden="true">→</span>
+        </button>
+        <button type="button" id="btn-contact" class="btn-hero btn-outline">
+          <span>Contact</span>
+        </button>
+        <button type="button" id="btn-toggle-photo" class="btn-hero btn-ghost" aria-pressed="false" title="Crossfade antara ilustrasi dan foto asli">
+          <span class="dot-indicator" aria-hidden="true"></span>
+          <span id="label-toggle-photo">Lihat foto</span>
+        </button>
+      </div>
+
+      <!-- Petunjuk Interaksi Singkat -->
+      <p class="hero-hint">
+        <span class="hint-dot" aria-hidden="true"></span>
+        <span>Usap gambar untuk membuka foto &bull; Tekan <kbd>K</kbd> untuk mode kalibrasi</span>
+      </p>
+    </section>
+
+    <!-- Sisi Kanan (55% - 60% Lebar Desktop): Kanvas WebGL Fluida Rasio 3:4 -->
+    <section class="hero-visual-side" aria-label="Kanvas Interaktif Ilustrasi dan Foto Asli">
+      <div class="fluid-stage" id="fluid-stage">
+
+        <!-- Gambar Aksesibilitas Tersembunyi untuk Screen Reader -->
+        <img src="img/hyouka.webp" alt="Ilustrasi anime karakter Hyouka dengan kemeja putih dan jam tangan" class="sr-only">
+        <img src="img/foto.webp" alt="Foto asli Yusuf mengenakan jas formal dengan pose tangan di dagu" class="sr-only">
+
+        <!-- Canvas WebGL 2D Navier-Stokes -->
+        <canvas
+          id="fluid-reveal-canvas"
+          role="img"
+          aria-label="Kanvas interaktif: gerakkan kursor atau jari untuk menghapus lapisan ilustrasi anime dan menampilkan foto asli Yusuf di bawahnya.">
+        </canvas>
+
+        <!-- Lapisan Area Mata (Clip-Path) yang Bergeser 2-4px Mengikuti Kursor -->
+        <div id="eye-layer-wrapper" class="eye-layer-wrapper" aria-hidden="true">
+          <img id="eye-layer-img" src="img/hyouka.webp" alt="" class="eye-layer-img" draggable="false">
+        </div>
+
+        <!-- Overlay Kotak Area Mata untuk Mode Kalibrasi (Bisa Digeser & Diubah Ukurannya) -->
+        <div id="eye-calibration-overlay" class="eye-calibration-overlay" aria-hidden="true">
+          <div id="target-box-lefteye" class="eye-target-box" data-label="Mata Kiri" tabindex="0" role="slider" aria-label="Area Mata Kiri">
+            <span class="eye-resize-handle" data-resize="left" title="Tarik untuk ubah ukuran"></span>
+          </div>
+          <div id="target-box-righteye" class="eye-target-box" data-label="Mata Kanan" tabindex="0" role="slider" aria-label="Area Mata Kanan">
+            <span class="eye-resize-handle" data-resize="right" title="Tarik untuk ubah ukuran"></span>
+          </div>
+        </div>
+
+        <!-- Badge Status Kecil di Sudut Kanvas -->
+        <div class="stage-caption" aria-hidden="true">
+          <span class="stage-caption-dot"></span>
+          <span id="stage-status-text">Usap kanvas untuk menyibak foto</span>
+        </div>
+      </div>
+    </section>
+
+  </main>
+
+  <!-- Modal / Drawer "Who i'm" -->
+  <div id="modal-whoim" class="info-modal hidden" role="dialog" aria-modal="true" aria-labelledby="modal-whoim-title">
+    <div class="info-modal-backdrop" data-close-modal="modal-whoim"></div>
+    <div class="info-modal-card">
+      <button type="button" class="modal-close-btn" data-close-modal="modal-whoim" aria-label="Tutup panel Who i'm">×</button>
+      <span class="modal-eyebrow">WHO I'M // PROFIL SINGKAT</span>
+      <h2 id="modal-whoim-title" class="modal-title">Yusuf, S.Stat <span class="modal-nick">(Hyouka)</span></h2>
+      <p class="modal-desc">
+        Halo! Aku <strong>Yusuf</strong>, seorang <em>Creative Web Developer</em> dan lulusan <strong>Statistika (S.Stat)</strong>. Aku menyukai perpaduan antara ketajaman logika data dengan kehangatan karya visual interaktif di web.
+      </p>
+      <div class="modal-pillars">
+        <div class="pillar-item">
+          <strong>Creative Frontend &amp; WebGL</strong>
+          <span>Merancang pengalaman web interaktif dengan HTML, CSS, JavaScript murni, dan shader WebGL yang ringan.</span>
+        </div>
+        <div class="pillar-item">
+          <strong>Statistical &amp; Data Thinking</strong>
+          <span>Mengolah data menjadi visualisasi dan keputusan produk yang akurat, terstruktur, dan mudah dipahami.</span>
+        </div>
+      </div>
+      <div class="modal-footer-actions">
+        <button type="button" class="btn-hero btn-primary" id="btn-switch-to-contact">Hubungi Saya →</button>
+        <button type="button" class="btn-hero btn-ghost" data-close-modal="modal-whoim">Kembali ke Kanvas</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Modal / Drawer "Contact" -->
+  <div id="modal-contact" class="info-modal hidden" role="dialog" aria-modal="true" aria-labelledby="modal-contact-title">
+    <div class="info-modal-backdrop" data-close-modal="modal-contact"></div>
+    <div class="info-modal-card">
+      <button type="button" class="modal-close-btn" data-close-modal="modal-contact" aria-label="Tutup panel Contact">×</button>
+      <span class="modal-eyebrow">CONTACT // MARI TERHUBUNG</span>
+      <h2 id="modal-contact-title" class="modal-title">Kirim Pesan untuk Yusuf</h2>
+      <p class="modal-desc">
+        Tertarik berkolaborasi dalam proyek web interaktif, visualisasi data, atau sekadar menyapa? Silakan hubungi melalui kanal berikut:
+      </p>
+      <div class="contact-links-grid">
+        <a href="mailto:yusufdarwis097@gmail.com" class="contact-card-link">
+          <span class="contact-type">Email</span>
+          <strong>yusufdarwis097@gmail.com</strong>
+        </a>
+        <a href="https://www.linkedin.com/in/yusuf-s-stat-41420931a/" target="_blank" rel="noopener noreferrer" class="contact-card-link">
+          <span class="contact-type">LinkedIn</span>
+          <strong>Yusuf, S.Stat ↗</strong>
+        </a>
+        <a href="https://github.com/my-system/" target="_blank" rel="noopener noreferrer" class="contact-card-link">
+          <span class="contact-type">GitHub</span>
+          <strong>github.com/my-system ↗</strong>
+        </a>
+        <a href="https://www.instagram.com/m._.systm/" target="_blank" rel="noopener noreferrer" class="contact-card-link">
+          <span class="contact-type">Instagram</span>
+          <strong>@m._.systm ↗</strong>
+        </a>
+      </div>
+      <div class="modal-footer-actions">
+        <button type="button" class="btn-hero btn-ghost" data-close-modal="modal-contact">Tutup</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Tombol Pintas Mode Kalibrasi (Kiri Bawah) -->
+  <button id="btn-calibration-toggle" class="calibration-badge-btn" type="button" aria-expanded="false" aria-controls="calibration-hud" title="Buka Mode Kalibrasi (Pintasan: Huruf K)">
+    <span>Kalibrasi</span>
+    <kbd>K</kbd>
+  </button>
+
+  <!-- Tombol Mute Musik Latar di Kanan Bawah (Tidak berputar sebelum diklik) -->
+  <div class="audio-mute-dock">
+    <button id="btn-audio-mute" class="btn-mute" type="button" aria-pressed="false" title="Putar / bisukan musik latar ambient">
+      <span class="mute-dot" aria-hidden="true"></span>
+      <span id="audio-mute-icon" aria-hidden="true">🔇</span>
+      <span id="audio-mute-label">Audio: Off</span>
+    </button>
+  </div>
+
+  <!-- Panel HUD Mode Kalibrasi (Tekan 'K' untuk Tampil/Sembunyi) -->
+  <aside id="calibration-hud" class="calibration-hud hidden" aria-label="Panel Mode Kalibrasi">
+    <div class="hud-header">
+      <h3>⚙ Mode Kalibrasi (K)</h3>
+      <button id="btn-hud-close" class="hud-close-btn" type="button" aria-label="Tutup panel kalibrasi">×</button>
+    </div>
+
+    <!-- 1. Slider Opasitas Foto -->
+    <div class="hud-section">
+      <h4>1. Perbandingan Foto &amp; Ilustrasi</h4>
+      <div class="hud-slider-group">
+        <label for="slider-photo-opacity">
+          <span>Opasitas Foto Asli:</span>
+          <strong id="val-photo-opacity">0%</strong>
+        </label>
+        <input type="range" id="slider-photo-opacity" min="0" max="1" step="0.01" value="0">
+      </div>
+    </div>
+
+    <!-- 2. Slider Fluida -->
+    <div class="hud-section">
+      <h4>2. Parameter Simulasi Fluida</h4>
+      <div class="hud-slider-group">
+        <label for="slider-max-reveal">
+          <span>Bukaan Maksimal Kursor (Akumulasi Sapuan Kuas):</span>
+          <strong id="val-max-reveal">100%</strong>
+        </label>
+        <input type="range" id="slider-max-reveal" min="0.20" max="1.00" step="0.05" value="1.00">
+      </div>
+
+      <div class="hud-slider-group">
+        <label for="slider-fluid-radius">
+          <span>Radius Fluida:</span>
+          <strong id="val-fluid-radius">0.0035</strong>
+        </label>
+        <input type="range" id="slider-fluid-radius" min="0.001" max="0.020" step="0.0005" value="0.0035">
+      </div>
+
+      <div class="hud-slider-group">
+        <label for="slider-dissipation">
+          <span>Dissipation (Laju Pudar):</span>
+          <strong id="val-dissipation">0.978</strong>
+        </label>
+        <input type="range" id="slider-dissipation" min="0.900" max="0.992" step="0.001" value="0.978">
+      </div>
+
+      <div class="hud-slider-group">
+        <label for="slider-distortion">
+          <span>Kekuatan Distorsi Tepi:</span>
+          <strong id="val-distortion">0.002</strong>
+        </label>
+        <input type="range" id="slider-distortion" min="0" max="0.040" step="0.001" value="0.002">
+      </div>
+    </div>
+
+    <!-- 3. Kotak Area Mata (Geser & Ubah Ukuran, Nilai dalam %) -->
+    <div class="hud-section">
+      <h4>3. Area Mata (Geser &amp; Tarik Sudut)</h4>
+      <p class="hud-note">
+        Geser kotak hijau di atas mata karakter atau tarik titik sudutnya untuk mengubah ukuran.
+      </p>
+      <div class="hud-row">
+        <span>Mata Kiri (%):</span>
+        <code id="label-coord-lefteye">x:43.4% y:31.2% w:6.2% h:2.8%</code>
+      </div>
+      <div class="hud-row">
+        <span>Mata Kanan (%):</span>
+        <code id="label-coord-righteye">x:58.4% y:31.2% w:6.2% h:2.8%</code>
+      </div>
+      <button id="btn-copy-config" class="hud-copy-btn" type="button">
+        📋 Salin Konfigurasi ke config.js
+      </button>
+    </div>
+  </aside>
+
+  <!-- Modul Utama Hero Mandiri -->
+  <script type="module" src="js/hero.js"></script>
+</body>
+</html>

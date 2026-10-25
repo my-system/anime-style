@@ -1,0 +1,129 @@
+/* ==========================================================================
+   Themes & Atmosphere CSS (Bagian 2 & 6 Cetak Biru)
+   - Terang (Default): #f7f7f5 ke #e9e9e6, aksen #22c55e
+   - Malam: #0f1210 ke #1b201d, aksen #4ade80, filter brightness(.85) contrast(1.1)
+   - Hujan: #e4e9ee, teks #1c2430, filter saturate(.8) + kanvas rintik hujan
+   ========================================================================== */
+
+body[data-theme="light"] {
+  --bg-primary: #f7f7f5;
+  --bg-secondary: #e9e9e6;
+  --bg-gradient: linear-gradient(135deg, #f7f7f5 0%, #e9e9e6 100%);
+  --bg-surface: rgba(255, 255, 255, 0.88);
+  --bg-card: rgba(255, 255, 255, 0.80);
+  --border-subtle: rgba(28, 28, 28, 0.09);
+  --border-strong: rgba(28, 28, 28, 0.24);
+
+  --text-primary: #1c1c1c;
+  --text-muted: #5a5a58;
+  --text-faint: rgba(28, 28, 28, 0.14);
+  --text-inverse: #f7f7f5;
+
+  --accent-green: #22c55e;
+  --accent-green-soft: rgba(34, 197, 94, 0.12);
+  --accent-green-glow: rgba(34, 197, 94, 0.35);
+}
+
+body[data-theme="night"] {
+  --bg-primary: #0f1210;
+  --bg-secondary: #1b201d;
+  --bg-gradient: linear-gradient(135deg, #0f1210 0%, #1b201d 100%);
+  --bg-surface: rgba(20, 26, 22, 0.88);
+  --bg-card: rgba(24, 31, 27, 0.82);
+  --border-subtle: rgba(255, 255, 255, 0.09);
+  --border-strong: rgba(255, 255, 255, 0.22);
+
+  --text-primary: #ececec;
+  --text-muted: #9ca69e;
+  --text-faint: rgba(255, 255, 255, 0.12);
+  --text-inverse: #0f1210;
+
+  --accent-green: #4ade80;
+  --accent-green-soft: rgba(74, 222, 128, 0.15);
+  --accent-green-glow: rgba(74, 222, 128, 0.52);
+}
+
+body[data-theme="night"]::before {
+  background-image: radial-gradient(rgba(255, 255, 255, 0.04) 1px, transparent 0);
+}
+
+body[data-theme="night"] .character-img,
+body[data-theme="night"] .character-eyes-layer img {
+  filter: brightness(0.85) contrast(1.1);
+}
+
+body[data-theme="night"] .eyes-glow-overlay {
+  opacity: 0.78;
+}
+
+body[data-theme="rain"] {
+  --bg-primary: #e4e9ee;
+  --bg-secondary: #d4dce4;
+  --bg-gradient: linear-gradient(135deg, #e4e9ee 0%, #d4dce4 100%);
+  --bg-surface: rgba(242, 246, 250, 0.88);
+  --bg-card: rgba(236, 242, 248, 0.82);
+  --border-subtle: rgba(28, 36, 48, 0.10);
+  --border-strong: rgba(28, 36, 48, 0.24);
+
+  --text-primary: #1c2430;
+  --text-muted: #526071;
+  --text-faint: rgba(28, 36, 48, 0.13);
+  --text-inverse: #ffffff;
+
+  --accent-green: #22c55e;
+  --accent-green-soft: rgba(34, 197, 94, 0.14);
+  --accent-green-glow: rgba(34, 197, 94, 0.38);
+}
+
+body[data-theme="rain"] .character-img,
+body[data-theme="rain"] .character-eyes-layer img {
+  filter: saturate(0.8);
+}
+
+body[data-theme="rain"] #rain-canvas {
+  opacity: 1;
+}
+
+/* Nonaktifkan Seluruh Efek Fluida Khusus pada Tema Hujan */
+body[data-theme="rain"] .fluid-cur,
+body[data-theme="rain"] #fluid-reveal-canvas,
+body[data-theme="rain"] .character-fluid-canvas {
+  display: none !important;
+  opacity: 0 !important;
+  pointer-events: none !important;
+  visibility: hidden !important;
+}
+
+/* Toast Komentar Suasana */
+.mood-toast {
+  position: fixed;
+  bottom: 88px;
+  left: 36px;
+  background: var(--bg-surface);
+  border: 1px solid var(--accent-green);
+  color: var(--text-primary);
+  padding: 9px 16px;
+  border-radius: var(--radius-md);
+  font-size: 0.8rem;
+  font-family: var(--font-mono);
+  box-shadow: 0 10px 28px rgba(0, 0, 0, 0.12);
+  backdrop-filter: blur(12px);
+  pointer-events: none;
+  opacity: 0;
+  transform: translateY(10px);
+  transition: all var(--duration-normal) var(--ease-spring);
+  z-index: 10000;
+  max-width: 380px;
+}
+
+.mood-toast.show {
+  opacity: 1;
+  transform: translateY(0);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after {
+    animation-duration: 0.01ms !important;
+    transition-duration: 0.01ms !important;
+  }
+}

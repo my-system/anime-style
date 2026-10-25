@@ -1,0 +1,1610 @@
+/**
+ * Main Application Orchestrator (Cetak Biru Portofolio Hyouka Versi 2)
+ * Mengatur Gerbang, Urutan Animasi Prolog, Kamera Karakter per Bab,
+ * Visual Novel Engine, RPG Skills, Lembar Misi, Timeline, Surat & Mode Ringkas
+ */
+
+import { siteConfig } from '../data/config.js';
+import {
+  moodComments,
+  whoAmIDialogues,
+  whoAmIExtraDialogues,
+  easterEggDialogues,
+  timeGreetings
+} from '../data/dialogs.js';
+import { skillsData } from '../data/skills.js';
+import { projectsData } from '../data/projects.js';
+import { creativeData } from '../data/creative.js';
+import { timelineData } from '../data/timeline.js';
+import { achievementsList } from '../data/achievements.js';
+import { soundEngine } from './audio.js';
+import { initFluidCursor, initMagneticCursor } from './fluidCursor.js';
+import { initCharacterFluidReveal } from './characterReveal.js';
+import { initEyes, setCharacterExpression } from './eyes.js';
+import { initRainCanvas } from './rain.js';
+import { DialogPlayer } from './dialog.js';
+import { initCharacterBehavior } from './character.js';
+import { initEmojiWidget } from './emoji.js';
+import {
+  achievementManager,
+  triggerAchievement,
+  initAchievementsModal
+} from './achievements.js';
+import { initOfudaGuestbook } from './ofuda.js';
+
+document.addEventListener('DOMContentLoaded', () => {
+  const prologTextEl = document.getElementById('prolog-dialog-text');
+  const dialogPlayer = new DialogPlayer(prologTextEl);
+
+  // Inisialisasi sistem kanvas fluida Navier-Stokes & kursor magnetik (dari Profil Cafe Cinematic)
+  initFluidCursor();
+  initMagneticCursor();
+  initCharacterFluidReveal();
+  initEyes((stareText) => {
+    dialogPlayer.typeText(stareText);
+  });
+  initRainCanvas(dialogPlayer);
+  initCharacterBehavior(dialogPlayer);
+  initEmojiWidget(dialogPlayer);
+  initAchievementsModal();
+  initOfudaGuestbook();
+
+  // Render seluruh konten bab dari folder /data
+  renderSkills();
+  renderProjects();
+  renderTimeline();
+  renderCompactRecruiterView();
+  renderEpilogAchievementsSummary();
+  setupWhoAmIScene();
+  setupCvScrollModal();
+  setupSecretEasterEggButton(dialogPlayer);
+
+  // Navigasi antar-bab & koreografi kamera karakter
+  setupSceneTransitions();
+
+  // Pengubah Suasana (Terang, Malam, Hujan)
+  setupMoodSwitcher(dialogPlayer);
+
+  // Sakelar Mode Cerita / Mode Ringkas (Recruiter 10-detik)
+  setupCompactMode();
+
+  // Tombol Mute Audio
+  setupAudioToggle();
+
+  // Konami Code Easter Egg
+  setupKonamiCode(dialogPlayer);
+
+  // Gerbang Pembuka (Preload aset & izin audio)
+  setupGate(dialogPlayer);
+});
+
+/**
+ * 1. Scene 0: Suzume no Tojimari Cinematic Video Opening (Gerbang Pembuka Hyouka)
+ * Durasi Video: 8 Detik
+ * 0s - 2s: Kamera meluncur maju melintasi genangan air tenang menuju pintu Suzume di reruntuhan.
+ * 2s - 4s: Gagang pintu kuningan berkilau terkena pantulan cahaya, berputar turun ("clack!").
+ * 4s - 6s: Pintu mengayun terbuka lebar menyemburkan aurora hijau zamrud, langit bintang Tokoyo & berkas cahaya ilahi.
+ * 6s - 8s: Kamera melesat masuk menembus pintu ke dalam inti cahaya yang menyilaukan, lalu layar memutih bersih menyatu ke panggung Hero.
+ */
+function setupGate(dialogPlayer) {
+  const overlay = document.getElementById('gate-overlay');
+  if (!overlay) return;
+
+  const idleVideo = document.getElementById('loader-idle-video');
+  const introVideo = document.getElementById('loader-intro-video');
+  const doorHotspot = document.getElementById('suzume-door-hotspot');
+  const doorRipple = document.getElementById('door-click-ripple');
+  const whiteoutVeil = document.getElementById('video-whiteout-veil');
+  const subText = document.getElementById('loader-sub-text');
+  const statusText = document.getElementById('loader-text-status');
+  const audioToggle = document.getElementById('loader-audio-toggle');
+  const audioIcon = document.getElementById('loader-audio-icon');
+  const audioLabel = document.getElementById('loader-audio-label');
+  const skipBtn = document.getElementById('loader-skip-btn');
+
+  let isAudioEnabled = false;
+  let isOpeningTriggered = false;
+  let isSequenceFinished = false;
+  let latchSoundPlayed = false;
+  let chimeSoundPlayed = false;
+  let failsafeTimer = null;
+
+  // Cek preferensi audio tersimpan
+  try {
+    if (localStorage.getItem('amine_audio') === 'on') {
+      isAudioEnabled = true;
+      if (audioToggle) audioToggle.classList.add('active');
+      if (audioIcon) audioIcon.textContent = '🔊';
+      if (audioLabel) audioLabel.textContent = 'Suara: Aktif';
+    }
+  } catch (e) {}
+
+  function toggleAudio() {
+    isAudioEnabled = !isAudioEnabled;
+    soundEngine.init(isAudioEnabled);
+    if (isAudioEnabled) soundEngine.playClickSound();
+
+    if (idleVideo && isOpeningTriggered) idleVideo.muted = !isAudioEnabled;
+    if (introVideo) introVideo.muted = !isAudioEnabled;
+
+    if (audioToggle) audioToggle.classList.toggle('active', isAudioEnabled);
+    if (audioIcon) audioIcon.textContent = isAudioEnabled ? '🔊' : '🔇';
+    if (audioLabel) audioLabel.textContent = isAudioEnabled ? 'Suara: Aktif' : 'Suara: Senyap';
+
+    const audioBtn = document.getElementById('audio-mute-btn');
+    if (audioBtn) {
+      audioBtn.innerHTML = isAudioEnabled ? '<span class="ctrl-icon">🔊</span>' : '<span class="ctrl-icon">🔇</span>';
+      audioBtn.title = isAudioEnabled ? 'Audio Latar: Aktif (Klik untuk Matikan)' : 'Audio Latar: Senyap (Klik untuk Nyalakan)';
+      audioBtn.classList.toggle('active', isAudioEnabled);
+    }
+    try {
+      localStorage.setItem('amine_audio', isAudioEnabled ? 'on' : 'off');
+    } catch (e) {}
+  }
+
+  if (audioToggle) {
+    audioToggle.addEventListener('click', (e) => {
+      e.stopPropagation();
+      toggleAudio();
+    });
+  }
+
+  // Mulai Tahap 1: Video Idle Pintu Hening
+  // Kunci autoplay modern browser: Selalu mulai dengan muted=true agar 100% tidak diblokir browser
+  if (idleVideo) {
+    idleVideo.muted = true;
+    idleVideo.defaultMuted = true;
+    idleVideo.loop = true;
+    idleVideo.playsInline = true;
+
+    const startIdlePlay = () => {
+      const p = idleVideo.play();
+      if (p !== undefined) {
+        p.catch(() => {
+          idleVideo.muted = true;
+          idleVideo.play().catch(() => {});
+        });
+      }
+    };
+
+    startIdlePlay();
+
+    // Pastikan jika ada interaksi kursor pertama kali, video dipastikan bergerak
+    window.addEventListener('pointerdown', () => {
+      if (!isOpeningTriggered && idleVideo.paused) {
+        startIdlePlay();
+      }
+    }, { once: true });
+
+    // Jaminan loop mulus tanpa freeze di akhir detik 8
+    idleVideo.addEventListener('ended', () => {
+      idleVideo.currentTime = 0;
+      idleVideo.play().catch(() => {});
+    });
+  }
+
+  if (subText) subText.classList.add('visible');
+
+  // Transisi Menembus Pintu Menuju Panggung Hero (Tahap Akhir)
+  function executeTransitionToHero() {
+    if (isSequenceFinished) return;
+    isSequenceFinished = true;
+
+    if (failsafeTimer) clearTimeout(failsafeTimer);
+
+    if (statusText) statusText.textContent = 'Melangkah Masuk ke Dunia Hyouka...';
+    if (subText) subText.style.opacity = '0';
+    if (skipBtn) skipBtn.style.opacity = '0';
+    const topControls = document.querySelector('.loader-top-controls');
+    if (topControls) {
+      topControls.style.opacity = '0';
+      topControls.style.pointerEvents = 'none';
+    }
+
+    // Aktifkan tabir putih murni untuk transisi tanpa celah
+    if (whiteoutVeil) whiteoutVeil.classList.add('active');
+
+    setTimeout(() => {
+      overlay.classList.add('fade-out');
+      triggerAchievement('welcome');
+      playPrologEntranceSequence(dialogPlayer);
+
+      setTimeout(() => {
+        overlay.classList.add('hidden');
+        overlay.style.display = 'none';
+        if (idleVideo) { try { idleVideo.pause(); } catch (e) {} }
+        if (introVideo) { try { introVideo.pause(); } catch (e) {} }
+      }, 550);
+    }, 280);
+  }
+
+  // Mulai Tahap 2: Kamera Mendekati Pintu, Memutar Gagang, dan Membuka ke Tokoyo
+  function triggerDoorOpen() {
+    if (isOpeningTriggered || isSequenceFinished) return;
+    isOpeningTriggered = true;
+
+    // Aktifkan audio jika belum diaktifkan oleh pengguna
+    if (!isAudioEnabled) {
+      toggleAudio();
+    } else {
+      soundEngine.init(true);
+    }
+
+    // Mainkan suara putaran kunci pintu
+    soundEngine.playDoorLatchSound();
+    latchSoundPlayed = true;
+
+    // Animasi shockwave riak air di pintu
+    if (doorRipple) {
+      doorRipple.classList.add('active');
+    }
+
+    // Sembunyikan hotspot interaktif
+    if (doorHotspot) {
+      doorHotspot.style.opacity = '0';
+      doorHotspot.style.pointerEvents = 'none';
+    }
+
+    if (statusText) statusText.textContent = 'Membuka Kunci Gerbang Suzume...';
+
+    // Munculkan dan putar Video 2 (Membuka Pintu)
+    if (introVideo) {
+      introVideo.classList.add('playing');
+      introVideo.muted = !isAudioEnabled;
+      introVideo.currentTime = 0;
+      introVideo.play().catch(() => {});
+
+      // Hentikan video 1 setelah transisi cross-fade mulus
+      setTimeout(() => {
+        if (idleVideo) {
+          try { idleVideo.pause(); } catch (e) {}
+        }
+      }, 600);
+
+      // Failsafe 8.8 detik untuk video 2
+      failsafeTimer = setTimeout(() => {
+        executeTransitionToHero();
+      }, 8800);
+    } else {
+      executeTransitionToHero();
+    }
+  }
+
+  // Pasang pendengar klik pada Hotspot Pintu Suzume
+  if (doorHotspot) {
+    doorHotspot.addEventListener('click', (e) => {
+      e.stopPropagation();
+      triggerDoorOpen();
+    });
+    doorHotspot.addEventListener('keydown', (e) => {
+      if (e.key === 'Enter' || e.key === ' ') {
+        e.preventDefault();
+        triggerDoorOpen();
+      }
+    });
+  }
+
+  // Klik di mana saja pada overlay juga memicu pembukaan gerbang
+  overlay.addEventListener('click', (e) => {
+    if (e.target.closest('#loader-audio-toggle') || e.target.closest('#loader-skip-btn')) return;
+    if (!isOpeningTriggered) {
+      triggerDoorOpen();
+    }
+  });
+
+  // Tombol Lewati langsung menuju ke Hero
+  if (skipBtn) {
+    skipBtn.addEventListener('click', (e) => {
+      e.stopPropagation();
+      executeTransitionToHero();
+    });
+  }
+
+  // Sinkronisasi Cerita & Suara Berdasarkan Waktu Video 2 (8 Detik)
+  if (introVideo) {
+    introVideo.addEventListener('timeupdate', () => {
+      const cur = introVideo.currentTime;
+
+      // 0.0s - 2.0s: Mendekati pintu
+      if (cur < 2.0) {
+        if (statusText && statusText.textContent !== 'Mendekati Gerbang Suzume...') {
+          statusText.textContent = 'Mendekati Gerbang Suzume...';
+        }
+      }
+      // 2.0s - 4.2s: Gagang pintu berkilau & berputar ("clack")
+      else if (cur >= 2.0 && cur < 4.2) {
+        if (!latchSoundPlayed) {
+          latchSoundPlayed = true;
+          soundEngine.playDoorLatchSound();
+        }
+        if (statusText && statusText.textContent !== 'Membuka Kunci Pintu...') {
+          statusText.textContent = 'Membuka Kunci Pintu...';
+        }
+      }
+      // 4.2s - 6.8s: Pintu terbuka lebar menyemburkan bintang & aurora Tokoyo
+      else if (cur >= 4.2 && cur < 6.8) {
+        if (!chimeSoundPlayed) {
+          chimeSoundPlayed = true;
+          soundEngine.playDoorOpenChime();
+        }
+        if (statusText && statusText.textContent !== 'Menyibak Cahaya Bintang Tokoyo...') {
+          statusText.textContent = 'Menyibak Cahaya Bintang Tokoyo...';
+        }
+      }
+      // 6.8s - 8.0s: Kamera melesat masuk ke dalam cahaya putih
+      else if (cur >= 6.8) {
+        if (statusText && statusText.textContent !== 'Melangkah Masuk...') {
+          statusText.textContent = 'Melangkah Masuk...';
+        }
+      }
+
+      // Detik 7.6 - 8.0: Pintu telah tembus ke layar putih murni -> transisi mulus ke Hero
+      if (cur >= 7.6) {
+        executeTransitionToHero();
+      }
+    });
+
+    introVideo.addEventListener('ended', () => {
+      executeTransitionToHero();
+    });
+  }
+}
+
+/**
+ * Urutan Animasi Saat Masuk Scene 1 (Sesuai Bagian 4 Cetak Biru):
+ * 1. Latar muncul perlahan (0,0 - 1,0 dtk)
+ * 2. Wajah Hyouka fade in dengan sedikit zoom-out dari 108% ke 100% (1,0 - 2,2 dtk)
+ * 3. Teks judul "Hi! I'm Hyouka" tertulis huruf per huruf seperti ditulis pensil (1,5 - 3,0 dtk)
+ * 4. Hyouka berkedip satu kali, lalu bubble dialog muncul dengan sapaan sesuai waktu (3,2 dtk)
+ * 5. Tombol muncul terakhir
+ */
+function playPrologEntranceSequence(dialogPlayer) {
+  const prologScene = document.getElementById('scene-prolog');
+  const stage = document.getElementById('character-stage');
+  const pencilTitle = document.getElementById('hero-pencil-text');
+  const dialogBubble = document.getElementById('prolog-vn-bubble');
+  const heroActions = document.getElementById('prolog-actions');
+  const emojiWidget = document.getElementById('prolog-emoji-widget');
+
+  const fullTitle = `Hi! I'm ${siteConfig.name}`;
+  if (pencilTitle) pencilTitle.textContent = '';
+
+  // Reset state awal untuk sekuens masuk
+  if (stage) stage.classList.add('entrance-zoom-start');
+  if (dialogBubble) dialogBubble.classList.add('seq-hidden');
+  if (heroActions) heroActions.classList.add('seq-hidden');
+  if (emojiWidget) emojiWidget.classList.add('seq-hidden');
+
+  // Langkah 2 (0.4s -> 1.8s): Wajah Hyouka fade-in & zoom-out 108% -> 100%
+  setTimeout(() => {
+    if (stage) stage.classList.remove('entrance-zoom-start');
+  }, 250);
+
+  // Langkah 3 (0.8s -> 2.1s): Judul ditulis huruf per huruf seperti coretan pensil
+  setTimeout(() => {
+    if (!pencilTitle) return;
+    let idx = 0;
+    const writeInterval = setInterval(() => {
+      if (idx < fullTitle.length) {
+        pencilTitle.textContent += fullTitle.charAt(idx);
+        idx++;
+      } else {
+        clearInterval(writeInterval);
+      }
+    }, 75);
+  }, 750);
+
+  // Langkah 4 (2.2s): Hyouka berkedip satu kali, lalu bubble dialog muncul dengan sapaan waktu
+  setTimeout(() => {
+    setCharacterExpression('blink', 160);
+    setTimeout(() => {
+      if (dialogBubble) dialogBubble.classList.remove('seq-hidden');
+      const greetingText = getLocalTimeGreeting();
+      if (dialogPlayer) dialogPlayer.typeText(greetingText, 26);
+    }, 200);
+  }, 2000);
+
+  // Langkah 5 (2.8s): Tombol Contact, Who i'm & Widget Emoji muncul terakhir
+  setTimeout(() => {
+    if (heroActions) heroActions.classList.remove('seq-hidden');
+    if (emojiWidget) emojiWidget.classList.remove('seq-hidden');
+  }, 2650);
+
+  if (prologScene) prologScene.classList.add('entered');
+}
+
+function getLocalTimeGreeting() {
+  const hour = new Date().getHours();
+  if (hour >= 0 && hour < 4) {
+    triggerAchievement('night_owl');
+  }
+  const found = timeGreetings.find((g) => {
+    if (g.start <= g.end) return hour >= g.start && hour < g.end;
+    return hour >= g.start || hour < g.end;
+  });
+  return found ? found.text : 'Selamat datang di perjalananku.';
+}
+
+/**
+ * 2. Scene 2: Bab 1 ("Who I'm") — Kotak Dialog Visual Novel Interaktif
+ * Mendukung klik atau tombol Spasi untuk lanjut, perubahan ekspresi mata, & cabang cerita
+ */
+function setupWhoAmIScene() {
+  const vnBox = document.getElementById('whoami-vn-box');
+  const textEl = document.getElementById('whoami-dialog-text');
+  const stepBadge = document.getElementById('whoami-step-counter');
+  const nextPrompt = document.getElementById('whoami-next-prompt');
+  const choicesWrap = document.getElementById('whoami-choices');
+  const btnMoreStory = document.getElementById('btn-vn-extra');
+  const btnToSkills = document.getElementById('btn-vn-skills');
+
+  if (!textEl) return;
+  const vnPlayer = new DialogPlayer(textEl);
+
+  let activeScript = [...whoAmIDialogues];
+  let currentIdx = 0;
+  let extraUnlocked = false;
+
+  function playCurrentBeat() {
+    const item = activeScript[currentIdx];
+    if (!item) return;
+
+    if (stepBadge) {
+      stepBadge.textContent = `Bagian ${currentIdx + 1} / ${activeScript.length}`;
+    }
+
+    setCharacterExpression(item.expression || 'base');
+
+    const isLast = currentIdx >= activeScript.length - 1;
+    if (choicesWrap) choicesWrap.classList.toggle('visible', isLast);
+    if (nextPrompt) nextPrompt.style.display = isLast ? 'none' : 'inline-flex';
+
+    vnPlayer.typeText(item.text, 24);
+  }
+
+  function advanceBeat() {
+    if (vnPlayer.isTyping) {
+      vnPlayer.instantComplete(activeScript[currentIdx].text);
+      return;
+    }
+    if (currentIdx < activeScript.length - 1) {
+      currentIdx++;
+      soundEngine.playClickSound();
+      playCurrentBeat();
+    }
+  }
+
+  playCurrentBeat();
+
+  if (vnBox) {
+    vnBox.addEventListener('click', (e) => {
+      if (e.target.closest('button')) return;
+      advanceBeat();
+    });
+  }
+
+  // Tekan Spasi untuk lanjut saat berada di Scene 2
+  window.addEventListener('keydown', (e) => {
+    if (e.code === 'Space' && document.body.dataset.scene === 'scene-whoami') {
+      const activeTag = document.activeElement?.tagName;
+      if (activeTag === 'INPUT' || activeTag === 'TEXTAREA' || activeTag === 'BUTTON') return;
+      e.preventDefault();
+      advanceBeat();
+    }
+  });
+
+  if (btnMoreStory) {
+    btnMoreStory.addEventListener('click', () => {
+      soundEngine.playClickSound();
+      if (!extraUnlocked) {
+        extraUnlocked = true;
+        activeScript = [...whoAmIDialogues, ...whoAmIExtraDialogues];
+        currentIdx = whoAmIDialogues.length;
+        btnMoreStory.textContent = 'Ulangi dari Awal ↺';
+        playCurrentBeat();
+      } else {
+        currentIdx = 0;
+        playCurrentBeat();
+      }
+    });
+  }
+
+  if (btnToSkills) {
+    btnToSkills.addEventListener('click', () => {
+      soundEngine.playClickSound();
+      document.getElementById('scene-skills')?.scrollIntoView({ behavior: 'smooth' });
+    });
+  }
+}
+
+/**
+ * 3. Scene 3: Bab 2 (Jurus / Skills) — Status RPG + Bar Hijau Beranimasi + Komentar Klik
+ */
+function renderSkills() {
+  const container = document.getElementById('skills-panel-list');
+  const commentEl = document.getElementById('rpg-skill-comment');
+  if (!container) return;
+
+  const groups = [
+    { key: 'main', title: 'Senjata Utama', subtitle: 'Keahlian Inti', list: skillsData.mainWeapons },
+    { key: 'sub', title: 'Senjata Cadangan', subtitle: 'Pustaka & Perkakas', list: skillsData.secondaryWeapons },
+    { key: 'secret', title: 'Jurus Rahasia', subtitle: 'Sedang Dipelajari', list: skillsData.secretJutsu }
+  ];
+
+  container.innerHTML = groups
+    .map(
+      (g) => `
+      <div class="skill-group-block">
+        <div class="skill-group-head">
+          <h3 class="skill-category-title">${g.title}</h3>
+          <span class="skill-category-sub">${g.subtitle}</span>
+        </div>
+        <div class="skills-pill-group">
+          ${g.list
+            .map(
+              (s) => `
+            <button type="button" class="skill-card" data-comment="${s.comment}" data-tooltip="${s.desc}">
+              <div class="skill-header">
+                <span class="skill-name"><span class="skill-icon">${s.icon}</span> ${s.name}</span>
+                <span class="skill-level-badge">${s.level} · ${s.meta}</span>
+              </div>
+              <div class="skill-bar-track">
+                <div class="skill-bar-fill" data-fill="${s.fill}" style="width: 0%;"></div>
+              </div>
+              <p class="skill-desc">${s.desc}</p>
+            </button>
+          `
+            )
+            .join('')}
+        </div>
+      </div>
+    `
+    )
+    .join('');
+
+  container.querySelectorAll('.skill-card').forEach((card) => {
+    card.addEventListener('click', () => {
+      soundEngine.playClickSound();
+      setCharacterExpression('blink', 150);
+      container.querySelectorAll('.skill-card').forEach((c) => c.classList.remove('selected'));
+      card.classList.add('selected');
+      if (commentEl && card.dataset.comment) {
+        commentEl.textContent = `"${card.dataset.comment}"`;
+      }
+    });
+  });
+}
+
+function animateSkillBars() {
+  const fills = document.querySelectorAll('.skill-bar-fill');
+  let triggeredSound = false;
+  fills.forEach((bar, i) => {
+    const target = bar.dataset.fill || 85;
+    if (bar.style.width === '0%') {
+      if (!triggeredSound) {
+        soundEngine.playBarFillSound();
+        triggeredSound = true;
+      }
+      setTimeout(() => {
+        bar.style.width = `${target}%`;
+      }, i * 65);
+    }
+  });
+}
+
+/**
+ * 4. Scene 4: Bab 3 (Misi / Projects & Studio Creative) — Dual Persona Switcher
+ */
+function renderProjects() {
+  const grid = document.getElementById('projects-cards-grid');
+  const filterBar = document.getElementById('projects-filter-bar');
+  const codeModal = document.getElementById('project-modal');
+  const creativeModal = document.getElementById('creative-modal');
+  const spectatorBubble = document.getElementById('spectator-comment-text');
+  const spectatorName = document.getElementById('spectator-name-label');
+  const chapterBadgeText = document.getElementById('projects-badge-text');
+  const sectionTitle = document.getElementById('projects-section-title');
+  const sectionSubtitle = document.getElementById('projects-section-subtitle');
+
+  if (!grid) return;
+
+  let currentPersona = 'code'; // 'code' | 'creative'
+  let currentFilter = 'all';
+  const openedProjects = new Set();
+  const openedCreatives = new Set();
+
+  function switchPersona(persona) {
+    if (currentPersona === persona) return;
+    currentPersona = persona;
+    currentFilter = 'all';
+
+    // Update active state in top-nav and section buttons
+    document.querySelectorAll('[data-persona]').forEach((btn) => {
+      btn.classList.toggle('active', btn.dataset.persona === persona);
+    });
+
+    // Sound effect
+    soundEngine.playClickSound();
+
+    if (persona === 'code') {
+      if (chapterBadgeText) chapterBadgeText.textContent = 'BAB 03 · LEMBAR MISI D:\\VIBE CODING';
+      if (sectionTitle) sectionTitle.textContent = 'Koleksi 9 Proyek Pilihan';
+      if (sectionSubtitle) sectionSubtitle.textContent = 'Konvergensi simulasi WebGL 2D/3D, analitika data inferensial, otomatisasi RPA, dan arsitektur web interaktif modern.';
+      if (spectatorName) spectatorName.textContent = 'Hyouka (Penonton Misi)';
+      if (spectatorBubble) spectatorBubble.textContent = '"Arahkan kursor atau klik kartu misi mana pun untuk membaca catatan di baliknya dan membuka live demo!"';
+      setCharacterExpression('base', 0);
+    } else {
+      if (chapterBadgeText) chapterBadgeText.textContent = 'BAB 03 · ATELIER VISUAL & STUDIO SINEMA';
+      if (sectionTitle) sectionTitle.textContent = 'Galeri Desain Grafis & Video Editing';
+      if (sectionSubtitle) sectionSubtitle.textContent = 'Eksplorasi ritme sinematik, color grading atmosferik, tipografi presisi, dan identitas visual.';
+      if (spectatorName) spectatorName.textContent = 'Hyouka (Studio Director)';
+      if (spectatorBubble) spectatorBubble.textContent = '"Selamat datang di studio visualku! Arahkan kursor atau klik karya untuk melihat detail proses, palet warna, dan bedah produksinya."';
+      setCharacterExpression('smile', 2500);
+    }
+
+    renderFilters();
+    renderContent();
+  }
+
+  // Bind persona switch buttons
+  document.querySelectorAll('[data-persona]').forEach((btn) => {
+    btn.addEventListener('click', (e) => {
+      e.preventDefault();
+      switchPersona(btn.dataset.persona);
+    });
+  });
+
+  function renderFilters() {
+    if (!filterBar) return;
+    if (currentPersona === 'code') {
+      filterBar.innerHTML = `
+        <button type="button" class="proj-filter-btn ${currentFilter === 'all' ? 'active' : ''}" data-filter="all">Semua Misi (9)</button>
+        <button type="button" class="proj-filter-btn ${currentFilter === 'Cinematic' ? 'active' : ''}" data-filter="Cinematic">Sinematik &amp; 3D WebGL</button>
+        <button type="button" class="proj-filter-btn ${currentFilter === 'Engine' ? 'active' : ''}" data-filter="Engine">Sistem &amp; AI / RPA</button>
+        <button type="button" class="proj-filter-btn ${currentFilter === 'Creative' ? 'active' : ''}" data-filter="Creative">Statistika &amp; Web</button>
+      `;
+    } else {
+      filterBar.innerHTML = `
+        <button type="button" class="proj-filter-btn ${currentFilter === 'all' ? 'active' : ''}" data-filter="all">Semua Karya Studio (10)</button>
+        <button type="button" class="proj-filter-btn ${currentFilter === 'video' ? 'active' : ''}" data-filter="video">🎬 Video Editing &amp; Motion (3)</button>
+        <button type="button" class="proj-filter-btn ${currentFilter === 'design' ? 'active' : ''}" data-filter="design">🎨 Desain Grafis Institusional (7)</button>
+      `;
+    }
+
+    filterBar.querySelectorAll('.proj-filter-btn').forEach((btn) => {
+      btn.addEventListener('click', () => {
+        filterBar.querySelectorAll('.proj-filter-btn').forEach((b) => b.classList.remove('active'));
+        btn.classList.add('active');
+        currentFilter = btn.dataset.filter;
+        renderContent();
+      });
+    });
+  }
+
+  function renderContent() {
+    if (currentPersona === 'code') {
+      renderCodeCards();
+    } else {
+      renderCreativeCards();
+    }
+  }
+
+  function initAutoplayVideos(container) {
+    if (!container) return;
+    const vids = container.querySelectorAll('video');
+    vids.forEach((vid) => {
+      vid.muted = true;
+      vid.defaultMuted = true;
+      vid.playsInline = true;
+      const playPromise = vid.play();
+      if (playPromise !== undefined) {
+        playPromise.catch(() => {
+          const kickstart = () => {
+            vid.play().catch(() => {});
+            window.removeEventListener('click', kickstart);
+            window.removeEventListener('touchstart', kickstart);
+            window.removeEventListener('keydown', kickstart);
+          };
+          window.addEventListener('click', kickstart, { once: true });
+          window.addEventListener('touchstart', kickstart, { once: true });
+          window.addEventListener('keydown', kickstart, { once: true });
+        });
+      }
+    });
+  }
+
+  function renderCodeCards() {
+    const filtered = currentFilter === 'all'
+      ? projectsData
+      : projectsData.filter((p) => {
+          if (currentFilter === 'Cinematic') return p.category.includes('Cinematic') || p.tags.includes('Three.js') || p.tags.includes('WebGL');
+          if (currentFilter === 'Engine') return p.category.includes('Engine') || p.category.includes('RPA') || p.category.includes('POS');
+          if (currentFilter === 'Creative') return p.category.includes('Creative') || p.category.includes('Desain') || p.tags.includes('Statistika');
+          return true;
+        });
+
+    grid.innerHTML = filtered.map((p) => `
+      <article class="mission-card-3d" data-project-id="${p.id}" tabindex="0" title="Klik 2x atau klik tombol ↻ untuk membalik kartu">
+        <div class="card-flip-inner">
+          <!-- SISI DEPAN KARTU -->
+          <div class="card-face card-front">
+            <div class="mission-thumb-wrap ${p.video ? 'has-video' : ''}">
+              ${p.video ? `
+                <video src="${p.video}" class="mission-thumb-video" autoplay muted loop playsinline preload="auto" poster="${p.image}"></video>
+                <span class="video-indicator-badge" title="Live Video Autoplay">▶ LIVE</span>
+              ` : `
+                <img src="${p.image}" alt="${p.title}" class="mission-thumb-img" loading="lazy">
+              `}
+              <span class="mission-badge-code">${p.code}</span>
+              <span class="mission-badge-cat">${p.category}</span>
+              <button type="button" class="btn-flip-trigger-corner" data-action="flip" title="Balik kartu (atau Klik 2x)" aria-label="Balik kartu">↻</button>
+            </div>
+            <div class="mission-body">
+              <h3>${p.title}</h3>
+              <p>${p.tagline}</p>
+              <div class="mission-tags">
+                ${p.tags.slice(0, 3).map((t) => `<span class="tag-pill">${t}</span>`).join('')}
+              </div>
+            </div>
+            <div class="mission-actions-bar">
+              <a href="${p.demoUrl}" target="_blank" rel="noopener" class="btn-card-demo" data-cursor="DEMO">
+                ⚡ Demo
+              </a>
+              <button type="button" class="btn-card-flip-btn" data-action="flip" title="Balik ke Lembar Spek">
+                ↻ Balik
+              </button>
+              <button type="button" class="btn-card-detail" data-action="modal" data-open-id="${p.id}" data-cursor="BERKAS">
+                📄 Kasus
+              </button>
+            </div>
+          </div>
+
+          <!-- SISI BELAKANG KARTU (3D FLIP DOSSIER) -->
+          <div class="card-face card-back">
+            <div class="card-back-header">
+              <div class="card-back-header-left">
+                <span class="card-back-badge">${p.code} · LEMBAR SPEK TEKNIS</span>
+                <h4 class="card-back-title">${p.title}</h4>
+              </div>
+              <button type="button" class="btn-flip-back-circle" data-action="flip" title="Kembali ke Depan (atau Klik 2x)" aria-label="Kembali ke depan">✕</button>
+            </div>
+            <div class="card-back-content">
+              <div class="card-back-field">
+                <span class="card-back-field-label">🎯 Misinya:</span>
+                <span class="card-back-field-val">${p.story.mission}</span>
+              </div>
+              <div class="card-back-field">
+                <span class="card-back-field-label">🛠️ Alat &amp; Peran:</span>
+                <span class="card-back-field-val">${p.story.equipment}</span>
+              </div>
+              <div class="card-back-field">
+                <span class="card-back-field-label">💡 Rintangan &amp; Solusi:</span>
+                <span class="card-back-field-val">${p.story.obstacle}</span>
+              </div>
+              <div class="card-back-hyouka-quote">
+                <span>💬</span>
+                <span>"${p.characterComment}"</span>
+              </div>
+            </div>
+            <div class="card-back-actions">
+              <a href="${p.demoUrl}" target="_blank" rel="noopener" class="btn-card-demo">
+                ⚡ Demo
+              </a>
+              <button type="button" class="btn-card-detail" data-action="modal" data-open-id="${p.id}">
+                📄 Full Modal
+              </button>
+              <button type="button" class="btn-card-flip-btn" data-action="flip">
+                ↻ Depan
+              </button>
+            </div>
+          </div>
+        </div>
+      </article>
+    `).join('');
+
+    initAutoplayVideos(grid);
+
+    grid.querySelectorAll('.mission-card-3d').forEach((card) => {
+      const pid = card.dataset.projectId;
+      const proj = projectsData.find((x) => x.id === pid);
+      if (!proj) return;
+
+      card.addEventListener('pointerenter', () => {
+        if (spectatorBubble) spectatorBubble.textContent = `"${proj.characterComment}"`;
+        setCharacterExpression('smile', 1800);
+      });
+
+      // 1. Double click untuk membalik kartu 3D secara intuitif
+      card.addEventListener('dblclick', (e) => {
+        if (e.target.closest('a') || e.target.closest('button')) return;
+        card.classList.toggle('is-flipped');
+        soundEngine.playClickSound();
+      });
+
+      // 2. Tombol Ikon Balik Kartu (↻ di thumbnail, ↻ Balik di action bar, ✕ di header belakang)
+      card.querySelectorAll('[data-action="flip"]').forEach((btn) => {
+        btn.addEventListener('click', (e) => {
+          e.stopPropagation();
+          e.preventDefault();
+          card.classList.toggle('is-flipped');
+          soundEngine.playClickSound();
+        });
+      });
+
+      // 3. Buka Full Modal Kasus
+      const openModalHandler = (e) => {
+        if (e) e.stopPropagation();
+        openedProjects.add(pid);
+        if (openedProjects.size === projectsData.length) {
+          triggerAchievement('mission_tracker');
+        }
+        openProjectModal(proj);
+      };
+
+      card.querySelectorAll('[data-action="modal"]').forEach((btn) => {
+        btn.addEventListener('click', openModalHandler);
+      });
+
+      const thumbWrap = card.querySelector('.mission-thumb-wrap');
+      if (thumbWrap) {
+        thumbWrap.addEventListener('click', (e) => {
+          if (e.target.closest('[data-action="flip"]')) return;
+          openModalHandler(e);
+        });
+      }
+
+      card.addEventListener('keydown', (e) => {
+        if (e.key === 'Enter') {
+          if (e.target.closest('[data-action="flip"]')) return;
+          if (e.target.closest('a')) return;
+          openModalHandler(e);
+        } else if (e.key.toLowerCase() === 'f') {
+          // Tombol 'F' shortcut untuk flip
+          card.classList.toggle('is-flipped');
+          soundEngine.playClickSound();
+        }
+      });
+    });
+  }
+
+  function renderCreativeCards() {
+    const filtered = currentFilter === 'all'
+      ? creativeData
+      : creativeData.filter((c) => c.type === currentFilter);
+
+    grid.innerHTML = filtered.map((item) => {
+      const isVideo = item.type === 'video';
+      return `
+        <article class="mission-card-3d creative-card-3d" data-creative-id="${item.id}" tabindex="0" style="--card-accent: ${item.accent};" title="Klik 2x atau klik tombol ↻ untuk membalik kartu">
+          <div class="card-flip-inner">
+            <!-- SISI DEPAN KARTU KREATIF -->
+            <div class="card-face card-front">
+              <div class="creative-thumb-wrap ${item.video ? 'has-video' : ''} ${isVideo && item.format.includes('Vertical') ? 'is-vertical' : ''}">
+                ${item.video ? `
+                  <video src="${item.video}" class="mission-thumb-video" autoplay muted loop playsinline preload="auto" poster="${item.image}"></video>
+                  <span class="video-indicator-badge" style="color: ${item.accent}; border-color: ${item.accent}55;" title="Live Video Autoplay">▶ LIVE</span>
+                ` : `
+                  <img src="${item.image}" alt="${item.title}" class="creative-thumb-img" loading="lazy">
+                `}
+                ${isVideo ? `
+                  <span class="creative-duration-pill">${item.duration} · ${item.resolution.split('·')[0].trim()}</span>
+                ` : `
+                  <span class="creative-duration-pill">📐 ${item.dimensions ? item.dimensions.split('·')[0].trim() : '4:5'}</span>
+                `}
+                <span class="mission-badge-code" style="color: ${item.accent}; border-color: ${item.accent}55;">${item.code}</span>
+                <button type="button" class="btn-flip-trigger-corner" data-action="flip" title="Balik kartu (atau Klik 2x)" aria-label="Balik kartu">↻</button>
+              </div>
+
+              <div class="mission-body">
+                <div style="display:flex; justify-content:space-between; align-items:center;">
+                  <span style="font-family: var(--font-mono); font-size: 0.7rem; color: ${item.accent}; font-weight: 600;">${item.category}</span>
+                  <span style="font-family: var(--font-mono); font-size: 0.65rem; color: var(--text-muted);">${isVideo ? item.format : item.format.split('&')[0].trim()}</span>
+                </div>
+                <h3>${item.title}</h3>
+                <p>${item.tagline}</p>
+                
+                ${!isVideo && item.palette ? `
+                  <div class="creative-palette-bar" style="margin-top:auto; padding:3px 7px;">
+                    <span class="palette-label" style="font-size:0.6rem;">Palet:</span>
+                    <div class="palette-dots">
+                      ${item.palette.slice(0, 4).map((c) => `<span class="swatch-dot" style="background:${c}; width:11px; height:11px;" title="Warna: ${c}"></span>`).join('')}
+                    </div>
+                  </div>
+                ` : `
+                  <div class="mission-tags">
+                    ${item.software.slice(0, 3).map((s) => `<span class="tag-pill">${s}</span>`).join('')}
+                  </div>
+                `}
+              </div>
+
+              <div class="mission-actions-bar">
+                <button type="button" class="btn-card-demo btn-open-creative" data-id="${item.id}" style="background: ${item.accent}; color: #fff;">
+                  ${isVideo ? '🎬 Tonton' : '🔍 Inspect'}
+                </button>
+                <button type="button" class="btn-card-flip-btn" data-action="flip" title="Balik ke Detail Bedah">
+                  ↻ Balik
+                </button>
+                <button type="button" class="btn-card-detail btn-open-creative" data-id="${item.id}">
+                  📄 Detail
+                </button>
+              </div>
+            </div>
+
+            <!-- SISI BELAKANG KARTU KREATIF (3D BEDAH KARYA) -->
+            <div class="card-face card-back" style="border-color: ${item.accent}66;">
+              <div class="card-back-header">
+                <div class="card-back-header-left">
+                  <span class="card-back-badge" style="color: ${item.accent};">${item.code} · ${isVideo ? 'BEDAH SINEMA & MOTION' : 'BEDAH DESAIN GRAFIS'}</span>
+                  <h4 class="card-back-title">${item.title}</h4>
+                </div>
+                <button type="button" class="btn-flip-back-circle" data-action="flip" title="Kembali ke Depan (atau Klik 2x)">✕</button>
+              </div>
+
+              <div class="card-back-content">
+                <div class="card-back-field">
+                  <span class="card-back-field-label">🎯 Konsep Visual:</span>
+                  <span class="card-back-field-val">${item.story.concept}</span>
+                </div>
+                <div class="card-back-field">
+                  <span class="card-back-field-label">🛠️ Software &amp; Peran:</span>
+                  <span class="card-back-field-val">${item.software.join(', ')} · ${item.roles.join(', ')}</span>
+                </div>
+                ${isVideo ? `
+                  <div class="card-back-field">
+                    <span class="card-back-field-label">🎨 Color Grading:</span>
+                    <span class="card-back-field-val">${item.colorGrade.profile} (${item.colorGrade.mood})</span>
+                  </div>
+                  <div class="card-back-field">
+                    <span class="card-back-field-label">✂️ Teknik Video:</span>
+                    <span class="card-back-field-val">${item.story.techniques}</span>
+                  </div>
+                ` : `
+                  <div class="card-back-field">
+                    <span class="card-back-field-label">📐 Dimensi &amp; Format:</span>
+                    <span class="card-back-field-val">${item.dimensions} · ${item.format}</span>
+                  </div>
+                  <div class="card-back-field">
+                    <span class="card-back-field-label">✒️ Tipografi Utama:</span>
+                    <span class="card-back-field-val">${item.typography.join(' · ')}</span>
+                  </div>
+                `}
+                <div class="card-back-hyouka-quote">
+                  <span>💬</span>
+                  <span>"${item.characterComment}"</span>
+                </div>
+              </div>
+
+              <div class="card-back-actions">
+                <button type="button" class="btn-card-demo btn-open-creative" data-id="${item.id}" style="background: ${item.accent}; color: #fff;">
+                  ${isVideo ? '🎬 Tonton' : '🔍 Inspect'}
+                </button>
+                <button type="button" class="btn-card-detail btn-open-creative" data-id="${item.id}">
+                  📄 Full Modal
+                </button>
+                <button type="button" class="btn-card-flip-btn" data-action="flip">
+                  ↻ Depan
+                </button>
+              </div>
+            </div>
+          </div>
+        </article>
+      `;
+    }).join('');
+
+    initAutoplayVideos(grid);
+
+    grid.querySelectorAll('.creative-card-3d').forEach((card) => {
+      const cid = card.dataset.creativeId;
+      const item = creativeData.find((x) => x.id === cid);
+      if (!item) return;
+
+      card.addEventListener('pointerenter', () => {
+        if (spectatorBubble) spectatorBubble.textContent = `"${item.characterComment}"`;
+        setCharacterExpression('smile', 1800);
+      });
+
+      // 1. Double click untuk membalik kartu
+      card.addEventListener('dblclick', (e) => {
+        if (e.target.closest('button')) return;
+        card.classList.toggle('is-flipped');
+        soundEngine.playClickSound();
+      });
+
+      // 2. Tombol Ikon Balik Kartu
+      card.querySelectorAll('[data-action="flip"]').forEach((btn) => {
+        btn.addEventListener('click', (e) => {
+          e.stopPropagation();
+          e.preventDefault();
+          card.classList.toggle('is-flipped');
+          soundEngine.playClickSound();
+        });
+      });
+
+      // 3. Buka Full Modal Studio Creative
+      const openModalHandler = (e) => {
+        if (e) e.stopPropagation();
+        openedCreatives.add(cid);
+        openCreativeModal(item);
+      };
+
+      card.querySelectorAll('.btn-open-creative').forEach((btn) => {
+        btn.addEventListener('click', openModalHandler);
+      });
+
+      const thumbWrap = card.querySelector('.creative-thumb-wrap');
+      if (thumbWrap) {
+        thumbWrap.addEventListener('click', (e) => {
+          if (e.target.closest('[data-action="flip"]')) return;
+          openModalHandler(e);
+        });
+      }
+
+      card.addEventListener('keydown', (e) => {
+        if (e.key === 'Enter') {
+          if (e.target.closest('[data-action="flip"]')) return;
+          openModalHandler(e);
+        } else if (e.key.toLowerCase() === 'f') {
+          card.classList.toggle('is-flipped');
+          soundEngine.playClickSound();
+        }
+      });
+    });
+  }
+
+  // Developer project modal
+  function openProjectModal(proj) {
+    if (!codeModal) return;
+    document.getElementById('modal-code-badge').textContent = `${proj.code} · ${proj.category}`;
+    document.getElementById('modal-title').textContent = proj.title;
+    document.getElementById('modal-tagline').textContent = proj.tagline;
+    document.getElementById('modal-mission').textContent = proj.story.mission;
+    document.getElementById('modal-equip').textContent = proj.story.equipment;
+    document.getElementById('modal-obstacle').textContent = proj.story.obstacle;
+    document.getElementById('modal-reward').textContent = proj.story.reward;
+    document.getElementById('modal-comment').textContent = `Catatan Hyouka: "${proj.characterComment}"`;
+
+    const previewBox = document.getElementById('modal-image-preview');
+    if (previewBox) {
+      if (proj.video) {
+        previewBox.style.display = 'block';
+        previewBox.innerHTML = `
+          <video src="${proj.video}" controls autoplay loop playsinline poster="${proj.image}" style="width: 100%; max-height: 220px; object-fit: cover; display: block; border-radius: 8px; background: #000;"></video>
+        `;
+      } else if (proj.image) {
+        previewBox.style.display = 'block';
+        previewBox.innerHTML = `
+          <img id="modal-img" src="${proj.image}" alt="${proj.title}" style="width: 100%; height: 200px; object-fit: cover; display: block; border-radius: 8px;">
+        `;
+      } else {
+        previewBox.style.display = 'none';
+      }
+    }
+
+    const demoBtn = document.getElementById('modal-demo-btn');
+    const codeBtn = document.getElementById('modal-code-btn');
+    if (demoBtn) demoBtn.href = proj.demoUrl;
+    if (codeBtn) codeBtn.href = proj.githubUrl;
+
+    soundEngine.playModalSound();
+    codeModal.classList.add('active');
+  }
+
+  // Creative studio modal
+  function openCreativeModal(item) {
+    if (!creativeModal) return;
+    document.getElementById('cmodal-code-badge').textContent = `${item.code} · ${item.category}`;
+    document.getElementById('cmodal-format-badge').textContent = item.format + ' (' + (item.duration || item.dimensions) + ')';
+    document.getElementById('cmodal-title').textContent = item.title;
+    document.getElementById('cmodal-tagline').textContent = item.tagline;
+
+    const videoContainer = document.getElementById('cmodal-video-container');
+    const designContainer = document.getElementById('cmodal-design-container');
+    const highlightBox = document.getElementById('cmodal-highlight-box');
+    const actionsBox = document.getElementById('cmodal-actions');
+
+    if (item.type === 'video') {
+      if (videoContainer) {
+        videoContainer.style.display = 'flex';
+        if (item.video || (item.videoUrl && item.videoUrl.endsWith('.mp4'))) {
+          const vsrc = item.video || item.videoUrl;
+          videoContainer.innerHTML = `
+            <video src="${vsrc}" controls autoplay loop playsinline poster="${item.image}" style="width:100%; height:100%; object-fit:contain; background:#000; border-radius:8px;"></video>
+          `;
+        } else {
+          videoContainer.innerHTML = `
+            <img id="cmodal-video-poster" src="${item.image}" alt="Thumbnail Video" class="cmodal-poster">
+            <div class="creative-play-overlay">
+              <span class="play-circle-btn">▶</span>
+            </div>
+          `;
+        }
+      }
+      if (designContainer) designContainer.style.display = 'none';
+
+      if (highlightBox && item.colorGrade) {
+        highlightBox.innerHTML = `
+          <div class="cmodal-colorgrade-row">
+            <strong>🎨 Color Grading &amp; Profil Warna:</strong>
+            <div>Profil: <span style="font-family: var(--font-mono); color: ${item.accent};">${item.colorGrade.profile}</span></div>
+            <div>Mood Warna: <em>${item.colorGrade.mood}</em></div>
+            <div style="color: var(--text-muted); font-size: 0.8rem; margin-top: 4px;">${item.colorGrade.note}</div>
+          </div>
+        `;
+      }
+
+      if (actionsBox) {
+        actionsBox.innerHTML = `
+          <a href="${item.video || item.videoUrl}" target="_blank" rel="noopener" class="btn-hero primary" style="background: ${item.accent};">
+            ▶ Buka File Video Asli ↗
+          </a>
+        `;
+      }
+    } else {
+      if (videoContainer) videoContainer.style.display = 'none';
+      if (designContainer) designContainer.style.display = 'flex';
+      const designImg = document.getElementById('cmodal-design-img');
+      if (designImg) designImg.src = item.mockupImage || item.image;
+
+      if (highlightBox && item.palette) {
+        highlightBox.innerHTML = `
+          <div style="display: flex; flex-direction: column; gap: 8px;">
+            <strong>🎨 Sistem Palet Warna &amp; Tipografi:</strong>
+            <div style="display: flex; align-items: center; gap: 10px; flex-wrap: wrap;">
+              ${item.palette.map(c => `
+                <div style="display: flex; align-items: center; gap: 5px; font-family: var(--font-mono); font-size: 0.76rem;">
+                  <span class="swatch-dot" style="background: ${c}; width: 16px; height: 16px;"></span>
+                  <span>${c}</span>
+                </div>
+              `).join('')}
+            </div>
+            <div style="font-size: 0.82rem; color: var(--text-muted); margin-top: 2px;">
+              Tipografi: <strong>${(item.typography || []).join(' • ')}</strong>
+            </div>
+          </div>
+        `;
+      }
+
+      if (actionsBox) {
+        actionsBox.innerHTML = `
+          <a href="${item.image}" target="_blank" rel="noopener" class="btn-hero primary" style="background: ${item.accent};">
+            🔍 Buka Gambar Resolusi Penuh ↗
+          </a>
+        `;
+      }
+    }
+
+    document.getElementById('cmodal-concept').textContent = item.story.concept;
+    document.getElementById('cmodal-software').textContent = `${item.software.join(', ')} (Peran: ${item.roles.join(', ')})`;
+    document.getElementById('cmodal-techniques').textContent = item.story.techniques;
+    document.getElementById('cmodal-deliverable').textContent = item.story.deliverable;
+    document.getElementById('cmodal-comment').textContent = `Catatan Hyouka: "${item.characterComment}"`;
+
+    soundEngine.playModalSound();
+    creativeModal.classList.add('active');
+  }
+
+  // Close modals & stop any active modal video playback
+  const stopModalVideos = () => {
+    document.querySelectorAll('.project-modal video').forEach((v) => {
+      v.pause();
+    });
+  };
+
+  document.getElementById('modal-close-btn')?.addEventListener('click', () => {
+    codeModal.classList.remove('active');
+    stopModalVideos();
+  });
+  codeModal.addEventListener('click', (e) => {
+    if (e.target === codeModal) {
+      codeModal.classList.remove('active');
+      stopModalVideos();
+    }
+  });
+
+  document.getElementById('creative-modal-close')?.addEventListener('click', () => {
+    creativeModal.classList.remove('active');
+    stopModalVideos();
+  });
+  creativeModal.addEventListener('click', (e) => {
+    if (e.target === creativeModal) {
+      creativeModal.classList.remove('active');
+      stopModalVideos();
+    }
+  });
+
+  // Initial render
+  renderFilters();
+  renderContent();
+}
+
+/**
+ * 5. Scene 5: Bab 4 (Jejak / Timeline) — Titik Perhentian Interaktif
+ */
+function renderTimeline() {
+  const container = document.getElementById('timeline-nodes');
+  const thoughtEl = document.getElementById('timeline-hyouka-thought');
+  if (!container) return;
+
+  container.innerHTML = timelineData
+    .map(
+      (item, idx) => `
+      <div class="timeline-node ${idx === 0 ? 'expanded' : ''}" data-stop="${item.id}" tabindex="0">
+        <div class="timeline-dot"></div>
+        <div class="timeline-card">
+          <div class="timeline-card-head">
+            <span class="timeline-year">${item.year}</span>
+            <span class="timeline-expand-hint">Klik detail</span>
+          </div>
+          <h3 class="timeline-role">${item.role}</h3>
+          <div class="timeline-org">${item.organization}</div>
+          <p class="timeline-summary">${item.summary}</p>
+          <div class="timeline-detail">
+            <p>${item.detail}</p>
+          </div>
+        </div>
+      </div>
+    `
+    )
+    .join('');
+
+  container.querySelectorAll('.timeline-node').forEach((node, idx) => {
+    const item = timelineData[idx];
+    node.addEventListener('click', () => {
+      soundEngine.playClickSound();
+      container.querySelectorAll('.timeline-node').forEach((n) => n.classList.remove('expanded'));
+      node.classList.add('expanded');
+      if (thoughtEl && item) {
+        thoughtEl.textContent = `Hyouka: "${item.thought}"`;
+      }
+    });
+  });
+}
+
+/**
+ * 6. Navigasi Scene & Koreografi Crop/Zoom Karakter Sesuai Tabel Bagian 4 Cetak Biru
+ */
+function setupSceneTransitions() {
+  const scenes = document.querySelectorAll('.story-scene');
+  const dotBtns = document.querySelectorAll('.dot-btn');
+  const visitedScenes = new Set(['scene-prolog']);
+
+  const observer = new IntersectionObserver(
+    (entries) => {
+      entries.forEach((entry) => {
+        if (entry.isIntersecting) {
+          const id = entry.target.id;
+          document.body.dataset.scene = id;
+          visitedScenes.add(id);
+
+          dotBtns.forEach((dot) => {
+            dot.classList.toggle('active', dot.dataset.target === id);
+          });
+          const navLinks = document.querySelectorAll('.nav-quick-links a');
+          navLinks.forEach((link) => {
+            link.classList.toggle('active', link.getAttribute('href') === `#${id}`);
+          });
+
+          // Perilaku khusus per scene sesuai cetak biru
+          if (id === 'scene-skills') {
+            animateSkillBars();
+          } else if (id === 'scene-contact') {
+            // Bab 5: ekspresi melunak (mata sedikit menyipit)
+            setCharacterExpression('smile', 2500);
+          } else if (id === 'scene-epilog') {
+            // Epilog: mata Hyouka terpejam pelan
+            setCharacterExpression('blink');
+            renderEpilogAchievementsSummary();
+          } else if (id === 'scene-prolog') {
+            setCharacterExpression('base');
+          }
+
+          // Achievement Penjelajah: jika sudah menelusuri semua bab
+          if (visitedScenes.size >= scenes.length) {
+            triggerAchievement('explorer');
+            renderEpilogAchievementsSummary();
+          }
+        }
+      });
+    },
+    { threshold: [0.15, 0.4] }
+  );
+
+  scenes.forEach((scene) => observer.observe(scene));
+
+  dotBtns.forEach((dot) => {
+    dot.addEventListener('click', () => {
+      soundEngine.playClickSound();
+      const targetEl = document.getElementById(dot.dataset.target);
+      if (targetEl) targetEl.scrollIntoView({ behavior: 'smooth' });
+    });
+  });
+}
+
+/**
+ * 7. Ringkasan Achievement & Petunjuk Samar Easter Egg di Epilog
+ */
+function renderEpilogAchievementsSummary() {
+  const grid = document.getElementById('epilog-achievements-preview');
+  const hintBox = document.getElementById('epilog-easter-egg-hint');
+  if (!grid) return;
+
+  grid.innerHTML = achievementsList
+    .map((a) => {
+      const unlocked = achievementManager.isUnlocked(a.id);
+      return `
+        <div class="epilog-badge-pill ${unlocked ? 'unlocked' : 'locked'}" title="${
+        unlocked ? a.desc : 'Petunjuk: ' + a.hint
+      }">
+          <span class="b-icon">${unlocked ? a.icon : '🔒'}</span>
+          <span class="b-name">${unlocked ? a.title : '???'}</span>
+        </div>
+      `;
+    })
+    .join('');
+
+  if (hintBox) {
+    const nextLocked = achievementsList.find((a) => !achievementManager.isUnlocked(a.id));
+    if (nextLocked) {
+      hintBox.textContent = `Petunjuk rahasia yang belum ditemukan: "${nextLocked.hint}"`;
+    } else {
+      hintBox.textContent = 'Selamat! Seluruh rahasia dan pencapaian di perjalanan ini telah kamu temukan.';
+    }
+  }
+}
+
+/**
+ * 8. Animasi Gulungan CV Terbuka (Bab 5: Unduh CV)
+ */
+function setupCvScrollModal() {
+  const openBtn = document.getElementById('btn-open-cv-scroll');
+  const modal = document.getElementById('cv-scroll-modal');
+  const closeBtn = document.getElementById('cv-scroll-close');
+
+  if (openBtn && modal) {
+    openBtn.addEventListener('click', (e) => {
+      e.preventDefault();
+      soundEngine.playModalSound();
+      modal.classList.add('active');
+    });
+  }
+  if (closeBtn && modal) {
+    closeBtn.addEventListener('click', () => modal.classList.remove('active'));
+  }
+  if (modal) {
+    modal.addEventListener('click', (e) => {
+      if (e.target === modal) modal.classList.remove('active');
+    });
+  }
+}
+
+/**
+ * 9. Tombol Rahasia Tersembunyi di Latar (Easter Egg Bagian 9)
+ */
+function setupSecretEasterEggButton(dialogPlayer) {
+  const secretBtn = document.getElementById('hidden-secret-trigger');
+  if (!secretBtn) return;
+
+  secretBtn.addEventListener('click', () => {
+    soundEngine.playAchievementJingle();
+    triggerAchievement('secret_found');
+    setCharacterExpression('smile', 4000);
+    if (dialogPlayer) {
+      dialogPlayer.typeText(easterEggDialogues.secretButton);
+    }
+    const toast = document.getElementById('mood-toast');
+    if (toast) {
+      toast.textContent = easterEggDialogues.secretButton;
+      toast.classList.add('show');
+      setTimeout(() => toast.classList.remove('show'), 5000);
+    }
+  });
+}
+
+/**
+ * 10. Pengubah Suasana (Terang -> Malam -> Hujan)
+ */
+function setupMoodSwitcher(dialogPlayer) {
+  const avatarBtn = document.getElementById('avatar-mood-btn');
+  const moodLabel = document.getElementById('mood-current-label');
+  const moodToast = document.getElementById('mood-toast');
+  const moods = ['light', 'night', 'rain'];
+  const moodNames = { light: 'Terang', night: 'Malam', rain: 'Hujan' };
+
+  let currentMoodIdx = 0;
+  const visitedMoods = new Set(['light']);
+
+  try {
+    const saved = localStorage.getItem('amine_theme');
+    if (saved && moods.includes(saved)) {
+      currentMoodIdx = moods.indexOf(saved);
+      document.body.dataset.theme = saved;
+      visitedMoods.add(saved);
+      if (moodLabel) moodLabel.textContent = moodNames[saved];
+    }
+  } catch (e) {}
+
+  if (!avatarBtn) return;
+
+  avatarBtn.addEventListener('click', () => {
+    currentMoodIdx = (currentMoodIdx + 1) % moods.length;
+    const mood = moods[currentMoodIdx];
+    document.body.dataset.theme = mood;
+    visitedMoods.add(mood);
+
+    soundEngine.setMood(mood);
+    soundEngine.playClickSound();
+
+    if (moodLabel) moodLabel.textContent = moodNames[mood];
+
+    try {
+      localStorage.setItem('amine_theme', mood);
+    } catch (e) {}
+
+    if (moodToast) {
+      moodToast.textContent = moodComments[mood];
+      moodToast.classList.add('show');
+      setTimeout(() => moodToast.classList.remove('show'), 3200);
+    }
+
+    if (dialogPlayer) {
+      dialogPlayer.typeText(moodComments[mood]);
+    }
+
+    if (visitedMoods.size === 3) {
+      triggerAchievement('mood_changer');
+    }
+  });
+}
+
+/**
+ * 11. Mode Ringkas (Untuk Recruiter yang Terburu-buru: Info Penting dalam 10 Detik)
+ */
+function renderCompactRecruiterView() {
+  const container = document.getElementById('compact-recruiter-content');
+  if (!container) return;
+
+  const allSkills = [
+    ...skillsData.mainWeapons,
+    ...skillsData.secondaryWeapons,
+    ...skillsData.secretJutsu
+  ];
+
+  container.innerHTML = `
+    <div class="compact-header-card">
+      <img src="img/ui/avatar-eye.png" alt="Hyouka" class="compact-avatar">
+      <div class="compact-bio">
+        <span class="compact-tag">MODE RINGKAS — RINGKASAN EKSEKUTIF 10 DETIK</span>
+        <h1>${siteConfig.fullName}</h1>
+        <p>${whoAmIDialogues[0].text} ${whoAmIDialogues[2].text}</p>
+        <div class="compact-quick-links">
+          <a href="mailto:${siteConfig.email}" class="btn-hero primary">${siteConfig.email}</a>
+          <a href="${siteConfig.github}" target="_blank" rel="noopener" class="btn-hero secondary">GitHub ↗</a>
+          <a href="${siteConfig.linkedin}" target="_blank" rel="noopener" class="btn-hero secondary">LinkedIn ↗</a>
+        </div>
+      </div>
+    </div>
+
+    <div class="compact-grid-two">
+      <section class="compact-section">
+        <h2>Keahlian & Teknologi</h2>
+        <div class="compact-skills-list">
+          ${allSkills
+            .map(
+              (s) => `
+            <div class="compact-skill-pill">
+              <strong>${s.icon} ${s.name}</strong>
+              <span>${s.level} · ${s.meta}</span>
+            </div>
+          `
+            )
+            .join('')}
+        </div>
+      </section>
+
+      <section class="compact-section">
+        <h2>Jejak Pengalaman</h2>
+        <div class="compact-timeline-list">
+          ${timelineData
+            .map(
+              (t) => `
+            <div class="compact-tl-item">
+              <span class="tl-y">${t.year}</span>
+              <strong>${t.role}</strong> — <em>${t.organization}</em>
+              <p>${t.summary}</p>
+            </div>
+          `
+            )
+            .join('')}
+        </div>
+      </section>
+    </div>
+
+    <section class="compact-section">
+      <h2>Karya & Misi Pilihan</h2>
+      <div class="compact-projects-grid">
+        ${projectsData
+          .map(
+            (p) => `
+          <div class="compact-proj-card">
+            <div class="cp-head">
+              <span>${p.code} · ${p.date}</span>
+              <span class="cp-cat">${p.category}</span>
+            </div>
+            <h3>${p.title}</h3>
+            <p>${p.tagline}</p>
+            <p class="cp-reward"><strong>Hasil:</strong> ${p.story.reward}</p>
+            <div class="mission-tags">${p.tags
+              .map((tag) => `<span class="tag-pill">${tag}</span>`)
+              .join('')}</div>
+          </div>
+        `
+          )
+          .join('')}
+      </div>
+    </section>
+  `;
+}
+
+function setupCompactMode() {
+  const toggleBtn = document.getElementById('compact-toggle-btn');
+  if (!toggleBtn) return;
+
+  toggleBtn.addEventListener('click', () => {
+    const isCompact = document.body.classList.toggle('mode-compact');
+    toggleBtn.innerHTML = '<span class="ctrl-icon">⚡</span>';
+    toggleBtn.title = isCompact
+      ? 'Mode Ringkas: Aktif (Klik untuk kembali ke Mode Cerita)'
+      : 'Mode Ringkas: Nonaktif (Klik untuk baca cepat 10 detik)';
+    toggleBtn.classList.toggle('active', isCompact);
+    soundEngine.playClickSound();
+  });
+}
+
+/**
+ * 12. Tombol Mute Audio
+ */
+function setupAudioToggle() {
+  const btn = document.getElementById('audio-mute-btn');
+  if (!btn) return;
+
+  btn.addEventListener('click', () => {
+    const isMuted = soundEngine.toggleMute();
+    btn.innerHTML = isMuted ? '<span class="ctrl-icon">🔇</span>' : '<span class="ctrl-icon">🔊</span>';
+    btn.title = isMuted ? 'Audio Latar: Senyap (Klik untuk Nyalakan)' : 'Audio Latar: Aktif (Klik untuk Matikan)';
+    btn.classList.toggle('active', !isMuted);
+  });
+}
+
+/**
+ * 13. Konami Code Easter Egg (↑↑↓↓←→←→BA)
+ */
+function setupKonamiCode(dialogPlayer) {
+  const sequence = [
+    'ArrowUp', 'ArrowUp', 'ArrowDown', 'ArrowDown',
+    'ArrowLeft', 'ArrowRight', 'ArrowLeft', 'ArrowRight',
+    'b', 'a'
+  ];
+  let seqIdx = 0;
+
+  window.addEventListener('keydown', (e) => {
+    if (e.key.toLowerCase() === sequence[seqIdx].toLowerCase()) {
+      seqIdx++;
+      if (seqIdx === sequence.length) {
+        seqIdx = 0;
+        triggerAchievement('secret_found');
+        setCharacterExpression('smile', 4500);
+        if (dialogPlayer) {
+          dialogPlayer.typeText(easterEggDialogues.konami);
+        }
+        const toast = document.getElementById('mood-toast');
+        if (toast) {
+          toast.textContent = easterEggDialogues.konami;
+          toast.classList.add('show');
+          setTimeout(() => toast.classList.remove('show'), 4500);
+        }
+      }
+    } else {
+      seqIdx = 0;
+    }
+  });
+}

@@ -1,0 +1,92 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>404 — Hyouka Tersesat di Hutan Bambu</title>
+  <link rel="icon" type="image/svg+xml" href="favicon.svg">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Caveat:wght@600;700&family=JetBrains+Mono:wght@400;600&family=Outfit:wght@400;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="css/base.css">
+  <link rel="stylesheet" href="css/themes.css">
+  <style>
+    body {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      height: 100vh;
+      overflow: hidden;
+      background: radial-gradient(circle at center, #f5f6f4 0%, #e2e5e0 100%);
+      text-align: center;
+      padding: 24px;
+    }
+    .lost-card {
+      background: rgba(255, 255, 255, 0.85);
+      backdrop-filter: blur(16px);
+      border: 1px solid rgba(28, 28, 28, 0.1);
+      border-radius: 24px;
+      padding: 48px 36px;
+      max-width: 520px;
+      box-shadow: 0 16px 48px rgba(0,0,0,0.06);
+      position: relative;
+      z-index: 10;
+    }
+    .lost-image {
+      width: 220px;
+      border-radius: 16px;
+      margin-bottom: 20px;
+      filter: grayscale(0.2) contrast(1.05);
+      box-shadow: 0 8px 24px rgba(0,0,0,0.08);
+    }
+    .code-tag {
+      font-family: var(--font-mono);
+      font-size: 0.85rem;
+      color: var(--accent-green);
+      background: var(--accent-green-soft);
+      padding: 4px 12px;
+      border-radius: 999px;
+      display: inline-block;
+      margin-bottom: 12px;
+    }
+    h1 {
+      font-family: var(--font-hand);
+      font-size: 2.8rem;
+      margin-bottom: 8px;
+      line-height: 1.1;
+    }
+    p {
+      color: #666;
+      font-size: 1rem;
+      line-height: 1.6;
+      margin-bottom: 24px;
+    }
+    .btn-return {
+      display: inline-block;
+      background: #1c1c1c;
+      color: #fff;
+      padding: 12px 28px;
+      border-radius: 999px;
+      text-decoration: none;
+      font-weight: 600;
+      transition: all 0.2s ease;
+    }
+    .btn-return:hover {
+      background: var(--accent-green);
+      transform: translateY(-2px);
+      box-shadow: 0 6px 20px var(--accent-green-glow);
+    }
+  </style>
+</head>
+<body data-theme="light">
+  <div class="lost-card">
+    <img src="img/ui/avatar-eye.png" alt="Mata Hyouka Menatap Tajam" class="lost-image">
+    <div>
+      <span class="code-tag">KESALAHAN 404</span>
+      <h1>Hyouka tersesat di hutan bambu...</h1>
+      <p>Jalur yang kamu cari tampaknya belum terukir dalam peta ini, atau telah tertutup kabut tebal.</p>
+      <a href="index.html" class="btn-return">Kembali ke Gerbang ⛩️</a>
+    </div>
+  </div>
+</body>
+</html>

@@ -1,0 +1,27 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 32 32" fill="none">
+  <defs>
+    <filter id="drop-shadow" x="-20%" y="-20%" width="150%" height="150%">
+      <feDropShadow dx="1" dy="1.5" stdDeviation="1" flood-color="#000000" flood-opacity="0.35"/>
+    </filter>
+    <linearGradient id="drop-grad" x1="2" y1="2" x2="16" y2="16" gradientUnits="userSpaceOnUse">
+      <stop offset="0%" stop-color="#38bdf8"/>
+      <stop offset="50%" stop-color="#0284c7"/>
+      <stop offset="100%" stop-color="#0f172a"/>
+    </linearGradient>
+    <linearGradient id="ripple-accent" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0%" stop-color="#22c55e"/>
+      <stop offset="100%" stop-color="#06b6d4"/>
+    </linearGradient>
+  </defs>
+  <g filter="url(#drop-shadow)">
+    <!-- Sleek Arrow Pointer with water droplet styling -->
+    <path d="M3 3 L3 20 L7.5 15.5 L12.5 24 L15.5 22.5 L10.5 14 L17 14 Z" 
+          fill="url(#drop-grad)" stroke="#ffffff" stroke-width="1.2" stroke-linejoin="round"/>
+    <!-- Glistening water highlight -->
+    <path d="M4.5 4.5 L4.5 14 L7 11.5 L10 16.5 L11.5 15.8 L8.5 10.8 L12 10.8 Z" 
+          fill="#ffffff" opacity="0.3"/>
+    <!-- Crystal Droplet at tip -->
+    <circle cx="3" cy="3" r="2.2" fill="#38bdf8"/>
+    <circle cx="3" cy="3" r="1.4" fill="#ffffff" opacity="0.9"/>
+  </g>
+</svg>
