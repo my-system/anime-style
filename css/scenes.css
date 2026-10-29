@@ -2236,50 +2236,50 @@ body.mode-compact .compact-recruiter-view {
     display: flex !important;
     align-items: flex-end !important;
     justify-content: center !important;
-    opacity: 0.22 !important;
-    filter: blur(2.5px) !important;
-    transition: opacity 0.5s ease, filter 0.5s ease;
+    opacity: 0.18 !important;
+    filter: none !important;
+    transition: opacity 0.5s ease;
   }
 
   body[data-scene="scene-prolog"] .character-stage {
-    opacity: 0.28 !important;
-    filter: blur(1.5px) !important;
+    opacity: 0.22 !important;
+    filter: none !important;
     transform: scale(0.95) translate3d(0, 4%, 0) !important;
   }
 
   body[data-scene="scene-whoami"] .character-stage {
-    opacity: 0.20 !important;
-    filter: blur(3px) !important;
+    opacity: 0.16 !important;
+    filter: none !important;
     transform: scale(1.05) translate3d(0, 0, 0) !important;
   }
 
   body[data-scene="scene-skills"] .character-stage {
-    opacity: 0.16 !important;
-    filter: blur(4px) !important;
+    opacity: 0.14 !important;
+    filter: none !important;
     transform: scale(1.1) translate3d(0, 0, 0) !important;
   }
 
   body[data-scene="scene-projects"] .character-stage {
-    opacity: 0.18 !important;
-    filter: blur(3px) !important;
+    opacity: 0.14 !important;
+    filter: none !important;
     transform: scale(0.95) translate3d(0, 2%, 0) !important;
   }
 
   body[data-scene="scene-timeline"] .character-stage {
-    opacity: 0.18 !important;
-    filter: blur(4px) !important;
+    opacity: 0.14 !important;
+    filter: none !important;
     transform: scale(1) translate3d(0, 0, 0) !important;
   }
 
   body[data-scene="scene-contact"] .character-stage {
-    opacity: 0.20 !important;
-    filter: blur(3px) !important;
+    opacity: 0.16 !important;
+    filter: none !important;
     transform: scale(1) translate3d(0, 0, 0) !important;
   }
 
   body[data-scene="scene-epilog"] .character-stage {
-    opacity: 0.20 !important;
-    filter: blur(3px) !important;
+    opacity: 0.16 !important;
+    filter: none !important;
     transform: scale(0.95) translate3d(0, 2%, 0) !important;
   }
 

@@ -48,22 +48,22 @@
       <video
         id="loader-idle-video"
         class="loader-video-layer loader-idle-video"
-        src="img/loader/idle_door.mp4"
+        src="/img/loader/idle_door.mp4"
         playsinline
         muted
         loop
         autoplay
-        preload="auto"
+        preload="metadata"
       ></video>
 
-      <!-- Stage 2: Kamera Mendekat & Membuka Pintu ke Tokoyo (Diputar Saat Pintu Diklik) -->
+      <!-- Stage 2: Kamera Mendekat & Membuka Pintu ke Tokoyo (Diputar Saat Pintu Diklik - Lazy Load 13.4MB) -->
       <video
         id="loader-intro-video"
         class="loader-video-layer loader-intro-video"
-        src="img/loader/intro.mp4"
+        data-src="/img/loader/intro.mp4"
         playsinline
         muted
-        preload="auto"
+        preload="none"
       ></video>
 
       <!-- Area Interaktif Gagang Pintu Suzume (Hotspot untuk Klik Membuka Gerbang) -->
@@ -242,6 +242,16 @@
           <small>Tiket Paspor &amp; Pencapaian</small>
         </div>
       </a>
+    </div>
+    <div class="mobile-drawer-footer">
+      <button type="button" class="mobile-perf-toggle" id="mobile-perf-toggle-btn" title="Aktifkan Mode Hemat Performa untuk perangkat HP">
+        <span class="perf-icon">⚡</span>
+        <div class="perf-meta">
+          <strong>Mode Performa (Hemat Baterai)</strong>
+          <small id="mobile-perf-desc">Matikan efek grafis berat agar super enteng</small>
+        </div>
+        <span class="perf-badge" id="mobile-perf-badge">OFF</span>
+      </button>
     </div>
   </aside>
   <div class="mobile-nav-backdrop" id="mobile-nav-backdrop" aria-hidden="true"></div>

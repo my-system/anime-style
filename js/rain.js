@@ -31,16 +31,17 @@ export function initRainCanvas(dialogPlayer) {
   // -------------------------------------------------------------
   // 1. Background Falling Rain (Rintik Hujan Latar)
   // -------------------------------------------------------------
-  const drops = [];
-  const DROP_COUNT = 65;
+  const isTouchDevice = ('ontouchstart' in window) || (navigator.maxTouchPoints > 0) || window.innerWidth <= 768;
+  const DROP_COUNT = isTouchDevice ? 16 : 48;
+  const DRIP_COUNT = isTouchDevice ? 3 : 8;
 
   for (let i = 0; i < DROP_COUNT; i++) {
     drops.push({
       x: Math.random() * width,
       y: Math.random() * height,
-      length: 14 + Math.random() * 20,
-      speed: 12 + Math.random() * 10,
-      opacity: 0.18 + Math.random() * 0.32
+      length: 12 + Math.random() * 16,
+      speed: 10 + Math.random() * 8,
+      opacity: 0.16 + Math.random() * 0.28
     });
   }
 
@@ -93,7 +94,6 @@ export function initRainCanvas(dialogPlayer) {
 
   // Tetesan air hujan yang meluncur lambat di atas kaca
   const glassDrips = [];
-  const DRIP_COUNT = 14;
 
   for (let i = 0; i < DRIP_COUNT; i++) {
     glassDrips.push({
@@ -187,89 +187,113 @@ export function initRainCanvas(dialogPlayer) {
   // Render Loop Utama
   // -------------------------------------------------------------
   let slowFogCounter = 0;
+  let isRainLoopRunning = false;
+
+  function triggerRainLoop() {
+    const isRain = document.body.dataset.theme === 'rain';
+    const isLite = document.body.classList.contains('lite-mode');
+    if (!isRainLoopRunning && isRain && !isLite && !document.hidden) {
+      isRainLoopRunning = true;
+      requestAnimationFrame(render);
+    }
+  }
 
   function render() {
     const isRain = document.body.dataset.theme === 'rain';
+    const isLite = document.body.classList.contains('lite-mode');
 
-    if (isRain) {
-      // 1. Gambar rintik hujan jatuh di latar belakang
-      if (rainCtx) {
-        rainCtx.clearRect(0, 0, width, height);
-        rainCtx.strokeStyle = 'rgba(160, 195, 220, 0.42)';
-        rainCtx.lineWidth = 1.3;
-        rainCtx.lineCap = 'round';
-
-        for (let i = 0; i < DROP_COUNT; i++) {
-          const d = drops[i];
-          rainCtx.beginPath();
-          rainCtx.moveTo(d.x, d.y);
-          rainCtx.lineTo(d.x + 1.8, d.y + d.length);
-          rainCtx.stroke();
-
-          d.y += d.speed;
-          d.x += 1.8;
-
-          if (d.y > height) {
-            d.y = -d.length;
-            d.x = Math.random() * width;
-          }
-        }
-      }
-
-      // 2. Gambar lapisan kaca berembun di depan
-      if (glassCtx) {
-        glassCtx.clearRect(0, 0, width, height);
-
-        // Rekondensasi embun sangat lambat (mengembun kembali setelah ~25 detik jika tidak disentuh)
-        slowFogCounter++;
-        if (slowFogCounter % 6 === 0) {
-          fogCtx.save();
-          fogCtx.globalCompositeOperation = 'source-over';
-          fogCtx.fillStyle = 'rgba(215, 232, 245, 0.0022)';
-          fogCtx.fillRect(0, 0, width, height);
-          fogCtx.restore();
-        }
-
-        // Tetesan air yang meluncur di atas kaca membelah embun
-        for (let i = 0; i < DRIP_COUNT; i++) {
-          const drip = glassDrips[i];
-          drip.y += drip.speed;
-
-          // Jejak tetesan membelah kabut tipis
-          fogCtx.save();
-          fogCtx.globalCompositeOperation = 'destination-out';
-          fogCtx.fillStyle = 'rgba(0, 0, 0, 0.45)';
-          fogCtx.beginPath();
-          fogCtx.arc(drip.x, drip.y, drip.r * 1.1, 0, Math.PI * 2);
-          fogCtx.fill();
-          fogCtx.restore();
-
-          if (drip.y > height + 20) {
-            drip.y = -20;
-            drip.x = Math.random() * width;
-            drip.speed = 0.8 + Math.random() * 2.2;
-          }
-        }
-
-        // Tampilkan buffer kabut ke kanvas kaca utama
-        glassCtx.drawImage(fogCanvas, 0, 0);
-
-        // Gambar titik air berkilau di kepala setiap tetesan
-        glassCtx.fillStyle = 'rgba(255, 255, 255, 0.75)';
-        for (let i = 0; i < DRIP_COUNT; i++) {
-          const drip = glassDrips[i];
-          glassCtx.beginPath();
-          glassCtx.arc(drip.x, drip.y, drip.r * 0.8, 0, Math.PI * 2);
-          glassCtx.fill();
-        }
-      }
-    } else {
+    // Smart Sleep: jika bukan mode hujan, atau mode hemat aktif, atau tab di-minimize, tidurkan render loop
+    if (!isRain || isLite || document.hidden) {
+      isRainLoopRunning = false;
       if (rainCtx) rainCtx.clearRect(0, 0, width, height);
       if (glassCtx) glassCtx.clearRect(0, 0, width, height);
+      return;
+    }
+
+    // 1. Gambar rintik hujan jatuh di latar belakang
+    if (rainCtx) {
+      rainCtx.clearRect(0, 0, width, height);
+      rainCtx.strokeStyle = 'rgba(160, 195, 220, 0.42)';
+      rainCtx.lineWidth = 1.3;
+      rainCtx.lineCap = 'round';
+
+      for (let i = 0; i < DROP_COUNT; i++) {
+        const d = drops[i];
+        rainCtx.beginPath();
+        rainCtx.moveTo(d.x, d.y);
+        rainCtx.lineTo(d.x + 1.8, d.y + d.length);
+        rainCtx.stroke();
+
+        d.y += d.speed;
+        d.x += 1.8;
+
+        if (d.y > height) {
+          d.y = -d.length;
+          d.x = Math.random() * width;
+        }
+      }
+    }
+
+    // 2. Gambar lapisan kaca berembun di depan (disederhanakan di mobile untuk menjaga 60 FPS)
+    if (glassCtx && !isTouchDevice) {
+      glassCtx.clearRect(0, 0, width, height);
+
+      // Rekondensasi embun sangat lambat
+      slowFogCounter++;
+      if (slowFogCounter % 6 === 0) {
+        fogCtx.save();
+        fogCtx.globalCompositeOperation = 'source-over';
+        fogCtx.fillStyle = 'rgba(215, 232, 245, 0.0022)';
+        fogCtx.fillRect(0, 0, width, height);
+        fogCtx.restore();
+      }
+
+      // Tetesan air yang meluncur di atas kaca membelah embun
+      for (let i = 0; i < DRIP_COUNT; i++) {
+        const drip = glassDrips[i];
+        drip.y += drip.speed;
+
+        fogCtx.save();
+        fogCtx.globalCompositeOperation = 'destination-out';
+        fogCtx.fillStyle = 'rgba(0, 0, 0, 0.45)';
+        fogCtx.beginPath();
+        fogCtx.arc(drip.x, drip.y, drip.r * 1.1, 0, Math.PI * 2);
+        fogCtx.fill();
+        fogCtx.restore();
+
+        if (drip.y > height + 20) {
+          drip.y = -20;
+          drip.x = Math.random() * width;
+          drip.speed = 0.8 + Math.random() * 2.2;
+        }
+      }
+
+      // Tampilkan buffer kabut ke kanvas kaca utama
+      glassCtx.drawImage(fogCanvas, 0, 0);
+
+      // Gambar titik air berkilau di kepala setiap tetesan
+      glassCtx.fillStyle = 'rgba(255, 255, 255, 0.75)';
+      for (let i = 0; i < DRIP_COUNT; i++) {
+        const drip = glassDrips[i];
+        glassCtx.beginPath();
+        glassCtx.arc(drip.x, drip.y, drip.r * 0.8, 0, Math.PI * 2);
+        glassCtx.fill();
+      }
     }
 
     requestAnimationFrame(render);
   }
 
-  render();
+  // Dengarkan perubahan tema agar loop hujan hanya aktif saat dibutuhkan
+  const rainThemeObserver = new MutationObserver(() => {
+    triggerRainLoop();
+  });
+  rainThemeObserver.observe(document.body, { attributes: true, attributeFilter: ['data-theme', 'class'] });
+
+  document.addEventListener('visibilitychange', () => {
+    if (!document.hidden) triggerRainLoop();
+  });
+
+  // Jalankan render jika tema awal sudah hujan
+  triggerRainLoop();
 }

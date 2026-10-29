@@ -16,6 +16,16 @@ export async function initFluidCursor() {
   const canvas = document.querySelector('[data-fluid-cursor]');
   if (!canvas) return;
 
+  // Optimasi Mobile & Layar Sentuh:
+  // Pada HP / layar sentuh, matikan WebGL fluida kursor agar GPU tetap dingin & baterai awet
+  const isTouchDevice = ('ontouchstart' in window) || (navigator.maxTouchPoints > 0) || window.innerWidth <= 768;
+  const isLiteMode = document.body.classList.contains('lite-mode') || localStorage.getItem('hyouka_lite_mode') === 'true';
+
+  if (isTouchDevice || isLiteMode) {
+    canvas.style.display = 'none';
+    return;
+  }
+
   // Cek dukungan WebGL
   try {
     const gl = canvas.getContext('webgl2') || canvas.getContext('webgl');
@@ -291,6 +301,7 @@ export async function initFluidCursor() {
         dy
       });
       idleFrames = 0;
+      triggerFluidLoop();
     }
     lastX = x;
     lastY = y;
@@ -309,18 +320,29 @@ export async function initFluidCursor() {
     splatMat.uniforms.uAspect.value = window.innerWidth / window.innerHeight;
   });
 
-  // Loop simulasi fluida
-  function updateFluid() {
-    requestAnimationFrame(updateFluid);
+  let isFluidLoopRunning = false;
+  function triggerFluidLoop() {
+    if (!isFluidLoopRunning && enabled && !document.hidden && document.body.dataset.theme !== 'rain' && !document.body.classList.contains('lite-mode')) {
+      isFluidLoopRunning = true;
+      requestAnimationFrame(updateFluid);
+    }
+  }
 
-    // Di mode hujan, hentikan simulasi & bersihkan kanvas kursor fluida
-    if (document.body.dataset.theme === 'rain') {
-      renderer.clear();
-      pointerSplats.length = 0;
+  // Loop simulasi fluida dengan Smart Sleep (hanya merender saat kursor bergerak)
+  function updateFluid() {
+    if (!enabled || document.hidden || document.body.dataset.theme === 'rain' || document.body.classList.contains('lite-mode')) {
+      isFluidLoopRunning = false;
+      if (document.body.dataset.theme === 'rain') {
+        renderer.clear();
+        pointerSplats.length = 0;
+      }
       return;
     }
 
-    if (idleFrames++ > 240 && pointerSplats.length === 0) return;
+    if (idleFrames++ > 120 && pointerSplats.length === 0) {
+      isFluidLoopRunning = false;
+      return;
+    }
 
     // Perbarui warna fluida jika berganti tema
     displayMat.uniforms.uColor.value = getThemeFluidColor();
@@ -378,9 +400,18 @@ export async function initFluidCursor() {
     // 8. Tampilkan densitas akhir ke layar kanvas
     displayMat.uniforms.uDensity.value = dye.read.texture;
     renderPass(displayMat, null);
+
+    requestAnimationFrame(updateFluid);
   }
 
-  updateFluid();
+  triggerFluidLoop();
+
+  document.addEventListener('visibilitychange', () => {
+    if (!document.hidden) {
+      idleFrames = 0;
+      triggerFluidLoop();
+    }
+  });
 
   // Reaktif terhadap pergantian suasana: reset posisi kursor & bangunkan simulasi saat kembali ke Terang/Malam
   const themeObserver = new MutationObserver(() => {
@@ -417,6 +448,10 @@ export async function initFluidCursor() {
       canvas.style.display = enabled ? 'block' : 'none';
       toggleBtn.classList.toggle('active', enabled);
       toggleBtn.title = `Efek Tinta Fluida: ${enabled ? 'Aktif (Klik untuk Matikan)' : 'Nonaktif (Klik untuk Nyalakan)'}`;
+      if (enabled) {
+        idleFrames = 0;
+        triggerFluidLoop();
+      }
       try {
         localStorage.setItem('hyouka_fluid', enabled ? 'on' : 'off');
         localStorage.setItem('amine_fluid', enabled ? 'on' : 'off');
@@ -436,6 +471,14 @@ export function initMagneticCursor() {
 
   if (!circle) return;
 
+  // Di perangkat sentuh (HP/Tablet) atau layar <= 768px: sembunyikan kursor magnetik & jangan jalankan loop
+  const isTouchDevice = ('ontouchstart' in window) || (navigator.maxTouchPoints > 0) || window.innerWidth <= 768;
+  if (isTouchDevice) {
+    if (dot) dot.style.display = 'none';
+    circle.style.display = 'none';
+    return;
+  }
+
   circle.style.opacity = '1';
 
   let mouseX = -100;
@@ -443,6 +486,14 @@ export function initMagneticCursor() {
   let circleX = -100;
   let circleY = -100;
   let hasMoved = false;
+  let isCursorLoopRunning = false;
+
+  function triggerCursorLoop() {
+    if (!isCursorLoopRunning && !document.hidden) {
+      isCursorLoopRunning = true;
+      requestAnimationFrame(renderCursor);
+    }
+  }
 
   window.addEventListener('mousemove', (e) => {
     mouseX = e.clientX;
@@ -454,24 +505,43 @@ export function initMagneticCursor() {
       circleY = mouseY;
       circle.style.opacity = '1';
     }
-  });
+    triggerCursorLoop();
+  }, { passive: true });
 
   window.addEventListener('mouseenter', () => {
     circle.style.opacity = '1';
+    triggerCursorLoop();
   });
 
   window.addEventListener('mouseleave', () => {
     circle.style.opacity = '0';
   });
 
+  document.addEventListener('visibilitychange', () => {
+    if (!document.hidden && hasMoved) triggerCursorLoop();
+  });
+
   function renderCursor() {
+    if (document.hidden) {
+      isCursorLoopRunning = false;
+      return;
+    }
+
+    const dx = mouseX - circleX;
+    const dy = mouseY - circleY;
+
+    // Tidurkan render loop jika kursor sudah mencapai posisi tenang
+    if (Math.abs(dx) < 0.15 && Math.abs(dy) < 0.15) {
+      isCursorLoopRunning = false;
+      return;
+    }
+
     // Interpolasi pegas lembut (Lerp 0.18)
-    circleX += (mouseX - circleX) * 0.18;
-    circleY += (mouseY - circleY) * 0.18;
-    circle.style.transform = `translate3d(${circleX}px, ${circleY}px, 0) translate(-50%, -50%)`;
+    circleX += dx * 0.18;
+    circleY += dy * 0.18;
+    circle.style.transform = `translate3d(${circleX.toFixed(1)}px, ${circleY.toFixed(1)}px, 0) translate(-50%, -50%)`;
     requestAnimationFrame(renderCursor);
   }
-  renderCursor();
 
   // Daftarkan target interaktif untuk memunculkan lingkaran magnetik & label
   function attachHoverListeners() {

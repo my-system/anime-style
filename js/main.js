@@ -217,8 +217,21 @@ function setupGate(dialogPlayer) {
       setTimeout(() => {
         overlay.classList.add('hidden');
         overlay.style.display = 'none';
-        if (idleVideo) { try { idleVideo.pause(); } catch (e) {} }
-        if (introVideo) { try { introVideo.pause(); } catch (e) {} }
+        // Bebaskan memori GPU & video decoder setelah gerbang dilewati
+        if (idleVideo) {
+          try {
+            idleVideo.pause();
+            idleVideo.removeAttribute('src');
+            idleVideo.load();
+          } catch (e) {}
+        }
+        if (introVideo) {
+          try {
+            introVideo.pause();
+            introVideo.removeAttribute('src');
+            introVideo.load();
+          } catch (e) {}
+        }
       }, 550);
     }, 280);
   }
@@ -252,8 +265,11 @@ function setupGate(dialogPlayer) {
 
     if (statusText) statusText.textContent = 'Membuka Kunci Gerbang Suzume...';
 
-    // Munculkan dan putar Video 2 (Membuka Pintu)
+    // Munculkan dan putar Video 2 (Membuka Pintu - Dimuat on-demand)
     if (introVideo) {
+      if (!introVideo.src && introVideo.dataset.src) {
+        introVideo.src = introVideo.dataset.src;
+      }
       introVideo.classList.add('playing');
       introVideo.muted = !isAudioEnabled;
       introVideo.currentTime = 0;
@@ -2321,17 +2337,67 @@ function renderCompactRecruiterView() {
 
 function setupCompactMode() {
   const toggleBtn = document.getElementById('compact-toggle-btn');
-  if (!toggleBtn) return;
+  const mobilePerfBtn = document.getElementById('mobile-perf-toggle-btn');
+  const mobilePerfBadge = document.getElementById('mobile-perf-badge');
 
-  toggleBtn.addEventListener('click', () => {
-    const isCompact = document.body.classList.toggle('mode-compact');
-    toggleBtn.innerHTML = '<span class="ctrl-icon">⚡</span>';
-    toggleBtn.title = isCompact
-      ? 'Mode Ringkas: Aktif (Klik untuk kembali ke Mode Cerita)'
-      : 'Mode Ringkas: Nonaktif (Klik untuk baca cepat 10 detik)';
-    toggleBtn.classList.toggle('active', isCompact);
+  function updatePerfUI(isLite) {
+    document.body.classList.toggle('lite-mode', isLite);
+    document.body.classList.toggle('mode-compact', isLite);
+
+    if (toggleBtn) {
+      toggleBtn.classList.toggle('active', isLite);
+      toggleBtn.title = isLite
+        ? 'Mode Performa: Aktif (Super Enteng & Hemat Baterai)'
+        : 'Mode Performa: Nonaktif (Efek Visual Novel Lengkap)';
+    }
+
+    if (mobilePerfBtn) {
+      mobilePerfBtn.classList.toggle('active', isLite);
+    }
+    if (mobilePerfBadge) {
+      mobilePerfBadge.textContent = isLite ? 'ON ⚡' : 'OFF';
+      mobilePerfBadge.classList.toggle('active', isLite);
+    }
+
+    const fluidCanvas = document.querySelector('[data-fluid-cursor]');
+    if (fluidCanvas) {
+      fluidCanvas.style.display = isLite ? 'none' : 'block';
+    }
+  }
+
+  // Cek preferensi tersimpan atau auto-detect HP kecil (<= 600px)
+  const savedPref = localStorage.getItem('hyouka_lite_mode');
+  const isSmallDevice = window.innerWidth <= 600;
+  const initialLite = savedPref === 'true' || (savedPref === null && isSmallDevice);
+
+  updatePerfUI(initialLite);
+
+  function togglePerf() {
     soundEngine.playClickSound();
-  });
+    const currentlyLite = document.body.classList.contains('lite-mode');
+    const nextState = !currentlyLite;
+    updatePerfUI(nextState);
+
+    try {
+      localStorage.setItem('hyouka_lite_mode', nextState ? 'true' : 'false');
+    } catch (e) {}
+
+    const toast = document.getElementById('mood-toast');
+    if (toast) {
+      toast.textContent = nextState
+        ? '⚡ Mode Performa Aktif: Efek grafis berat dinonaktifkan agar super enteng & hemat baterai.'
+        : '✨ Mode Sinematik Penuh: Efek grafis visual novel lengkap diaktifkan.';
+      toast.classList.add('show');
+      setTimeout(() => toast.classList.remove('show'), 3500);
+    }
+  }
+
+  if (toggleBtn) {
+    toggleBtn.addEventListener('click', togglePerf);
+  }
+  if (mobilePerfBtn) {
+    mobilePerfBtn.addEventListener('click', togglePerf);
+  }
 }
 
 /**

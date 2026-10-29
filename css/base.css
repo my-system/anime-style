@@ -705,4 +705,144 @@ body[data-theme="night"] .btn-ctrl {
     opacity: 1;
     pointer-events: auto;
   }
+
+  /* Mobile Drawer Footer: Performance Toggle */
+  .mobile-drawer-footer {
+    padding: 14px 16px;
+    border-top: 1px solid rgba(255, 255, 255, 0.08);
+    margin-top: auto;
+  }
+
+  body[data-theme="light"] .mobile-drawer-footer {
+    border-top-color: rgba(0, 0, 0, 0.08);
+  }
+
+  .mobile-perf-toggle {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    width: 100%;
+    padding: 10px 12px;
+    background: rgba(255, 255, 255, 0.05);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    border-radius: 12px;
+    color: var(--text-primary);
+    font-family: var(--font-sans);
+    text-align: left;
+    cursor: pointer;
+    transition: all 0.2s ease;
+  }
+
+  body[data-theme="light"] .mobile-perf-toggle {
+    background: rgba(0, 0, 0, 0.03);
+    border-color: rgba(0, 0, 0, 0.08);
+  }
+
+  .mobile-perf-toggle.active {
+    background: rgba(34, 197, 94, 0.12);
+    border-color: var(--accent-green);
+  }
+
+  .perf-icon {
+    font-size: 1.1rem;
+  }
+
+  .perf-meta {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+  }
+
+  .perf-meta strong {
+    font-size: 0.82rem;
+    color: var(--text-primary);
+  }
+
+  .perf-meta small {
+    font-size: 0.68rem;
+    color: var(--text-muted);
+  }
+
+  .perf-badge {
+    font-family: var(--font-mono);
+    font-size: 0.72rem;
+    font-weight: 700;
+    padding: 3px 8px;
+    border-radius: 6px;
+    background: rgba(255, 255, 255, 0.1);
+    color: var(--text-muted);
+  }
+
+  .perf-badge.active {
+    background: var(--accent-green);
+    color: #fff;
+  }
+}
+
+/* ========================================================
+   MODERN PERFORMANCE OPTIMIZATIONS (Lite Mode & Offscreen Containment)
+   ======================================================== */
+
+/* Content visibility: render offscreen chapters on demand */
+.projects-scene,
+.timeline-scene,
+.contact-scene,
+.epilog-scene {
+  content-visibility: auto;
+  contain-intrinsic-size: 800px;
+}
+
+/* Mobile & Low-End GPU Opt: reduce heavy backdrop filters on small screens */
+@media (max-width: 768px) {
+  .top-nav {
+    backdrop-filter: none !important;
+    -webkit-backdrop-filter: none !important;
+    background: rgba(15, 23, 42, 0.94) !important;
+  }
+
+  body[data-theme="light"] .top-nav {
+    background: rgba(255, 255, 255, 0.96) !important;
+  }
+
+  .mobile-nav-drawer {
+    backdrop-filter: none !important;
+    -webkit-backdrop-filter: none !important;
+    background: rgba(15, 23, 42, 0.98) !important;
+  }
+
+  body[data-theme="light"] .mobile-nav-drawer {
+    background: rgba(255, 255, 255, 0.98) !important;
+  }
+
+  /* Nonaktifkan kursor kustom di HP */
+  .cursor-dot,
+  .cursor-circle {
+    display: none !important;
+  }
+}
+
+/* Lite Mode Styles (Super Enteng / Hemat Daya) */
+body.lite-mode {
+  --sheen-active: 0;
+}
+
+body.lite-mode [data-fluid-cursor],
+body.lite-mode #window-glass-canvas {
+  display: none !important;
+}
+
+body.lite-mode * {
+  backdrop-filter: none !important;
+  -webkit-backdrop-filter: none !important;
+}
+
+body.lite-mode .character-stage {
+  filter: none !important;
+  will-change: auto !important;
+}
+
+body.lite-mode .mission-card-3d,
+body.lite-mode .dialog-card,
+body.lite-mode .modal-content-glass {
+  box-shadow: 0 4px 14px rgba(0, 0, 0, 0.08) !important;
 }

@@ -452,6 +452,8 @@ export function createFluidHero(canvas, imgAnime, imgFoto, config) {
       dy: -dy * (config.fluid.speedMultiplier || 4.0),
       radius: (config.fluid.radius || 0.0065) * radiusMult
     });
+    idleFrames = 0;
+    triggerStep();
   }
 
   function resize() {
@@ -483,8 +485,35 @@ export function createFluidHero(canvas, imgAnime, imgFoto, config) {
   }
 
   let lastTime = performance.now();
+  let isStepRunning = false;
+  let idleFrames = 0;
+
+  function triggerStep() {
+    if (!isStepRunning && !document.hidden && !document.body.classList.contains('lite-mode')) {
+      isStepRunning = true;
+      lastTime = performance.now();
+      requestAnimationFrame(step);
+    }
+  }
 
   function step() {
+    if (document.hidden || document.body.classList.contains('lite-mode')) {
+      isStepRunning = false;
+      return;
+    }
+
+    // Jika tidak ada interaksi kursor baru dan fluida sudah reda, tidurkan render loop
+    if (splats.length === 0) {
+      idleFrames++;
+      if (idleFrames > 120) {
+        renderQuad(null);
+        isStepRunning = false;
+        return;
+      }
+    } else {
+      idleFrames = 0;
+    }
+
     const now = performance.now();
     const dt = Math.min((now - lastTime) / 1000, 0.025);
     lastTime = now;
@@ -614,7 +643,11 @@ export function createFluidHero(canvas, imgAnime, imgFoto, config) {
     requestAnimationFrame(step);
   }
 
-  requestAnimationFrame(step);
+  triggerStep();
+
+  document.addEventListener('visibilitychange', () => {
+    if (!document.hidden) triggerStep();
+  });
 
   return {
     isWebGL: true,
@@ -668,11 +701,20 @@ function createCanvas2DFallback(canvas, imgAnime, imgFoto, config) {
     }
   }
 
+  let is2DLoopRunning = false;
+  function trigger2DRender() {
+    if (!is2DLoopRunning && !document.hidden && !document.body.classList.contains('lite-mode')) {
+      is2DLoopRunning = true;
+      requestAnimationFrame(render);
+    }
+  }
+
   function addSplat(x, y, dx, dy, radiusMult = 1.0) {
     if (!fluidEnabled) return;
     const dpr = Math.min(window.devicePixelRatio || 1, 2);
     const r = Math.max(canvas.width, canvas.height) * 0.09 * radiusMult;
     trails.push({ x: x * dpr, y: y * dpr, r, alpha: 0.50 });
+    trigger2DRender();
   }
 
   function drawCover(targetCtx, img, w, h) {
@@ -687,6 +729,17 @@ function createCanvas2DFallback(canvas, imgAnime, imgFoto, config) {
   }
 
   function render() {
+    if (document.hidden || document.body.classList.contains('lite-mode')) {
+      is2DLoopRunning = false;
+      return;
+    }
+
+    const manualOpacity = config.calibration.manualPhotoOpacity || 0;
+    if (trails.length === 0 && manualOpacity <= 0.005) {
+      is2DLoopRunning = false;
+      return;
+    }
+
     resize();
     const w = canvas.width;
     const h = canvas.height;
@@ -716,7 +769,6 @@ function createCanvas2DFallback(canvas, imgAnime, imgFoto, config) {
       maskCtx.fill();
     }
 
-    const manualOpacity = config.calibration.manualPhotoOpacity || 0;
     if (trails.length > 0 || manualOpacity > 0.005) {
       tempCtx.clearRect(0, 0, w, h);
       drawCover(tempCtx, imgFoto, w, h);
@@ -736,7 +788,11 @@ function createCanvas2DFallback(canvas, imgAnime, imgFoto, config) {
     requestAnimationFrame(render);
   }
 
-  requestAnimationFrame(render);
+  trigger2DRender();
+
+  document.addEventListener('visibilitychange', () => {
+    if (!document.hidden) trigger2DRender();
+  });
 
   return {
     isWebGL: false,
