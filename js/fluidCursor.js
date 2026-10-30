@@ -35,6 +35,14 @@ export async function initFluidCursor() {
     return;
   }
 
+  // Sakelar Nyala/Mati Fluida di Top Nav
+  const toggleBtn = document.getElementById('ink-toggle-btn');
+  let enabled = localStorage.getItem('hyouka_fluid') !== 'off' && localStorage.getItem('amine_fluid') !== 'off';
+  if (!enabled && canvas) {
+    canvas.style.display = 'none';
+    if (toggleBtn) toggleBtn.classList.remove('active');
+  }
+
   // Parameter simulasi dari proyek Cafe Cinematic (Disesuaikan agar ramping, halus, dan tidak terlalu besar)
   const intensity = 0.55;
   const simRes = 128;
@@ -432,13 +440,6 @@ export async function initFluidCursor() {
     localStorage.setItem('amine_fluid_migrated_v3', 'true');
   }
 
-  // Sakelar Nyala/Mati Fluida di Top Nav
-  const toggleBtn = document.getElementById('ink-toggle-btn');
-  let enabled = localStorage.getItem('hyouka_fluid') !== 'off' && localStorage.getItem('amine_fluid') !== 'off';
-  if (!enabled && canvas) {
-    canvas.style.display = 'none';
-    if (toggleBtn) toggleBtn.classList.remove('active');
-  }
   if (toggleBtn) {
     toggleBtn.innerHTML = '<span class="ctrl-icon">🖌️</span>';
     toggleBtn.title = `Efek Tinta Fluida: ${enabled ? 'Aktif (Klik untuk Matikan)' : 'Nonaktif (Klik untuk Nyalakan)'}`;
