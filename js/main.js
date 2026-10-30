@@ -265,15 +265,27 @@ function setupGate(dialogPlayer) {
 
     if (statusText) statusText.textContent = 'Membuka Kunci Gerbang Suzume...';
 
-    // Munculkan dan putar Video 2 (Membuka Pintu - Dimuat on-demand)
+    // Munculkan dan putar Video 2 (Membuka Pintu)
     if (introVideo) {
       if (!introVideo.src && introVideo.dataset.src) {
         introVideo.src = introVideo.dataset.src;
       }
       introVideo.classList.add('playing');
       introVideo.muted = !isAudioEnabled;
-      introVideo.currentTime = 0;
-      introVideo.play().catch(() => {});
+      try { introVideo.currentTime = 0; } catch (e) {}
+
+      const playPromise = introVideo.play();
+      if (playPromise !== undefined) {
+        playPromise.catch(() => {
+          // Fallback jika browser memblokir audio unmuted pada autoplay
+          introVideo.muted = true;
+          introVideo.play().catch(() => {});
+        });
+      }
+
+      introVideo.addEventListener('error', () => {
+        executeTransitionToHero();
+      }, { once: true });
 
       // Hentikan video 1 setelah transisi cross-fade mulus
       setTimeout(() => {
@@ -282,10 +294,10 @@ function setupGate(dialogPlayer) {
         }
       }, 600);
 
-      // Failsafe 8.8 detik untuk video 2
+      // Failsafe 8.5 detik untuk video 2 jika macet
       failsafeTimer = setTimeout(() => {
         executeTransitionToHero();
-      }, 8800);
+      }, 8500);
     } else {
       executeTransitionToHero();
     }

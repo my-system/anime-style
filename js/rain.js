@@ -34,6 +34,7 @@ export function initRainCanvas(dialogPlayer) {
   const isTouchDevice = ('ontouchstart' in window) || (navigator.maxTouchPoints > 0) || window.innerWidth <= 768;
   const DROP_COUNT = isTouchDevice ? 16 : 48;
   const DRIP_COUNT = isTouchDevice ? 3 : 8;
+  const drops = [];
 
   for (let i = 0; i < DROP_COUNT; i++) {
     drops.push({
